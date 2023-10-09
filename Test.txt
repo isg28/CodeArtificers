@@ -1,0 +1,5 @@
+Testing out git and the repo if it works! - Danica
+
+Try to make changes to this document and add, commit, and push the changes to see if it works!
+
+Danica was here! Hello world.
