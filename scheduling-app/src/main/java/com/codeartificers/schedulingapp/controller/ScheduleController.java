@@ -4,6 +4,7 @@ import com.codeartificers.schedulingapp.model.Counter;
 import com.codeartificers.schedulingapp.model.Schedules;
 import com.codeartificers.schedulingapp.repository.CounterRepository;
 import com.codeartificers.schedulingapp.repository.ScheduleRepository;
+import com.codeartificers.schedulingapp.resource.AvailabilityRequest;
 import com.codeartificers.schedulingapp.resource.UserRequest;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,26 +35,42 @@ class ScheduleController {
     }
 
     private final ScheduleRepository scheduleRepository;
-    @Autowired
     private final CounterRepository counterRepository;
+
+    //private final UserCounterRepository userCounterRepository;
+    @Autowired
     public ScheduleController(ScheduleRepository scheduleRepository, CounterRepository counterRepository) {
         this.scheduleRepository = scheduleRepository;
         this.counterRepository = counterRepository;
+        //this.userCounterRepository = userCounterRepository;
     }
 
 
-    //User Management Endpoints
+    // ********************* USER MANAGEMENT ENDPOINTS ***********************************
 
-    // GET: Retrieve all user data
+    // GET: Retrieve all user data, Danica
     @GetMapping("/api/user")
-    public ResponseEntity<List<Schedules>> getAllSchedules() {
-        return ResponseEntity.ok(this.scheduleRepository.findAll());
+    public ResponseEntity<List<Schedules>> getAllUserData() {
+        return ResponseEntity.status(200).body(this.scheduleRepository.findAll());
     }
 
-    //POST: Create a new user
+    //POST: Create a new user, Danica and Isabel
     @PostMapping("/api/user")
     public ResponseEntity<Schedules> createSchedule(@RequestBody UserRequest userRequest) {
-        //Retrieve and increment the counter
+
+        // ISABEL PLS FIX THIS LOL its telling me to make findByName static which is weird (10/18/23) - Danica
+
+        /*UserCounter counter = UserCounterRepository.findByName("user_id");
+        if(counter == null){
+            counter = new UserCounter();
+            counter.setName("user_id");
+            counter.setSequence(1L); // Set an initial variable of 1.
+        }
+        long nextUserId = counter.getSequence() + 1;
+        counter.setSequence(nextUserId);
+        UserCounterRepository.save(counter);*/
+
+        //Retrieve and increment the counter (this is the counter that works)
         Counter counter = counterRepository.findByName("user_id");
         if(counter == null){
             counter = new Counter();
@@ -74,7 +91,9 @@ class ScheduleController {
         return ResponseEntity.status(201).body(this.scheduleRepository.save(schedule));
 
     }
-    //PUT: Edit user info
+    //GET: Retrieve user profile information, Mansoor
+
+    //PUT: Edit user info, Isabel
     @PutMapping("/api/user/{user_id}")
     public ResponseEntity edit_UserProfile(@RequestBody UserRequest userRequest, @PathVariable String user_id) {
         Optional<Schedules> userProfile = this.scheduleRepository.findById(user_id);
@@ -103,6 +122,36 @@ class ScheduleController {
             return ResponseEntity.notFound().build();
         }
     }
+    //********************* AVAILABILITY MANAGEMENT ENDPOINTS ***********************************
+    //POST: Create a new availability entry for a user, Danica
+    @PostMapping("/api/user/{user_id}/availability")
+    public ResponseEntity<Schedules> createNewAvailability(@RequestBody UserRequest userRequest, @PathVariable String user_id, @RequestBody AvailabilityRequest availabilityRequest) {
+        //this is a work in progress, we still need to fix/ make individual counters for Availability, User, etc (10/18/23) - Danica
+        /*Counter counter = counterRepository.findByName("user_id");
+        if(counter == null){
+            counter = new Counter();
+            counter.setName("user_id");
+            counter.setSequence(1L); // Set an initial variable of 1.
+        }
+        long nextUserId = counter.getSequence() + 1;
+        counter.setSequence(nextUserId);
+        counterRepository.save(counter);
+
+        Schedules schedule = new Schedules();
+        schedule.setDays(availabilityRequest.getDays());
+        schedule.setTime(availabilityRequest.getTime());*/
+        return null;
+
+    }
+
+
+    //GET: Retrieve all availabilities for a user (useful for showing your own availability), Brandon
+
+    //PUT: Update an existing availability entry
+
+    //DELETE: Delete an available entry
+
+    //// ********************* MEETING MANAGEMENT ENDPOINTS ***********************************
 
 
 

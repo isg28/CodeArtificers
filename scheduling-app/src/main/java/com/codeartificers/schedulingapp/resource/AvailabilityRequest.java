@@ -3,6 +3,7 @@ import lombok.Getter;
 
 @Getter
 public class AvailabilityRequest {
+    //Getter and Setter methods for instance variables
     private String availability_Id;
     private String days;
     private String time;
@@ -16,25 +17,13 @@ public class AvailabilityRequest {
         this.days = days;
         this.time = time;
     }
-    //Getter and Setter methods for instance variables
-    public String getAvailability_Id() {
-        return availability_Id;
-    }
 
     public void setAvailability_Id(String availability_Id) {
         this.availability_Id = availability_Id;
     }
 
-    public String getDays() {
-        return days;
-    }
-
     public void setDays(String days) {
         this.days = days;
-    }
-
-    public String getTime() {
-        return time;
     }
 
     public void setTime(String time) {
