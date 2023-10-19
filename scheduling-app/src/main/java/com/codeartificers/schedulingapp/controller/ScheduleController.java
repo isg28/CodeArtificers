@@ -1,11 +1,14 @@
 package com.codeartificers.schedulingapp.controller;
 
-import com.codeartificers.schedulingapp.model.Counter;
+import com.codeartificers.schedulingapp.model.AvailabilityCounter;
 import com.codeartificers.schedulingapp.model.Schedules;
-import com.codeartificers.schedulingapp.repository.CounterRepository;
+import com.codeartificers.schedulingapp.model.UserCounter;
+import com.codeartificers.schedulingapp.repository.AvailabilityCounterRepository;
 import com.codeartificers.schedulingapp.repository.ScheduleRepository;
+import com.codeartificers.schedulingapp.repository.UserCounterRepository;
 import com.codeartificers.schedulingapp.resource.AvailabilityRequest;
 import com.codeartificers.schedulingapp.resource.UserRequest;
+import org.apache.catalina.User;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -35,14 +38,13 @@ class ScheduleController {
     }
 
     private final ScheduleRepository scheduleRepository;
-    private final CounterRepository counterRepository;
-
-    //private final UserCounterRepository userCounterRepository;
+    private final UserCounterRepository userCounterRepository;
+    //private final AvailabilityCounterRepository availabilityCounterRepository;
     @Autowired
-    public ScheduleController(ScheduleRepository scheduleRepository, CounterRepository counterRepository) {
+    public ScheduleController(ScheduleRepository scheduleRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository) {
         this.scheduleRepository = scheduleRepository;
-        this.counterRepository = counterRepository;
-        //this.userCounterRepository = userCounterRepository;
+        this.userCounterRepository = userCounterRepository;
+        //this.availabilityCounterRepository = availabilityCounterRepository;
     }
 
 
@@ -58,9 +60,9 @@ class ScheduleController {
     @PostMapping("/api/user")
     public ResponseEntity<Schedules> createSchedule(@RequestBody UserRequest userRequest) {
 
-        // ISABEL PLS FIX THIS LOL its telling me to make findByName static which is weird (10/18/23) - Danica
+        // ISABEL PLS FIX CHECK THIS OVER THANKS!! (10/18/23) - Danica
 
-        /*UserCounter counter = UserCounterRepository.findByName("user_id");
+        UserCounter counter = userCounterRepository.findByName("user_id");
         if(counter == null){
             counter = new UserCounter();
             counter.setName("user_id");
@@ -68,18 +70,8 @@ class ScheduleController {
         }
         long nextUserId = counter.getSequence() + 1;
         counter.setSequence(nextUserId);
-        UserCounterRepository.save(counter);*/
+        userCounterRepository.save(counter);
 
-        //Retrieve and increment the counter (this is the counter that works)
-        Counter counter = counterRepository.findByName("user_id");
-        if(counter == null){
-            counter = new Counter();
-            counter.setName("user_id");
-            counter.setSequence(1L); // Set an initial variable of 1.
-        }
-        long nextUserId = counter.getSequence() + 1;
-        counter.setSequence(nextUserId);
-        counterRepository.save(counter);
 
         Schedules schedule = new Schedules();
         schedule.setUser_id(String.valueOf(nextUserId));
@@ -122,24 +114,34 @@ class ScheduleController {
             return ResponseEntity.notFound().build();
         }
     }
+    //DELETE: deletes user, Oscar
+
     //********************* AVAILABILITY MANAGEMENT ENDPOINTS ***********************************
     //POST: Create a new availability entry for a user, Danica
     @PostMapping("/api/user/{user_id}/availability")
     public ResponseEntity<Schedules> createNewAvailability(@RequestBody UserRequest userRequest, @PathVariable String user_id, @RequestBody AvailabilityRequest availabilityRequest) {
         //this is a work in progress, we still need to fix/ make individual counters for Availability, User, etc (10/18/23) - Danica
-        /*Counter counter = counterRepository.findByName("user_id");
+        /*AvailabilityCounter counter = availabilityCounterRepository.findByUser_Id("user_id");
         if(counter == null){
-            counter = new Counter();
-            counter.setName("user_id");
-            counter.setSequence(1L); // Set an initial variable of 1.
+            counter = new AvailabilityCounter();
+            counter.setAvailability_Id("user_id");
+            counter.setSequence(1L); //sets initial variable to 1
         }
-        long nextUserId = counter.getSequence() + 1;
-        counter.setSequence(nextUserId);
-        counterRepository.save(counter);
+        long nextAvailabilityId = counter.getSequence() + 1;
+        counter.setSequence(nextAvailabilityId);
+        availabilityCounterRepository.save(counter);
 
         Schedules schedule = new Schedules();
+        schedule.setAvailability_Id(String.valueOf(nextAvailabilityId));
         schedule.setDays(availabilityRequest.getDays());
-        schedule.setTime(availabilityRequest.getTime());*/
+        schedule.setTime(availabilityRequest.getTime());
+
+        return ResponseEntity.status(201).body(this.scheduleRepository.save(schedule));*/
+
+
+
+
+
         return null;
 
     }

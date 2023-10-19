@@ -2,12 +2,13 @@ package com.codeartificers.schedulingapp.model;
 
 import org.springframework.data.annotation.Id;
 
-//This class is to ensure the numeric sequence of IDs.
-public class Counter {
+public class UserCounter {
     @Id
     private String id;
     private String name;
     private long sequence;
+
+
 
     public String getId() {
         return id;

@@ -29,4 +29,5 @@ public class AvailabilityRequest {
     public void setTime(String time) {
         this.time = time;
     }
+
 }
