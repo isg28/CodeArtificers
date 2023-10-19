@@ -3,43 +3,25 @@ package com.codeartificers.schedulingapp.model;
 import org.springframework.data.annotation.Id;
 
 public class AvailabilityCounter {
-    /*@Id
-    private String user_id;
-    private String availability_Id;
-    private String days;
-    private String time;
+    @Id
+    private String id;
+    private String name;
     private long sequence;
 
-    public String getUser_id() {
-        return user_id;
+    public String getId() {
+        return id;
     }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getAvailability_Id() {
-        return availability_Id;
+    public String getName() {
+        return name;
     }
 
-    public void setAvailability_Id(String availability_Id) {
-        this.availability_Id = availability_Id;
-    }
-
-    public String getDays() {
-        return days;
-    }
-
-    public void setDays(String days) {
-        this.days = days;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public long getSequence() {
@@ -48,5 +30,5 @@ public class AvailabilityCounter {
 
     public void setSequence(long sequence) {
         this.sequence = sequence;
-    }*/
+    }
 }
