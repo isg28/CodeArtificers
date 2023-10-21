@@ -85,7 +85,16 @@ class ScheduleController {
 
     }
     //GET: Retrieve user profile information, Mansoor
-
+    @GetMapping("/api/user/{user_id}")
+    public ResponseEntity<User> get_UserProfile(@PathVariable String user_id){
+        Optional<User> userProfile = this.userRepository.findById(user_id);
+        // checks if the user profile based on id is available else print error code.
+        if (userProfile.isPresent()) {
+            return ResponseEntity.status(200).body(userProfile.get());
+        }else {
+            return ResponseEntity.notFound().build();
+        }
+    }
     //PUT: Edit user info, Isabel
     @PutMapping("/api/user/{user_id}")
     public ResponseEntity edit_UserProfile(@RequestBody UserRequest userRequest, @PathVariable String user_id) {
