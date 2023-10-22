@@ -10,6 +10,8 @@ import com.codeartificers.schedulingapp.repository.UserRepository;
 import com.codeartificers.schedulingapp.repository.UserCounterRepository;
 import com.codeartificers.schedulingapp.resource.AvailabilityRequest;
 import com.codeartificers.schedulingapp.resource.UserRequest;
+import com.codeartificers.schedulingapp.model.Meeting;
+import com.codeartificers.schedulingapp.model.MeetingCounter;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -154,11 +156,37 @@ class ScheduleController {
 
     //GET: Retrieve all availabilities for a user (useful for showing your own availability), Brandon
 
-    //PUT: Update an existing availability entry
+
+    //PUT: Update an existing availability entry, Danica
+
 
     //DELETE: Delete an available entry
 
+
     //// ********************* MEETING MANAGEMENT ENDPOINTS ***********************************
+    //POST: Create a new meeting, Danica
+
+
+    //GET: Retrieve details about a specific meeting
+
+
+    //GET: Retrieve a list of all available meetings based on user's availability
+
+
+    //PUT: Update an existing meeting (add, remove participants)
+
+
+    //DELETE: delete a meeting
+
+
+    //// ********************* SEARCH FOR AVAILABLE TIMESLOTS ENDPOINTS ***********************************
+    //GET: Retrieve available timeslots for scheduling a meeting with one or more users
+
+
+    //// ********************* USER REGISTRATION AND AUTHENTICATION ENDPOINTS ***********************************
+
+
+    //// ********************* INVITATION AND NOTIFICATION ENDPOINTS ***********************************
 
 
 
