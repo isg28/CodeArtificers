@@ -126,6 +126,7 @@ class ScheduleController {
             return ResponseEntity.notFound().build();
         }
     }
+
     //DELETE: deletes user, Oscar
 
     //********************* AVAILABILITY MANAGEMENT ENDPOINTS ***********************************
