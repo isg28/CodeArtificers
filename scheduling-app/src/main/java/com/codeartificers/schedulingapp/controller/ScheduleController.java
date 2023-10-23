@@ -4,10 +4,7 @@ import com.codeartificers.schedulingapp.model.Availability;
 import com.codeartificers.schedulingapp.model.AvailabilityCounter;
 import com.codeartificers.schedulingapp.model.User;
 import com.codeartificers.schedulingapp.model.UserCounter;
-import com.codeartificers.schedulingapp.repository.AvailabilityCounterRepository;
-import com.codeartificers.schedulingapp.repository.AvailabilityRepository;
-import com.codeartificers.schedulingapp.repository.UserRepository;
-import com.codeartificers.schedulingapp.repository.UserCounterRepository;
+import com.codeartificers.schedulingapp.repository.*;
 import com.codeartificers.schedulingapp.resource.AvailabilityRequest;
 import com.codeartificers.schedulingapp.resource.UserRequest;
 import com.codeartificers.schedulingapp.model.Meeting;
@@ -44,12 +41,15 @@ class ScheduleController {
     private final AvailabilityRepository availabilityRepository;
     private final UserCounterRepository userCounterRepository;
     private final AvailabilityCounterRepository availabilityCounterRepository;
+    private final MeetingCounterRepository meetingCounterRepository;
+
     @Autowired
-    public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1) {
+    public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1, MeetingCounterRepository meetingCounterRepository) {
         this.userRepository = userRepository;
         this.availabilityRepository = availabilityRepository;
         this.userCounterRepository = userCounterRepository;
         this.availabilityCounterRepository = availabilityCounterRepository1;
+        this.meetingCounterRepository = meetingCounterRepository;
     }
 
 
@@ -126,8 +126,20 @@ class ScheduleController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    
     //DELETE: deletes user, Oscar
+    @DeleteMapping("/api/user/{user_id}")
+    public ResponseEntity delete_UserProfile(@PathVariable String user_id)
+    {
+        Optional<User> userProfile = this.userRepository.findById(user_id);
+        if (userProfile.isPresent())
+        {
+            this.userRepository.deleteById(user_id);
+
+            return ResponseEntity.status(201).body("User " + user_id + " has been deleted");
+        }
+    return ResponseEntity.status(404).build();
+    }
 
     //********************* AVAILABILITY MANAGEMENT ENDPOINTS ***********************************
     //POST: Create a new availability entry for a user, Danica
@@ -161,23 +173,27 @@ class ScheduleController {
     //PUT: Update an existing availability entry, Danica
 
 
-    //DELETE: Delete an available entry
+<<<<<<< HEAD
+    //DELETE: Delete an available entry, Isabel
+=======
+    //DELETE: Delete an available entry, Oscar 
+>>>>>>> a9ad20a005e5e1a8977af75b96f9c7a787b30cbc
 
 
     //// ********************* MEETING MANAGEMENT ENDPOINTS ***********************************
     //POST: Create a new meeting, Danica
 
 
-    //GET: Retrieve details about a specific meeting
+    //GET: Retrieve details about a specific meeting, Oscar
 
 
-    //GET: Retrieve a list of all available meetings based on user's availability
+    //GET: Retrieve a list of all available meetings based on user's availability, Isabel
 
 
-    //PUT: Update an existing meeting (add, remove participants)
+    //PUT: Update an existing meeting (add, remove participants), Mansoor
 
 
-    //DELETE: delete a meeting
+    //DELETE: delete a meeting, Brandon
 
 
     //// ********************* SEARCH FOR AVAILABLE TIMESLOTS ENDPOINTS ***********************************
