@@ -126,7 +126,20 @@ class ScheduleController {
             return ResponseEntity.notFound().build();
         }
     }
+    
     //DELETE: deletes user, Oscar
+    @DeleteMapping("/api/user/{user_id}")
+    public ResponseEntity delete_UserProfile(@PathVariable String user_id)
+    {
+        Optional<User> userProfile = this.userRepository.findById(user_id);
+        if (userProfile.isPresent())
+        {
+            this.userRepository.deleteById(user_id);
+
+            return ResponseEntity.status(201).body("User " + user_id + " has been deleted");
+        }
+    return ResponseEntity.status(404).build();
+    }
 
     //********************* AVAILABILITY MANAGEMENT ENDPOINTS ***********************************
     //POST: Create a new availability entry for a user, Danica
@@ -160,7 +173,7 @@ class ScheduleController {
     //PUT: Update an existing availability entry, Danica
 
 
-    //DELETE: Delete an available entry
+    //DELETE: Delete an available entry, Oscar 
 
 
     //// ********************* MEETING MANAGEMENT ENDPOINTS ***********************************
