@@ -6,6 +6,7 @@ import com.codeartificers.schedulingapp.model.User;
 import com.codeartificers.schedulingapp.model.UserCounter;
 import com.codeartificers.schedulingapp.repository.*;
 import com.codeartificers.schedulingapp.resource.AvailabilityRequest;
+import com.codeartificers.schedulingapp.resource.MeetingRequest;
 import com.codeartificers.schedulingapp.resource.UserRequest;
 import com.codeartificers.schedulingapp.model.Meeting;
 import com.codeartificers.schedulingapp.model.MeetingCounter;
@@ -41,14 +42,16 @@ class ScheduleController {
     private final AvailabilityRepository availabilityRepository;
     private final UserCounterRepository userCounterRepository;
     private final AvailabilityCounterRepository availabilityCounterRepository;
+    private final MeetingRepository meetingRepository;
     private final MeetingCounterRepository meetingCounterRepository;
 
     @Autowired
-    public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1, MeetingCounterRepository meetingCounterRepository) {
+    public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1, MeetingRepository meetingRepository,MeetingCounterRepository meetingCounterRepository) {
         this.userRepository = userRepository;
         this.availabilityRepository = availabilityRepository;
         this.userCounterRepository = userCounterRepository;
         this.availabilityCounterRepository = availabilityCounterRepository1;
+        this.meetingRepository = meetingRepository;
         this.meetingCounterRepository = meetingCounterRepository;
     }
 
@@ -173,15 +176,33 @@ class ScheduleController {
     //PUT: Update an existing availability entry, Danica
 
 
-<<<<<<< HEAD
     //DELETE: Delete an available entry, Isabel
-=======
-    //DELETE: Delete an available entry, Oscar 
->>>>>>> a9ad20a005e5e1a8977af75b96f9c7a787b30cbc
 
 
     //// ********************* MEETING MANAGEMENT ENDPOINTS ***********************************
     //POST: Create a new meeting, Danica
+    @PostMapping("/api/meeting")
+    public ResponseEntity<Meeting> createMeeting(@RequestBody MeetingRequest meetingRequest){
+        MeetingCounter counter = meetingCounterRepository.findByName("meeting_id");
+        if(counter == null){
+            counter = new MeetingCounter();
+            counter.setName("meeting_id");
+            counter.setSequence(1L); //sets initial variable to 1
+        }
+        long nextMeetingId = counter.getSequence() + 1;
+        counter.setSequence(nextMeetingId);
+        meetingCounterRepository.save(counter);
+
+        Meeting meeting = new Meeting();
+        meeting.setMeeting_id(String.valueOf(nextMeetingId));
+        meeting.setDay(meetingRequest.getDay());
+        meeting.setTime(meetingRequest.getTime());
+        meeting.setParticipants(meetingRequest.getParticipants());
+        meeting.setMeeting_Description(meetingRequest.getMeeting_Description());
+
+        return ResponseEntity.status(201).body(this.meetingRepository.save(meeting));
+
+    }
 
 
     //GET: Retrieve details about a specific meeting, Oscar
