@@ -12,6 +12,18 @@ public class Meeting {
     private String participants;
     private String meeting_Description;
 
+
+    public Meeting(){
+
+    }
+    public Meeting(String meeting_id,String time,String day,String participants,String meeting_Descriptions){
+        this.meeting_id=meeting_id;
+        this.time=time;
+        this.day=day;
+        this.participants=participants;
+        this.meeting_Description=meeting_Descriptions;
+    }
+
     public String getMeeting_id() {
         return meeting_id;
     }
