@@ -16,6 +16,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -176,6 +178,34 @@ class ScheduleController {
 
 
     //PUT: Update an existing availability entry, Danica
+    @PutMapping ("/api/user/{user_id}/availability/{availability_id}")
+    public ResponseEntity edit_availabilityEntry(@RequestBody AvailabilityRequest availabilityRequest, @PathVariable String user_id, @PathVariable String availability_id){
+        Optional<User> userProfile = this.userRepository.findById(user_id);
+        Optional<Availability> availability = this.availabilityRepository.findById(availability_id);
+
+        if(userProfile.isPresent() && availability.isPresent()) {
+            Availability existingAvailability = availability.get();
+
+            if (availabilityRequest.getTime() != null) {
+                existingAvailability.setTime(availabilityRequest.getTime());
+            }
+            if (availabilityRequest.getDays() != null) {
+                existingAvailability.setDays(availabilityRequest.getDays());
+            }
+            if(availabilityRequest.getTime() == null && availabilityRequest.getDays() == null){
+                return ResponseEntity.status(404).body("Malformed request. Missing required availability fields.");
+
+            }
+
+            availabilityRepository.save(existingAvailability);
+            //userRepository.save(userAvailability);
+            return ResponseEntity.status(200).body(existingAvailability);
+
+        } else {
+            return ResponseEntity.status(404).body("Availability " + availability_id + " for User " + user_id + " does not exist.");
+
+        }
+    }
 
 
     //DELETE: Delete an available entry, Isabel
