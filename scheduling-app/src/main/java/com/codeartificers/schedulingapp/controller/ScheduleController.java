@@ -251,6 +251,16 @@ class ScheduleController {
 
 
     //GET: Retrieve details about a specific meeting, Oscar
+    @GetMapping("/api/meeting/{meeting_id}")
+    public ResponseEntity<Meeting> getMeetingDetails(@PathVariable String meeting_id){
+        Optional<Meeting> meetingData = this.meetingRepository.findById(meeting_id); // Checks for any meetings that were made
+        if (meetingData.isPresent()){
+            return ResponseEntity.status(200).body(meetingData.get()); // returns meeting details
+        }
+        else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 
     //GET: Retrieve a list of all available meetings based on user's availability, Isabel
