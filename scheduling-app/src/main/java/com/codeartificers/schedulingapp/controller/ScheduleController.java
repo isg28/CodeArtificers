@@ -91,13 +91,13 @@ class ScheduleController {
     }
     //GET: Retrieve user profile information, Mansoor
     @GetMapping("/api/user/{user_id}")
-    public ResponseEntity<User> get_UserProfile(@PathVariable String user_id){
+    public ResponseEntity<?> get_UserProfile(@PathVariable String user_id){
         Optional<User> userProfile = this.userRepository.findById(user_id);
         // checks if the user profile based on id is available else print error code.
         if (userProfile.isPresent()) {
             return ResponseEntity.status(200).body(userProfile.get());
         }else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body("User " + user_id + " does not exist.");
         }
     }
     //PUT: Edit user info, Isabel
@@ -270,6 +270,41 @@ class ScheduleController {
     }
 
     //PUT: Update an existing meeting (add, remove participants), Mansoor
+    @PutMapping("/api/meeting/{meeting_id}")
+    public ResponseEntity update_meeting(@RequestBody MeetingRequest meetingRequest,@PathVariable String meeting_id){
+        Optional<Meeting>meetingProfile=this.meetingRepository.findById(meeting_id);
+        if(meetingProfile.isPresent()){
+            Meeting existingProfile=meetingProfile.get();
+
+            //Edit meeting information based on JSON request for each meeting data fields
+            if(meetingRequest.getMeeting_id()!=null){
+                existingProfile.setMeeting_id(meetingRequest.getMeeting_id());
+            }
+            if(meetingRequest.getTime()!=null){
+                existingProfile.setTime(meetingRequest.getTime());
+            }
+            if(meetingRequest.getDay()!=null){
+                existingProfile.setDay(meetingRequest.getDay());
+            }
+            if(meetingRequest.getParticipants()!=null){
+                existingProfile.setParticipants(meetingRequest.getParticipants());
+            }
+            if(meetingRequest.getMeeting_Description()!=null){
+                existingProfile.setMeeting_Description(meetingRequest.getMeeting_Description());
+            }
+            //error check for invalid JSON request format
+            if(meetingRequest.getMeeting_id()==null&&meetingRequest.getTime()==null&&meetingRequest.getDay()
+                    ==null&&meetingRequest.getParticipants()==null&&meetingRequest.getMeeting_Description()==null){
+                return ResponseEntity.status(404).body("Malformed request. Missing required user fields.");
+            }
+
+            meetingRepository.save(existingProfile);//store in DB
+            return ResponseEntity.status(200).body(existingProfile);
+        }else{
+            return ResponseEntity.status(404).body("Meeting "+meeting_id+" does not exist.");
+        }
+    }
+
 
 
     //DELETE: delete a meeting, Brandon
