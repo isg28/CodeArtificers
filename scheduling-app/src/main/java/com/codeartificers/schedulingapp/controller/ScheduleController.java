@@ -19,15 +19,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-//We Will delete later, but this is to check whether you connected
-//successfully with MongoDB via local host
 @RestController
 class ScheduleController {
 
     @Autowired
     private MongoTemplate mongoTemplate;
 
-
+    //We will delete later, but this is to check whether you connected
+    //successfully with MongoDB via local host
     @GetMapping("/health")
     public ResponseEntity<String> checkHealth() {
         try {
@@ -67,7 +66,6 @@ class ScheduleController {
     //POST: Create a new user, Danica and Isabel
     @PostMapping("/api/user")
     public ResponseEntity<User> createSchedule(@RequestBody UserRequest userRequest) {
-
         UserCounter counter = userCounterRepository.findByName("user_id");
         if(counter == null){
             counter = new UserCounter();
@@ -121,12 +119,16 @@ class ScheduleController {
             if(userRequest.getUsername() != null){
                 existingProfile.setUsername(userRequest.getUsername());
             }
+            //error case if the JSON request is invalid for any of the User's data fields
+            if(userRequest.getName() == null && userRequest.getEmail() == null && userRequest.getDob() == null && userRequest.getUsername() == null){
+                return ResponseEntity.status(404).body("Malformed request. Missing required user fields.");
+            }
 
             //saving the updated profile to the DB
             userRepository.save(existingProfile);
             return ResponseEntity.status(200).body(existingProfile);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body("User " + user_id + " does not exist.");
         }
     }
     
@@ -139,7 +141,7 @@ class ScheduleController {
         {
             this.userRepository.deleteById(user_id);
 
-            return ResponseEntity.status(201).body("User " + user_id + " has been deleted");
+            return ResponseEntity.status(200).body("User " + user_id + " has been deleted");
         }
     return ResponseEntity.status(404).build();
     }
@@ -177,6 +179,19 @@ class ScheduleController {
 
 
     //DELETE: Delete an available entry, Isabel
+    @DeleteMapping ("/api/user/{user_id}/availability/{availability_id}")
+    public ResponseEntity deleteAvailabilityEntry(@PathVariable String user_id, @PathVariable String availability_id){
+        Optional<User> userProfile = this.userRepository.findById(user_id);
+        Optional<Availability> availabilityEntry = this.availabilityRepository.findById(availability_id);
+
+        if(userProfile.isPresent() && availabilityEntry.isPresent()){
+            Availability deletedEntry = availabilityEntry.get();
+            this.availabilityRepository.deleteById(availability_id);
+            String errorMessage = "Availability entry with ID " + deletedEntry.getAvailability_Id() + " has been deleted";
+            return ResponseEntity.status(200).body(errorMessage);
+        }
+        return ResponseEntity.status(404).body("Availability entry " + availability_id + " not found for User " + user_id);
+    }
 
 
     //// ********************* MEETING MANAGEMENT ENDPOINTS ***********************************
@@ -209,7 +224,10 @@ class ScheduleController {
 
 
     //GET: Retrieve a list of all available meetings based on user's availability, Isabel
-
+    @GetMapping ("/api/meeting")
+    public ResponseEntity<List<Meeting>> getAllMeetingData(){
+        return ResponseEntity.status(200).body(this.meetingRepository.findAll());
+    }
 
     //PUT: Update an existing meeting (add, remove participants), Mansoor
 

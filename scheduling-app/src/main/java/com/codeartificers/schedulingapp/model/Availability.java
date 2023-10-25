@@ -1,6 +1,11 @@
 package com.codeartificers.schedulingapp.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document("availability")
 public class Availability {
+    @Id
     private String availability_Id;
     private String user_id;
     private String days;

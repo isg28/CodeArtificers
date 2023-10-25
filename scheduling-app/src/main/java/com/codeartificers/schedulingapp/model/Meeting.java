@@ -1,6 +1,11 @@
 package com.codeartificers.schedulingapp.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document("Meeting")
 public class Meeting {
+    @Id
     private String meeting_id;
     private String time;
     private String day;

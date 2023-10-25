@@ -11,9 +11,7 @@ public class User{
     private String email;
     private String dob;
     private String username;
-    private String availability_Id;
-    private String days;
-    private String time;
+
 
     public User(){
 
