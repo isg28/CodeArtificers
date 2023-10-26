@@ -176,7 +176,6 @@ class ScheduleController {
 
     //GET: Retrieve all availabilities for a user (useful for showing your own availability), Brandon
 
-
     //PUT: Update an existing availability entry, Danica
     @PutMapping ("/api/user/{user_id}/availability/{availability_id}")
     public ResponseEntity edit_availabilityEntry(@RequestBody AvailabilityRequest availabilityRequest, @PathVariable String user_id, @PathVariable String availability_id){
@@ -308,8 +307,17 @@ class ScheduleController {
 
 
     //DELETE: delete a meeting, Brandon
+    @DeleteMapping("/api/meeting/{meeting_id}")
+    public ResponseEntity delete_Meeting(@PathVariable String meeting_id) {
+        Optional<?> meetingProfile = this.meetingRepository.findById(meeting_id);
+        if (meetingProfile.isPresent()) {
+            this.meetingRepository.deleteById(meeting_id);
 
-
+            return ResponseEntity.status(200).body("Meeting " + meeting_id + " has been deleted");
+        } else {
+            return ResponseEntity.status(404).body("Meeting " + meeting_id + " does not exist.");
+        }
+    }
     //// ********************* SEARCH FOR AVAILABLE TIMESLOTS ENDPOINTS ***********************************
     //GET: Retrieve available timeslots for scheduling a meeting with one or more users
 
