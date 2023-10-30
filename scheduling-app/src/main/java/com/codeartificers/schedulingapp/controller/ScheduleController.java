@@ -16,6 +16,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -173,6 +175,26 @@ class ScheduleController {
 
 
     //GET: Retrieve all availabilities for a user (useful for showing your own availability), Brandon
+    @GetMapping("/api/user/{user_id}/availability")
+    public ResponseEntity<?> getAllAvailability(@RequestBody AvailabilityRequest availabilityRequest, @PathVariable String user_id){
+        Optional<User> userProfile = this.userRepository.findById(user_id);
+        if(!userProfile.isPresent()){
+            return ResponseEntity.status(404).body("User ID: " + user_id + " not found");
+        }
+        List<Availability> allAvailabilities = this.availabilityRepository.findAll();
+        List<Availability> userAvailabilities = new ArrayList<>();
+
+        for(Availability availability: allAvailabilities){
+            if(availability.getUser_id().equals(user_id)){
+                userAvailabilities.add(availability);
+            }
+        }
+        if(userAvailabilities.isEmpty()){
+            return ResponseEntity.status(404).body("There is no availability entry for User: "+ user_id);
+        }
+        return ResponseEntity.status(200).body(userAvailabilities);
+    }
+
 
     //PUT: Update an existing availability entry, Danica
     @PutMapping ("/api/user/{user_id}/availability/{availability_id}")
