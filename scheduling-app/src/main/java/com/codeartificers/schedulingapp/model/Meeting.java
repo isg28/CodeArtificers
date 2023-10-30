@@ -10,17 +10,20 @@ public class Meeting {
     private String time;
     private String day;
     private String participants;
+    private String location;
+
     private String meeting_Description;
 
 
     public Meeting(){
 
     }
-    public Meeting(String meeting_id,String time,String day,String participants,String meeting_Descriptions){
+    public Meeting(String meeting_id,String time,String day,String participants, String location, String meeting_Descriptions){
         this.meeting_id=meeting_id;
         this.time=time;
         this.day=day;
         this.participants=participants;
+        this.location = location;
         this.meeting_Description=meeting_Descriptions;
     }
 
@@ -55,6 +58,8 @@ public class Meeting {
     public void setParticipants(String participants) {
         this.participants = participants;
     }
+    public String getLocation(){return location;}
+    public void setLocation(String location){ this.location = location;}
 
     public String getMeeting_Description() {
         return meeting_Description;

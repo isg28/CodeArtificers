@@ -16,8 +16,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -242,6 +240,7 @@ class ScheduleController {
         meeting.setDay(meetingRequest.getDay());
         meeting.setTime(meetingRequest.getTime());
         meeting.setParticipants(meetingRequest.getParticipants());
+        meeting.setLocation(meetingRequest.getLocation());
         meeting.setMeeting_Description(meetingRequest.getMeeting_Description());
 
         return ResponseEntity.status(201).body(this.meetingRepository.save(meeting));
@@ -288,12 +287,15 @@ class ScheduleController {
             if(meetingRequest.getParticipants()!=null){
                 existingProfile.setParticipants(meetingRequest.getParticipants());
             }
+            if(meetingRequest.getLocation() != null){
+                existingProfile.setLocation(meetingRequest.getLocation());
+            }
             if(meetingRequest.getMeeting_Description()!=null){
                 existingProfile.setMeeting_Description(meetingRequest.getMeeting_Description());
             }
             //error check for invalid JSON request format
             if(meetingRequest.getMeeting_id()==null&&meetingRequest.getTime()==null&&meetingRequest.getDay()
-                    ==null&&meetingRequest.getParticipants()==null&&meetingRequest.getMeeting_Description()==null){
+                    ==null&&meetingRequest.getParticipants()==null&&meetingRequest.getLocation()==null&&meetingRequest.getMeeting_Description()==null){
                 return ResponseEntity.status(404).body("Malformed request. Missing required user fields.");
             }
 

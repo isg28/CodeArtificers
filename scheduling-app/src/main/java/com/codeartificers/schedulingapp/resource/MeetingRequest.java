@@ -5,6 +5,7 @@ public class MeetingRequest {
     private String time;
     private String day;
     private String participants;
+    private String location;
     private String meeting_Description;
 
     public MeetingRequest() {
@@ -42,6 +43,8 @@ public class MeetingRequest {
     public void setParticipants(String participants) {
         this.participants = participants;
     }
+    public String getLocation(){ return location;}
+    public void setLocation(String location){ this.location = location;}
 
     public String getMeeting_Description() {
         return meeting_Description;
