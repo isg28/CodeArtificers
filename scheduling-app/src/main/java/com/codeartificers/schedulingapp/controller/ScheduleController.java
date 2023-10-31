@@ -67,26 +67,32 @@ class ScheduleController {
 
     //POST: Create a new user, Danica and Isabel
     @PostMapping("/api/user")
-    public ResponseEntity<User> createSchedule(@RequestBody UserRequest userRequest) {
+    public ResponseEntity<?> createSchedule(@RequestBody UserRequest userRequest) {
         UserCounter counter = userCounterRepository.findByName("user_id");
-        if(counter == null){
-            counter = new UserCounter();
-            counter.setName("user_id");
-            counter.setSequence(1L); // Set an initial variable of 1.
+
+        if(userRequest.getName() != null && userRequest.getEmail() != null && userRequest.getDob() != null && userRequest.getUsername() != null){
+            if(counter == null){
+                counter = new UserCounter();
+                counter.setName("user_id");
+                counter.setSequence(1L); // Set an initial variable of 1.
+            }
+            long nextUserId = counter.getSequence() + 1;
+            counter.setSequence(nextUserId);
+            userCounterRepository.save(counter);
+
+            User user = new User();
+            user.setUser_id(String.valueOf(nextUserId));
+            user.setName(userRequest.getName());
+            user.setEmail(userRequest.getEmail());
+            user.setDob(userRequest.getDob());
+            user.setUsername(userRequest.getUsername());
+
+            return ResponseEntity.status(201).body(this.userRepository.save(user));
         }
-        long nextUserId = counter.getSequence() + 1;
-        counter.setSequence(nextUserId);
-        userCounterRepository.save(counter);
-
-
-        User user = new User();
-        user.setUser_id(String.valueOf(nextUserId));
-        user.setName(userRequest.getName());
-        user.setEmail(userRequest.getEmail());
-        user.setDob(userRequest.getDob());
-        user.setUsername(userRequest.getUsername());
-
-        return ResponseEntity.status(201).body(this.userRepository.save(user));
+        //error case handling if the JSON request from the client-side forgets to input each of the User's data fields
+        else{
+            return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
+        }
 
     }
     //GET: Retrieve user profile information, Mansoor
@@ -121,9 +127,9 @@ class ScheduleController {
             if(userRequest.getUsername() != null){
                 existingProfile.setUsername(userRequest.getUsername());
             }
-            //error case if the JSON request is invalid for any of the User's data fields
+            //error case handling if the JSON request is invalid for any of the User's data fields
             if(userRequest.getName() == null && userRequest.getEmail() == null && userRequest.getDob() == null && userRequest.getUsername() == null){
-                return ResponseEntity.status(404).body("Malformed request. Missing required user fields.");
+                return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
 
             //saving the updated profile to the DB
@@ -212,7 +218,7 @@ class ScheduleController {
                 existingAvailability.setDays(availabilityRequest.getDays());
             }
             if(availabilityRequest.getTime() == null && availabilityRequest.getDays() == null){
-                return ResponseEntity.status(404).body("Malformed request. Missing required availability fields.");
+                return ResponseEntity.status(400).body("Malformed request. Missing required availability fields.");
 
             }
 
@@ -318,7 +324,7 @@ class ScheduleController {
             //error check for invalid JSON request format
             if(meetingRequest.getMeeting_id()==null&&meetingRequest.getTime()==null&&meetingRequest.getDay()
                     ==null&&meetingRequest.getParticipants()==null&&meetingRequest.getLocation()==null&&meetingRequest.getMeeting_Description()==null){
-                return ResponseEntity.status(404).body("Malformed request. Missing required user fields.");
+                return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
 
             meetingRepository.save(existingProfile);//store in DB
