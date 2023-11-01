@@ -157,25 +157,31 @@ class ScheduleController {
     //********************* AVAILABILITY MANAGEMENT ENDPOINTS ***********************************
     //POST: Create a new availability entry for a user, Danica
     @PostMapping("/api/user/{user_id}/availability")
-    public ResponseEntity<Availability> createNewAvailability(@PathVariable String user_id, @RequestBody AvailabilityRequest availabilityRequest) {
+    public ResponseEntity<?> createNewAvailability(@PathVariable String user_id, @RequestBody AvailabilityRequest availabilityRequest) {
         AvailabilityCounter availabilityCounter = availabilityCounterRepository.findByName("availability_id");
-        //To ensure that the availabilityCounter remains consistent. If empty, starts at 0 then increments.
-        if(availabilityCounter == null){
-            availabilityCounter = new AvailabilityCounter();
-            availabilityCounter.setName("availability_id");
-            availabilityCounter.setSequence(1L); //sets initial variable to 1
+
+        if (availabilityRequest.getUser_id() != null && availabilityRequest.getDays() != null && availabilityRequest.getTime() != null){
+            //To ensure that the availabilityCounter remains consistent. If empty, starts at 0 then increments.
+            if(availabilityCounter == null){
+                availabilityCounter = new AvailabilityCounter();
+                availabilityCounter.setName("availability_id");
+                availabilityCounter.setSequence(1L); //sets initial variable to 1
+            }
+            long nextAvailabilityId = availabilityCounter.getSequence() + 1;
+            availabilityCounter.setSequence(nextAvailabilityId);
+            availabilityCounterRepository.save(availabilityCounter);
+
+            Availability availability = new Availability();
+            availability.setAvailability_Id(String.valueOf(nextAvailabilityId));
+            availability.setUser_id(user_id);
+            availability.setDays(availabilityRequest.getDays());
+            availability.setTime(availabilityRequest.getTime());
+
+            return ResponseEntity.status(201).body(this.availabilityRepository.save(availability));
         }
-        long nextAvailabilityId = availabilityCounter.getSequence() + 1;
-        availabilityCounter.setSequence(nextAvailabilityId);
-        availabilityCounterRepository.save(availabilityCounter);
-
-        Availability availability = new Availability();
-        availability.setAvailability_Id(String.valueOf(nextAvailabilityId));
-        availability.setUser_id(user_id);
-        availability.setDays(availabilityRequest.getDays());
-        availability.setTime(availabilityRequest.getTime());
-
-        return ResponseEntity.status(201).body(this.availabilityRepository.save(availability));
+        else{
+            return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
+        }
 
     }
 
@@ -252,26 +258,33 @@ class ScheduleController {
     //// ********************* MEETING MANAGEMENT ENDPOINTS ***********************************
     //POST: Create a new meeting, Danica
     @PostMapping("/api/meeting")
-    public ResponseEntity<Meeting> createMeeting(@RequestBody MeetingRequest meetingRequest){
+    public ResponseEntity<?> createMeeting(@RequestBody MeetingRequest meetingRequest){
         MeetingCounter counter = meetingCounterRepository.findByName("meeting_id");
-        if(counter == null){
-            counter = new MeetingCounter();
-            counter.setName("meeting_id");
-            counter.setSequence(1L); //sets initial variable to 1
+
+        if(meetingRequest.getDay() != null && meetingRequest.getTime() != null && meetingRequest.getParticipants() != null && meetingRequest.getLocation() != null && meetingRequest.getMeeting_Description() != null){
+            if(counter == null){
+                counter = new MeetingCounter();
+                counter.setName("meeting_id");
+                counter.setSequence(1L); //sets initial variable to 1
+            }
+            long nextMeetingId = counter.getSequence() + 1;
+            counter.setSequence(nextMeetingId);
+            meetingCounterRepository.save(counter);
+
+            Meeting meeting = new Meeting();
+            meeting.setMeeting_id(String.valueOf(nextMeetingId));
+            meeting.setDay(meetingRequest.getDay());
+            meeting.setTime(meetingRequest.getTime());
+            meeting.setParticipants(meetingRequest.getParticipants());
+            meeting.setLocation(meetingRequest.getLocation());
+            meeting.setMeeting_Description(meetingRequest.getMeeting_Description());
+
+            return ResponseEntity.status(201).body(this.meetingRepository.save(meeting));
         }
-        long nextMeetingId = counter.getSequence() + 1;
-        counter.setSequence(nextMeetingId);
-        meetingCounterRepository.save(counter);
 
-        Meeting meeting = new Meeting();
-        meeting.setMeeting_id(String.valueOf(nextMeetingId));
-        meeting.setDay(meetingRequest.getDay());
-        meeting.setTime(meetingRequest.getTime());
-        meeting.setParticipants(meetingRequest.getParticipants());
-        meeting.setLocation(meetingRequest.getLocation());
-        meeting.setMeeting_Description(meetingRequest.getMeeting_Description());
-
-        return ResponseEntity.status(201).body(this.meetingRepository.save(meeting));
+        else{
+            return ResponseEntity.status(400).body("Malformed request. Missing required user data fields.");
+        }
 
     }
 
