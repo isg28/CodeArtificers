@@ -350,7 +350,20 @@ class ScheduleController {
     }
     //// ********************* SEARCH FOR AVAILABLE TIMESLOTS ENDPOINTS ***********************************
     //GET: Retrieve available timeslots for scheduling a meeting with one or more users
+    @GetMapping("/api/timeslots")
+    public ResponseEntity<?> getAllTimeslots(){
+        List<Availability> availabilityTimeslot = this.availabilityRepository.findAll();
+        List<String> storesTimeslot = new ArrayList<>();
 
+        for(Availability availability : availabilityTimeslot){
+            storesTimeslot.add(availability.getDays());
+            storesTimeslot.add(availability.getTime());
+        }
+        if(storesTimeslot.isEmpty()){
+            return ResponseEntity.status(404).body("There is no availability time stored in the database");
+        }
+        return ResponseEntity.status(200).body(storesTimeslot);
+    }
 
     //// ********************* USER REGISTRATION AND AUTHENTICATION ENDPOINTS ***********************************
 
