@@ -16,15 +16,25 @@ export default function User() {
         const[firstName,setName]=useState('')
         const[lastName,setLastName]=useState('')
         const[email,setEmail]=useState('')
-        const[userName,setUserName]=useState('')
+        const[username,setUsername]=useState('')
         const[dob,setDob]=useState('')
 
-        
+        //HandleClick event handler - function for clicking the submit button on the UI
         const handleClick=(e)=>{
             e.preventDefault()
-            const User={firstName,lastName,email,userName,dob}
+            const User={firstName,lastName,email,dob,username}
             console.log(User)
-        }
+            //POST: Connects User data with the Mongo database 
+            fetch("http://localhost:8080/api/user", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body:JSON.stringify(User)
+        
+        }).then(() => {
+            console.log("New User added to database");
+        })
+    
+}
     
     return (
         <Container maxWidth="md">
@@ -60,8 +70,8 @@ export default function User() {
             />
             <div></div>
             <TextField id="outlined-basic" label="Username" variant="outlined" 
-            value={userName}
-            onChange={(e)=>setUserName(e.target.value)}
+            value={username}
+            onChange={(e)=>setUsername(e.target.value)}
             />
             <div></div>
             <Button variant="contained" endIcon={<SendIcon />} onClick={handleClick}>
@@ -74,7 +84,7 @@ export default function User() {
             <div></div> 
             {dob}
             <div></div> 
-            {userName}
+            {username}
         </Box>
             </Paper>
         </Container>
