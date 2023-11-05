@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 class ScheduleController {
 
     @Autowired
@@ -70,7 +71,7 @@ class ScheduleController {
     public ResponseEntity<?> createSchedule(@RequestBody UserRequest userRequest) {
         UserCounter counter = userCounterRepository.findByName("user_id");
 
-        if(userRequest.getName() != null && userRequest.getEmail() != null && userRequest.getDob() != null && userRequest.getUsername() != null){
+        if(userRequest.getFirstName() != null && userRequest.getLastName() != null && userRequest.getEmail() != null && userRequest.getDob() != null && userRequest.getUsername() != null){
             if(counter == null){
                 counter = new UserCounter();
                 counter.setName("user_id");
@@ -82,7 +83,8 @@ class ScheduleController {
 
             User user = new User();
             user.setUser_id(String.valueOf(nextUserId));
-            user.setName(userRequest.getName());
+            user.setFirstName(userRequest.getFirstName());
+            user.setLastName(userRequest.getLastName());
             user.setEmail(userRequest.getEmail());
             user.setDob(userRequest.getDob());
             user.setUsername(userRequest.getUsername());
@@ -108,15 +110,18 @@ class ScheduleController {
     }
     //PUT: Edit user info, Isabel
     @PutMapping("/api/user/{user_id}")
-    public ResponseEntity edit_UserProfile(@RequestBody UserRequest userRequest, @PathVariable String user_id) {
+    public ResponseEntity<?> edit_UserProfile(@RequestBody UserRequest userRequest, @PathVariable String user_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
 
         if (userProfile.isPresent()) {
             User existingProfile = userProfile.get();
 
             //Updated the user's profile data with the new values, doesn't have to provide new values for each component
-            if(userRequest.getName() != null){
-                existingProfile.setName(userRequest.getName());
+            if(userRequest.getFirstName() != null){
+                existingProfile.setFirstName(userRequest.getFirstName());
+            }
+            if(userRequest.getLastName() != null){
+                existingProfile.setLastName(userRequest.getLastName());
             }
             if(userRequest.getEmail() != null){
                 existingProfile.setEmail(userRequest.getEmail());
@@ -128,7 +133,7 @@ class ScheduleController {
                 existingProfile.setUsername(userRequest.getUsername());
             }
             //error case handling if the JSON request is invalid for any of the User's data fields
-            if(userRequest.getName() == null && userRequest.getEmail() == null && userRequest.getDob() == null && userRequest.getUsername() == null){
+            if(userRequest.getFirstName() == null && userRequest.getLastName() == null && userRequest.getEmail() == null && userRequest.getDob() == null && userRequest.getUsername() == null){
                 return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
 
@@ -241,7 +246,7 @@ class ScheduleController {
 
     //DELETE: Delete an available entry, Isabel
     @DeleteMapping ("/api/user/{user_id}/availability/{availability_id}")
-    public ResponseEntity deleteAvailabilityEntry(@PathVariable String user_id, @PathVariable String availability_id){
+    public ResponseEntity<?> deleteAvailabilityEntry(@PathVariable String user_id, @PathVariable String availability_id){
         Optional<User> userProfile = this.userRepository.findById(user_id);
         Optional<Availability> availabilityEntry = this.availabilityRepository.findById(availability_id);
 
