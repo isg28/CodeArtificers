@@ -1,15 +1,14 @@
 package com.codeartificers.schedulingapp.controller;
 
-import com.codeartificers.schedulingapp.model.Availability;
-import com.codeartificers.schedulingapp.model.AvailabilityCounter;
-import com.codeartificers.schedulingapp.model.User;
-import com.codeartificers.schedulingapp.model.UserCounter;
+import com.codeartificers.schedulingapp.model.*;
 import com.codeartificers.schedulingapp.repository.*;
 import com.codeartificers.schedulingapp.resource.AvailabilityRequest;
 import com.codeartificers.schedulingapp.resource.MeetingRequest;
+import com.codeartificers.schedulingapp.resource.TimeSlotRequest;
 import com.codeartificers.schedulingapp.resource.UserRequest;
-import com.codeartificers.schedulingapp.model.Meeting;
-import com.codeartificers.schedulingapp.model.MeetingCounter;
+import com.codeartificers.schedulingapp.service.TimeSlotService;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.coyote.Response;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -17,9 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -46,15 +44,19 @@ class ScheduleController {
     private final AvailabilityCounterRepository availabilityCounterRepository;
     private final MeetingRepository meetingRepository;
     private final MeetingCounterRepository meetingCounterRepository;
+    private final TimeSlotRepository timeSlotRepository;
+    private TimeSlotService timeSlotService;
 
     @Autowired
-    public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1, MeetingRepository meetingRepository,MeetingCounterRepository meetingCounterRepository) {
+    public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1, MeetingRepository meetingRepository, MeetingCounterRepository meetingCounterRepository, TimeSlotRepository timeSlotRepository, TimeSlotService timeSlotService) {
         this.userRepository = userRepository;
         this.availabilityRepository = availabilityRepository;
         this.userCounterRepository = userCounterRepository;
         this.availabilityCounterRepository = availabilityCounterRepository1;
         this.meetingRepository = meetingRepository;
         this.meetingCounterRepository = meetingCounterRepository;
+        this.timeSlotRepository = timeSlotRepository;
+        this.timeSlotService = timeSlotService;
     }
 
 
@@ -71,8 +73,8 @@ class ScheduleController {
     public ResponseEntity<?> createSchedule(@RequestBody UserRequest userRequest) {
         UserCounter counter = userCounterRepository.findByName("user_id");
 
-        if(userRequest.getFirstName() != null && userRequest.getLastName() != null && userRequest.getEmail() != null && userRequest.getDob() != null && userRequest.getUsername() != null){
-            if(counter == null){
+        if (userRequest.getFirstName() != null && userRequest.getLastName() != null && userRequest.getEmail() != null && userRequest.getDob() != null && userRequest.getUsername() != null) {
+            if (counter == null) {
                 counter = new UserCounter();
                 counter.setName("user_id");
                 counter.setSequence(1L); // Set an initial variable of 1.
@@ -92,22 +94,24 @@ class ScheduleController {
             return ResponseEntity.status(201).body(this.userRepository.save(user));
         }
         //error case handling if the JSON request from the client-side forgets to input each of the User's data fields
-        else{
+        else {
             return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
         }
 
     }
+
     //GET: Retrieve user profile information, Mansoor
     @GetMapping("/api/user/{user_id}")
-    public ResponseEntity<?> get_UserProfile(@PathVariable String user_id){
+    public ResponseEntity<?> get_UserProfile(@PathVariable String user_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
         // checks if the user profile based on id is available else print error code.
         if (userProfile.isPresent()) {
             return ResponseEntity.status(200).body(userProfile.get());
-        }else {
+        } else {
             return ResponseEntity.status(404).body("User " + user_id + " does not exist.");
         }
     }
+
     //PUT: Edit user info, Isabel
     @PutMapping("/api/user/{user_id}")
     public ResponseEntity<?> edit_UserProfile(@RequestBody UserRequest userRequest, @PathVariable String user_id) {
@@ -117,23 +121,23 @@ class ScheduleController {
             User existingProfile = userProfile.get();
 
             //Updated the user's profile data with the new values, doesn't have to provide new values for each component
-            if(userRequest.getFirstName() != null){
+            if (userRequest.getFirstName() != null) {
                 existingProfile.setFirstName(userRequest.getFirstName());
             }
-            if(userRequest.getLastName() != null){
+            if (userRequest.getLastName() != null) {
                 existingProfile.setLastName(userRequest.getLastName());
             }
-            if(userRequest.getEmail() != null){
+            if (userRequest.getEmail() != null) {
                 existingProfile.setEmail(userRequest.getEmail());
             }
-            if(userRequest.getDob() != null){
+            if (userRequest.getDob() != null) {
                 existingProfile.setDob(userRequest.getDob());
             }
-            if(userRequest.getUsername() != null){
+            if (userRequest.getUsername() != null) {
                 existingProfile.setUsername(userRequest.getUsername());
             }
             //error case handling if the JSON request is invalid for any of the User's data fields
-            if(userRequest.getFirstName() == null && userRequest.getLastName() == null && userRequest.getEmail() == null && userRequest.getDob() == null && userRequest.getUsername() == null){
+            if (userRequest.getFirstName() == null && userRequest.getLastName() == null && userRequest.getEmail() == null && userRequest.getDob() == null && userRequest.getUsername() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
 
@@ -144,19 +148,17 @@ class ScheduleController {
             return ResponseEntity.status(404).body("User " + user_id + " does not exist.");
         }
     }
-    
+
     //DELETE: deletes user, Oscar
     @DeleteMapping("/api/user/{user_id}")
-    public ResponseEntity delete_UserProfile(@PathVariable String user_id)
-    {
+    public ResponseEntity delete_UserProfile(@PathVariable String user_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
-        if (userProfile.isPresent())
-        {
+        if (userProfile.isPresent()) {
             this.userRepository.deleteById(user_id);
 
             return ResponseEntity.status(200).body("User " + user_id + " has been deleted");
         }
-    return ResponseEntity.status(404).build();
+        return ResponseEntity.status(404).build();
     }
 
     //********************* AVAILABILITY MANAGEMENT ENDPOINTS ***********************************
@@ -165,9 +167,9 @@ class ScheduleController {
     public ResponseEntity<?> createNewAvailability(@PathVariable String user_id, @RequestBody AvailabilityRequest availabilityRequest) {
         AvailabilityCounter availabilityCounter = availabilityCounterRepository.findByName("availability_id");
 
-        if (availabilityRequest.getUser_id() != null && availabilityRequest.getDays() != null && availabilityRequest.getTime() != null){
+        if (availabilityRequest.getUser_id() != null && availabilityRequest.getDate() != null && availabilityRequest.getStartTime() != null && availabilityRequest.getEndTime() != null) {
             //To ensure that the availabilityCounter remains consistent. If empty, starts at 0 then increments.
-            if(availabilityCounter == null){
+            if (availabilityCounter == null) {
                 availabilityCounter = new AvailabilityCounter();
                 availabilityCounter.setName("availability_id");
                 availabilityCounter.setSequence(1L); //sets initial variable to 1
@@ -179,12 +181,12 @@ class ScheduleController {
             Availability availability = new Availability();
             availability.setAvailability_Id(String.valueOf(nextAvailabilityId));
             availability.setUser_id(user_id);
-            availability.setDays(availabilityRequest.getDays());
-            availability.setTime(availabilityRequest.getTime());
+            availability.setDate(availabilityRequest.getDate());
+            availability.setStartTime(availabilityRequest.getStartTime());
+            availability.setEndTime(availabilityRequest.getEndTime());
 
             return ResponseEntity.status(201).body(this.availabilityRepository.save(availability));
-        }
-        else{
+        } else {
             return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
         }
 
@@ -193,42 +195,45 @@ class ScheduleController {
 
     //GET: Retrieve all availabilities for a user (useful for showing your own availability), Brandon
     @GetMapping("/api/user/{user_id}/availability")
-    public ResponseEntity<?> getAllAvailability(@RequestBody AvailabilityRequest availabilityRequest, @PathVariable String user_id){
+    public ResponseEntity<?> getAllAvailability(@RequestBody AvailabilityRequest availabilityRequest, @PathVariable String user_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
-        if(!userProfile.isPresent()){
+        if (!userProfile.isPresent()) {
             return ResponseEntity.status(404).body("User ID: " + user_id + " not found");
         }
         List<Availability> allAvailabilities = this.availabilityRepository.findAll();
         List<Availability> userAvailabilities = new ArrayList<>();
 
-        for(Availability availability: allAvailabilities){
-            if(availability.getUser_id().equals(user_id)){
+        for (Availability availability : allAvailabilities) {
+            if (availability.getUser_id().equals(user_id)) {
                 userAvailabilities.add(availability);
             }
         }
-        if(userAvailabilities.isEmpty()){
-            return ResponseEntity.status(404).body("There is no availability entry for User: "+ user_id);
+        if (userAvailabilities.isEmpty()) {
+            return ResponseEntity.status(404).body("There is no availability entry for User: " + user_id);
         }
         return ResponseEntity.status(200).body(userAvailabilities);
     }
 
 
     //PUT: Update an existing availability entry, Danica
-    @PutMapping ("/api/user/{user_id}/availability/{availability_id}")
-    public ResponseEntity edit_availabilityEntry(@RequestBody AvailabilityRequest availabilityRequest, @PathVariable String user_id, @PathVariable String availability_id){
+    @PutMapping("/api/user/{user_id}/availability/{availability_id}")
+    public ResponseEntity edit_availabilityEntry(@RequestBody AvailabilityRequest availabilityRequest, @PathVariable String user_id, @PathVariable String availability_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
         Optional<Availability> availability = this.availabilityRepository.findById(availability_id);
 
-        if(userProfile.isPresent() && availability.isPresent()) {
+        if (userProfile.isPresent() && availability.isPresent()) {
             Availability existingAvailability = availability.get();
 
-            if (availabilityRequest.getTime() != null) {
-                existingAvailability.setTime(availabilityRequest.getTime());
+            if (availabilityRequest.getStartTime() != null) {
+                existingAvailability.setStartTime(availabilityRequest.getStartTime());
             }
-            if (availabilityRequest.getDays() != null) {
-                existingAvailability.setDays(availabilityRequest.getDays());
+            if (availabilityRequest.getEndTime() != null) {
+                existingAvailability.setEndTime(availabilityRequest.getEndTime());
             }
-            if(availabilityRequest.getTime() == null && availabilityRequest.getDays() == null){
+            if (availabilityRequest.getDate() != null) {
+                existingAvailability.setDate(availabilityRequest.getDate());
+            }
+            if (availabilityRequest.getStartTime() == null && availabilityRequest.getDate() == null && availabilityRequest.getEndTime() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required availability fields.");
 
             }
@@ -245,12 +250,12 @@ class ScheduleController {
 
 
     //DELETE: Delete an available entry, Isabel
-    @DeleteMapping ("/api/user/{user_id}/availability/{availability_id}")
-    public ResponseEntity<?> deleteAvailabilityEntry(@PathVariable String user_id, @PathVariable String availability_id){
+    @DeleteMapping("/api/user/{user_id}/availability/{availability_id}")
+    public ResponseEntity<?> deleteAvailabilityEntry(@PathVariable String user_id, @PathVariable String availability_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
         Optional<Availability> availabilityEntry = this.availabilityRepository.findById(availability_id);
 
-        if(userProfile.isPresent() && availabilityEntry.isPresent()){
+        if (userProfile.isPresent() && availabilityEntry.isPresent()) {
             Availability deletedEntry = availabilityEntry.get();
             this.availabilityRepository.deleteById(availability_id);
             String errorMessage = "Availability entry with ID " + deletedEntry.getAvailability_Id() + " has been deleted";
@@ -263,11 +268,11 @@ class ScheduleController {
     //// ********************* MEETING MANAGEMENT ENDPOINTS ***********************************
     //POST: Create a new meeting, Danica
     @PostMapping("/api/meeting")
-    public ResponseEntity<?> createMeeting(@RequestBody MeetingRequest meetingRequest){
+    public ResponseEntity<?> createMeeting(@RequestBody MeetingRequest meetingRequest) {
         MeetingCounter counter = meetingCounterRepository.findByName("meeting_id");
 
-        if(meetingRequest.getDay() != null && meetingRequest.getTime() != null && meetingRequest.getParticipants() != null && meetingRequest.getLocation() != null && meetingRequest.getMeeting_Description() != null){
-            if(counter == null){
+        if (meetingRequest.getDate() != null && meetingRequest.getStartTime() != null && meetingRequest.getEndTime() != null && meetingRequest.getParticipants() != null && meetingRequest.getLocation() != null && meetingRequest.getMeeting_Description() != null) {
+            if (counter == null) {
                 counter = new MeetingCounter();
                 counter.setName("meeting_id");
                 counter.setSequence(1L); //sets initial variable to 1
@@ -278,16 +283,15 @@ class ScheduleController {
 
             Meeting meeting = new Meeting();
             meeting.setMeeting_id(String.valueOf(nextMeetingId));
-            meeting.setDay(meetingRequest.getDay());
-            meeting.setTime(meetingRequest.getTime());
+            meeting.setDate(meetingRequest.getDate());
+            meeting.setStartTime(meetingRequest.getStartTime());
+            meeting.setEndTime(meetingRequest.getEndTime());
             meeting.setParticipants(meetingRequest.getParticipants());
             meeting.setLocation(meetingRequest.getLocation());
             meeting.setMeeting_Description(meetingRequest.getMeeting_Description());
 
             return ResponseEntity.status(201).body(this.meetingRepository.save(meeting));
-        }
-
-        else{
+        } else {
             return ResponseEntity.status(400).body("Malformed request. Missing required user data fields.");
         }
 
@@ -296,62 +300,63 @@ class ScheduleController {
 
     //GET: Retrieve details about a specific meeting, Oscar
     @GetMapping("/api/meeting/{meeting_id}")
-    public ResponseEntity<Meeting> getMeetingDetails(@PathVariable String meeting_id){
+    public ResponseEntity<Meeting> getMeetingDetails(@PathVariable String meeting_id) {
         Optional<Meeting> meetingData = this.meetingRepository.findById(meeting_id); // Checks for any meetings that were made
-        if (meetingData.isPresent()){
+        if (meetingData.isPresent()) {
             return ResponseEntity.status(200).body(meetingData.get()); // returns meeting details
-        }
-        else {
+        } else {
             return ResponseEntity.notFound().build();
         }
     }
 
 
     //GET: Retrieve a list of all available meetings based on user's availability, Isabel
-    @GetMapping ("/api/meeting")
-    public ResponseEntity<List<Meeting>> getAllMeetingData(){
+    @GetMapping("/api/meeting")
+    public ResponseEntity<List<Meeting>> getAllMeetingData() {
         return ResponseEntity.status(200).body(this.meetingRepository.findAll());
     }
 
     //PUT: Update an existing meeting (add, remove participants), Mansoor
     @PutMapping("/api/meeting/{meeting_id}")
-    public ResponseEntity update_meeting(@RequestBody MeetingRequest meetingRequest,@PathVariable String meeting_id){
-        Optional<Meeting>meetingProfile=this.meetingRepository.findById(meeting_id);
-        if(meetingProfile.isPresent()){
-            Meeting existingProfile=meetingProfile.get();
+    public ResponseEntity update_meeting(@RequestBody MeetingRequest meetingRequest, @PathVariable String meeting_id) {
+        Optional<Meeting> meetingProfile = this.meetingRepository.findById(meeting_id);
+        if (meetingProfile.isPresent()) {
+            Meeting existingProfile = meetingProfile.get();
 
             //Edit meeting information based on JSON request for each meeting data fields
-            if(meetingRequest.getMeeting_id()!=null){
+            if (meetingRequest.getMeeting_id() != null) {
                 existingProfile.setMeeting_id(meetingRequest.getMeeting_id());
             }
-            if(meetingRequest.getTime()!=null){
-                existingProfile.setTime(meetingRequest.getTime());
+            if (meetingRequest.getStartTime() != null) {
+                existingProfile.setStartTime(meetingRequest.getStartTime());
             }
-            if(meetingRequest.getDay()!=null){
-                existingProfile.setDay(meetingRequest.getDay());
+            if (meetingRequest.getEndTime() != null) {
+                existingProfile.setEndTime(meetingRequest.getEndTime());
             }
-            if(meetingRequest.getParticipants()!=null){
+            if (meetingRequest.getDate() != null) {
+                existingProfile.setDate(meetingRequest.getDate());
+            }
+            if (meetingRequest.getParticipants() != null) {
                 existingProfile.setParticipants(meetingRequest.getParticipants());
             }
-            if(meetingRequest.getLocation() != null){
+            if (meetingRequest.getLocation() != null) {
                 existingProfile.setLocation(meetingRequest.getLocation());
             }
-            if(meetingRequest.getMeeting_Description()!=null){
+            if (meetingRequest.getMeeting_Description() != null) {
                 existingProfile.setMeeting_Description(meetingRequest.getMeeting_Description());
             }
             //error check for invalid JSON request format
-            if(meetingRequest.getMeeting_id()==null&&meetingRequest.getTime()==null&&meetingRequest.getDay()
-                    ==null&&meetingRequest.getParticipants()==null&&meetingRequest.getLocation()==null&&meetingRequest.getMeeting_Description()==null){
+            if (meetingRequest.getMeeting_id() == null && meetingRequest.getStartTime() == null && meetingRequest.getEndTime() == null && meetingRequest.getDate()
+                    == null && meetingRequest.getParticipants() == null && meetingRequest.getLocation() == null && meetingRequest.getMeeting_Description() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
 
             meetingRepository.save(existingProfile);//store in DB
             return ResponseEntity.status(200).body(existingProfile);
-        }else{
-            return ResponseEntity.status(404).body("Meeting "+meeting_id+" does not exist.");
+        } else {
+            return ResponseEntity.status(404).body("Meeting " + meeting_id + " does not exist.");
         }
     }
-
 
 
     //DELETE: delete a meeting, Brandon
@@ -366,21 +371,17 @@ class ScheduleController {
             return ResponseEntity.status(404).body("Meeting " + meeting_id + " does not exist.");
         }
     }
-    //// ********************* SEARCH FOR AVAILABLE TIMESLOTS ENDPOINTS ***********************************
-    //GET: Retrieve available timeslots for scheduling a meeting with one or more users
-    @GetMapping("/api/timeslots")
-    public ResponseEntity<?> getAllTimeslots(){
-        List<Availability> availabilityTimeslot = this.availabilityRepository.findAll();
-        List<String> storesTimeslot = new ArrayList<>();
 
-        for(Availability availability : availabilityTimeslot){
-            storesTimeslot.add(availability.getDays());
-            storesTimeslot.add(availability.getTime());
+    //// ********************* SEARCH FOR AVAILABLE TIMESLOTS ENDPOINTS ***********************************
+    @GetMapping("/api/timeslots")
+    public ResponseEntity<List<UserTimeSlots>> getCommonTimeSlots() {
+        List<UserTimeSlots> commonTimeSlotsList = timeSlotService.getCommonTimeSlotsForAllUsers();
+
+        if (commonTimeSlotsList.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        if(storesTimeslot.isEmpty()){
-            return ResponseEntity.status(404).body("There is no availability time stored in the database");
-        }
-        return ResponseEntity.status(200).body(storesTimeslot);
+
+        return ResponseEntity.ok(commonTimeSlotsList);
     }
 
     //// ********************* USER REGISTRATION AND AUTHENTICATION ENDPOINTS ***********************************

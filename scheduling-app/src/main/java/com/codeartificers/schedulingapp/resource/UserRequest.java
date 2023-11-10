@@ -2,19 +2,21 @@ package com.codeartificers.schedulingapp.resource;
 
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 @Getter
 public class UserRequest {
     private String user_id;
     private String firstName;
     private String lastName;
     private String email;
-    private String dob;
+    private LocalDate dob;
     private String username;
 
     public UserRequest() {
     }
     //Constructor to access id, name, email, dob, and username for User Profile
-    public UserRequest(String user_id, String firstName, String lastName, String email, String dob, String username) {
+    public UserRequest(String user_id, String firstName, String lastName, String email, LocalDate dob, String username) {
         this.user_id = user_id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -43,10 +45,11 @@ public class UserRequest {
     public void setEmail(String email) {
         this.email = email;
     }
-    public String getDob() {
+    public LocalDate getDob() {
         return dob;
     }
-    public void setDob(String dob) {
+
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
     public String getUsername() {

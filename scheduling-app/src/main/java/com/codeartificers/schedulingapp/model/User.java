@@ -3,6 +3,8 @@ package com.codeartificers.schedulingapp.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+
 @Document("user")
 public class User{
     @Id
@@ -10,7 +12,7 @@ public class User{
     private String firstName;
     private String lastName;
     private String email;
-    private String dob;
+    private LocalDate dob;
     private String username;
 
 
@@ -18,7 +20,7 @@ public class User{
 
     }
 
-    public User(String user_id, String firstName, String lastName, String email, String dob, String username){
+    public User(String user_id, String firstName, String lastName, String email, LocalDate dob, String username){
         this.user_id = user_id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -48,12 +50,15 @@ public class User{
     public void setEmail(String email) {
         this.email = email;
     }
-    public String getDob() {
+
+    public LocalDate getDob() {
         return dob;
     }
-    public void setDob(String dob) {
+
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
+
     public String getUsername() {
         return username;
     }

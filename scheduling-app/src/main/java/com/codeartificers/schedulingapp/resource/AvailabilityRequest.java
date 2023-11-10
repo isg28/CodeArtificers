@@ -1,38 +1,60 @@
 package com.codeartificers.schedulingapp.resource;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Getter
 public class AvailabilityRequest {
     //Getter and Setter methods for instance variables
     private String availability_Id;
     private String user_id;
-    private String days;
-    private String time;
+    private LocalDate date;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime startTime;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime endTime;
 
     public AvailabilityRequest(){
 
     }
     //Constructor to access availability_Id, days, and time for Availability entry
-    public AvailabilityRequest(String availability_Id, String user_id, String days, String time) {
+    public AvailabilityRequest(String availability_Id, String user_id, LocalDate date, LocalTime startTime, LocalTime endTime) {
         this.availability_Id = availability_Id;
         this.user_id = user_id;
-        this.days = days;
-        this.time = time;
+        this.date = date;
+        this.startTime = startTime;
     }
 
     public void setAvailability_Id(String availability_Id) {
         this.availability_Id = availability_Id;
     }
 
-    public void setDays(String days) {
-        this.days = days;
+    public LocalDate getDate() {
+        return date;
     }
-    public String getDays(){return days;}
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
-    public String getTime(){return time;}
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+
     public String getUser_id(){return user_id;}
     public void setUserId(String user_id){this.user_id = user_id;}
 

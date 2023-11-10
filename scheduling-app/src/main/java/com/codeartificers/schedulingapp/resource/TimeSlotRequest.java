@@ -1,16 +1,10 @@
-package com.codeartificers.schedulingapp.model;
-
+package com.codeartificers.schedulingapp.resource;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Document("availability")
-public class Availability {
-    @Id
-    private String availability_Id;
+public class TimeSlotRequest {
     private String user_id;
     private LocalDate date;
     @JsonFormat(pattern = "HH:mm")
@@ -18,23 +12,22 @@ public class Availability {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime endTime;
 
-    public Availability(){
+    public TimeSlotRequest(){
 
     }
-    public Availability(String availability_Id, String user_id, LocalDate date, LocalTime startTime, LocalTime endTime) {
-        this.availability_Id = availability_Id;
+    public TimeSlotRequest(String user_id, LocalDate date, LocalTime startTime, LocalTime endTime){
         this.user_id = user_id;
         this.date = date;
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
-    public String getAvailability_Id() {
-        return availability_Id;
+    public String getUser_id() {
+        return user_id;
     }
 
-    public void setAvailability_Id(String availability_Id) {
-        this.availability_Id = availability_Id;
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
 
     public LocalDate getDate() {
@@ -60,7 +53,4 @@ public class Availability {
     public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
     }
-
-    public void setUser_id(String user_id){this.user_id = user_id;}
-    public String getUser_id(){return user_id;}
 }
