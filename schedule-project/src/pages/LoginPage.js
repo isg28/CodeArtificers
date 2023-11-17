@@ -1,12 +1,13 @@
 import React from 'react'
 import AppBar from '../components/AppBar';
+import LoginSignup from '../components/LoginSignup';
 
 function LoginPage() {
   return (
     
     <div className="App">
       <AppBar />
-      <div>LoginPage</div>
+      <LoginSignup />
       </div>
   )
 }
