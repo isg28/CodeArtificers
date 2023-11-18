@@ -1,12 +1,15 @@
 package com.codeartificers.schedulingapp.model;
 
+
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.Collections;
 
 @Document("user")
-public class User{
+public class User {
     @Id
     private String user_id;
     private String firstName;
@@ -14,19 +17,22 @@ public class User{
     private String email;
     private LocalDate dob;
     private String username;
+    private String password;
 
 
     public User(){
 
     }
 
-    public User(String user_id, String firstName, String lastName, String email, LocalDate dob, String username){
+    public User(String user_id, String firstName, String lastName, String email,
+                LocalDate dob, String username, String password){
         this.user_id = user_id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.dob = dob;
         this.username = username;
+        this.password = password;
     }
 
     //Getter and Setter methods for each instance variable
@@ -59,11 +65,11 @@ public class User{
         this.dob = dob;
     }
 
-    public String getUsername() {
-        return username;
-    }
+    public String getUsername() {return username;}
     public void setUsername(String username) {
         this.username = username;
     }
+    public String getPassword(){ return password;}
+    public void setPassword(String password){ this.password = password;}
 
 }

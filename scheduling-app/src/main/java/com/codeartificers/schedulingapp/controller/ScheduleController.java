@@ -7,6 +7,8 @@ import com.codeartificers.schedulingapp.resource.MeetingRequest;
 import com.codeartificers.schedulingapp.resource.TimeSlotRequest;
 import com.codeartificers.schedulingapp.resource.UserRequest;
 import com.codeartificers.schedulingapp.service.TimeSlotService;
+import com.codeartificers.schedulingapp.service.TokenUtil;
+import com.codeartificers.schedulingapp.service.UserService;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.coyote.Response;
 import org.bson.Document;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -46,9 +49,12 @@ class ScheduleController {
     private final MeetingCounterRepository meetingCounterRepository;
     private final TimeSlotRepository timeSlotRepository;
     private TimeSlotService timeSlotService;
+    private UserService userService;
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1, MeetingRepository meetingRepository, MeetingCounterRepository meetingCounterRepository, TimeSlotRepository timeSlotRepository, TimeSlotService timeSlotService) {
+    public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1,
+                              MeetingRepository meetingRepository, MeetingCounterRepository meetingCounterRepository, TimeSlotRepository timeSlotRepository, TimeSlotService timeSlotService, UserService userService) {
         this.userRepository = userRepository;
         this.availabilityRepository = availabilityRepository;
         this.userCounterRepository = userCounterRepository;
@@ -57,6 +63,7 @@ class ScheduleController {
         this.meetingCounterRepository = meetingCounterRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.timeSlotService = timeSlotService;
+        this.userService = userService;
     }
 
 
@@ -70,32 +77,12 @@ class ScheduleController {
 
     //POST: Create a new user, Danica and Isabel
     @PostMapping("/api/user")
-    public ResponseEntity<?> createSchedule(@RequestBody UserRequest userRequest) {
-        UserCounter counter = userCounterRepository.findByName("user_id");
-
-        if (userRequest.getFirstName() != null && userRequest.getLastName() != null && userRequest.getEmail() != null && userRequest.getDob() != null && userRequest.getUsername() != null) {
-            if (counter == null) {
-                counter = new UserCounter();
-                counter.setName("user_id");
-                counter.setSequence(1L); // Set an initial variable of 1.
-            }
-            long nextUserId = counter.getSequence() + 1;
-            counter.setSequence(nextUserId);
-            userCounterRepository.save(counter);
-
-            User user = new User();
-            user.setUser_id(String.valueOf(nextUserId));
-            user.setFirstName(userRequest.getFirstName());
-            user.setLastName(userRequest.getLastName());
-            user.setEmail(userRequest.getEmail());
-            user.setDob(userRequest.getDob());
-            user.setUsername(userRequest.getUsername());
-
-            return ResponseEntity.status(201).body(this.userRepository.save(user));
-        }
-        //error case handling if the JSON request from the client-side forgets to input each of the User's data fields
-        else {
-            return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
+    public ResponseEntity<?> createUser(@RequestBody UserRequest userRequest) {
+        try{
+            User newUser = userService.createUser(userRequest);
+            return ResponseEntity.status(201).body(newUser);
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.status(400).body(e.getMessage());
         }
 
     }
@@ -136,8 +123,12 @@ class ScheduleController {
             if (userRequest.getUsername() != null) {
                 existingProfile.setUsername(userRequest.getUsername());
             }
+            if(userRequest.getPassword() != null){
+                existingProfile.setPassword(userRequest.getPassword());
+            }
             //error case handling if the JSON request is invalid for any of the User's data fields
-            if (userRequest.getFirstName() == null && userRequest.getLastName() == null && userRequest.getEmail() == null && userRequest.getDob() == null && userRequest.getUsername() == null) {
+            if (userRequest.getFirstName() == null && userRequest.getLastName() == null && userRequest.getEmail() == null
+                    && userRequest.getDob() == null && userRequest.getUsername() == null && userRequest.getPassword() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
 
@@ -385,6 +376,31 @@ class ScheduleController {
     }
 
     //// ********************* USER REGISTRATION AND AUTHENTICATION ENDPOINTS ***********************************
+    @PostMapping("/api/register")
+    public ResponseEntity<?> registerUser(@RequestBody UserRequest userRequest){
+        try {
+            User newUser = userService.createUser(userRequest);
+            return ResponseEntity.status(201).body("User registered successfully");
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+
+    }
+
+    @PostMapping("/api/login")
+    public ResponseEntity<?> authenticateUser(@RequestBody UserRequest userRequest){
+        User authenticatedUser = userService.authenticateUser(userRequest.getEmail(), userRequest.getPassword());
+
+        if(authenticatedUser != null){
+            String token = TokenUtil.generateToken(authenticatedUser);
+            return ResponseEntity.ok(token);
+        }
+        else{
+            return ResponseEntity.status(401).body("Authentication failed.");
+        }
+
+    }
+
 
 
     //// ********************* INVITATION AND NOTIFICATION ENDPOINTS ***********************************
