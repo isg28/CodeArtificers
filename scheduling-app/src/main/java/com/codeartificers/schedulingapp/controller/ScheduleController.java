@@ -133,13 +133,10 @@ class ScheduleController {
             if (userRequest.getUsername() != null) {
                 existingProfile.setUsername(userRequest.getUsername());
             }
-            if(userRequest.getPassword() != null ){
-                    existingProfile.setPassword(userRequest.getPassword());
 
-            }
             //error case handling if the JSON request is invalid for any of the User's data fields
             if (userRequest.getFirstName() == null && userRequest.getLastName() == null && userRequest.getEmail() == null
-                    && userRequest.getDob() == null && userRequest.getUsername() == null && userRequest.getPassword() == null) {
+                    && userRequest.getDob() == null && userRequest.getUsername() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
 
@@ -247,7 +244,6 @@ class ScheduleController {
             }
 
             availabilityRepository.save(existingAvailability);
-            //userRepository.save(userAvailability);
             return ResponseEntity.status(200).body(existingAvailability);
 
         } else {
@@ -416,6 +412,18 @@ class ScheduleController {
             return ResponseEntity.status(401).body("Authentication failed.");
         }
 
+    }
+
+    @PutMapping("/api/user/{user_id}/updatePassword")
+    public ResponseEntity<?> updateUserPassword(@RequestBody UserRequest userRequest, @PathVariable String user_id){
+        try {
+            userService.updatePassword(user_id, userRequest);
+            return ResponseEntity.status(200).body("Password updated successfully");
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.status(400).body(e.getMessage());
+        }catch (NoSuchElementException e){
+            return ResponseEntity.status(404).body("User "+ user_id + " not found.");
+        }
     }
 
 
