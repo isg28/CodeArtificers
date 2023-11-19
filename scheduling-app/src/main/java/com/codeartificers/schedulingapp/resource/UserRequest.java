@@ -13,13 +13,13 @@ public class UserRequest {
     private LocalDate dob;
     private String username;
     private String password;
-   // private String newPassword;
+    private String newPassword;
 
     public UserRequest() {
     }
     //Constructor to access id, name, email, dob, and username for User Profile
     public UserRequest(String user_id, String firstName, String lastName, String email,
-                       LocalDate dob, String username, String password) {
+                       LocalDate dob, String username, String password, String newPassword) {
         this.user_id = user_id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -27,6 +27,7 @@ public class UserRequest {
         this.dob = dob;
         this.username = username;
         this.password = password;
+        this.newPassword = newPassword;
     }
     //Getter and Setter methods for instance variables
     public String getUser_Id() {
@@ -64,8 +65,8 @@ public class UserRequest {
     }
     public String getPassword(){ return password;}
     public void setPassword(String password){ this.password = password;}
-    //public String getNewPassword(){ return newPassword;}
-    //public void setNewPassword(String newPassword){this.newPassword = newPassword;}
+    public String getNewPassword(){ return newPassword;}
+    public void setNewPassword(String newPassword){this.newPassword = newPassword;}
 
 
 }

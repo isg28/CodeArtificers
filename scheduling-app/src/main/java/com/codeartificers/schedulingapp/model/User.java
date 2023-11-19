@@ -4,6 +4,7 @@ package com.codeartificers.schedulingapp.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -18,6 +19,7 @@ public class User {
     private LocalDate dob;
     private String username;
     private String password;
+    @Field("newPassword")
     private String newPassword;
 
 
@@ -34,7 +36,7 @@ public class User {
         this.dob = dob;
         this.username = username;
         this.password = password;
-        this.password = newPassword;
+        this.newPassword = newPassword;
     }
 
     //Getter and Setter methods for each instance variable

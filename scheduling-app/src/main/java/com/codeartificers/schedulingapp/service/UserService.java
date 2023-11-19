@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.NoSuchElementException;
+
 
 @Service
 public class UserService {
@@ -82,5 +84,17 @@ public class UserService {
         return existingUser == null;
     }
 
+    public void updatePassword(String user_id, UserRequest userRequest){
+        User existingUser = userRepository.findById(user_id).orElseThrow(() -> new NoSuchElementException("User not found"));
+
+        if(passwordEncoder.matches(userRequest.getPassword(), existingUser.getPassword())){
+            String hashedNewPassword = passwordEncoder.encode(userRequest.getNewPassword());
+            existingUser.setPassword(hashedNewPassword);
+            userRepository.save(existingUser);
+        }else{
+            throw new IllegalArgumentException("Incorrect original password");
+        }
+
+    }
 
 }
