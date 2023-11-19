@@ -19,7 +19,7 @@ function App() {
       <div style={headingStyle}>
       Schedule Your Availabilities Now
       </div>
-      <User />
+      
     </div>
   );
 }

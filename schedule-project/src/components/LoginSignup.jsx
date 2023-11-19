@@ -14,6 +14,7 @@ const LoginSignup = () => {
     const[email,setEmail]=useState('');
     const[username,setUsername]=useState('');
     const[dob,setDob]=useState('');
+    const[password, setPassword] = useState('');
 
     const handleClick = async (e) => {
         e.preventDefault();
@@ -50,17 +51,24 @@ const LoginSignup = () => {
             if (!dobRegex.test(dob)) {
                 dobErrors.push("Invalid Date of Birth. It must be in yyyy-mm-dd format.");
             }
+
+            const passwordRegex = /^[A-Za-z0-9_]+$/;
+            const passwordErrors = [];
+            
+            if(!passwordRegex.test(password)){
+                passwordErrors.push("Invalid password. Only letters and numbers.");
+            }
     
-            const hasErrors = nameErrors.length > 0 || usernameErrors.length > 0 || emailErrors.length > 0 || dobErrors.length > 0;
+            const hasErrors = nameErrors.length > 0 || usernameErrors.length > 0 || emailErrors.length > 0 || dobErrors.length > 0 || passwordErrors.length > 0;
 
             if(hasErrors){
-                const allErrors = [...nameErrors,...usernameErrors,...emailErrors,...dobErrors];
+                const allErrors = [...nameErrors,...usernameErrors,...emailErrors,...dobErrors, ...passwordErrors];
                 window.alert(allErrors.join('\n'));
                 return;
             }
             
           // Logic for handling POST method to the database
-            const User={firstName,lastName,email,dob,username};
+            const User={firstName,lastName,email,dob,username,password};
             console.log(User);
 
             //POST: Connects User data with the Mongo database 
@@ -78,6 +86,7 @@ const LoginSignup = () => {
                 setEmail('');
                 setUsername('');
                 setDob('');
+                setPassword('');
             })
     }
 };
@@ -124,7 +133,10 @@ const LoginSignup = () => {
                 {action === "Login"?<div className = 'input'>
                     <img src = {password_icon} alt= 'Password Icon'/>
                     <input type = 'password' placeholder = 'Password' />
-                </div>: <div></div>}
+                </div>: <div className = 'input'>
+                    <img src = {password_icon} alt= 'Password Icon'/>
+                    <input type = 'password' placeholder = 'Password' value={password} onChange ={(e) => setPassword(e.target.value)}/>
+                </div>}
                 
 
             </div>
