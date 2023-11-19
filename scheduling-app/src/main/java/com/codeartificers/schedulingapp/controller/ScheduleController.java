@@ -41,15 +41,25 @@ class ScheduleController {
         }
     }
 
+    @Autowired
     private final UserRepository userRepository;
+    @Autowired
     private final AvailabilityRepository availabilityRepository;
+    @Autowired
     private final UserCounterRepository userCounterRepository;
+    @Autowired
     private final AvailabilityCounterRepository availabilityCounterRepository;
+    @Autowired
     private final MeetingRepository meetingRepository;
+    @Autowired
     private final MeetingCounterRepository meetingCounterRepository;
+    @Autowired
     private final TimeSlotRepository timeSlotRepository;
+    @Autowired
     private TimeSlotService timeSlotService;
+    @Autowired
     private UserService userService;
+    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
@@ -123,8 +133,9 @@ class ScheduleController {
             if (userRequest.getUsername() != null) {
                 existingProfile.setUsername(userRequest.getUsername());
             }
-            if(userRequest.getPassword() != null){
-                existingProfile.setPassword(userRequest.getPassword());
+            if(userRequest.getPassword() != null ){
+                    existingProfile.setPassword(userRequest.getPassword());
+
             }
             //error case handling if the JSON request is invalid for any of the User's data fields
             if (userRequest.getFirstName() == null && userRequest.getLastName() == null && userRequest.getEmail() == null
@@ -158,7 +169,8 @@ class ScheduleController {
     public ResponseEntity<?> createNewAvailability(@PathVariable String user_id, @RequestBody AvailabilityRequest availabilityRequest) {
         AvailabilityCounter availabilityCounter = availabilityCounterRepository.findByName("availability_id");
 
-        if (availabilityRequest.getUser_id() != null && availabilityRequest.getDate() != null && availabilityRequest.getStartTime() != null && availabilityRequest.getEndTime() != null) {
+        if (availabilityRequest.getUser_id() != null && availabilityRequest.getDate() != null
+                && availabilityRequest.getStartTime() != null && availabilityRequest.getEndTime() != null && availabilityRequest.getTitle() != null) {
             //To ensure that the availabilityCounter remains consistent. If empty, starts at 0 then increments.
             if (availabilityCounter == null) {
                 availabilityCounter = new AvailabilityCounter();
@@ -175,6 +187,7 @@ class ScheduleController {
             availability.setDate(availabilityRequest.getDate());
             availability.setStartTime(availabilityRequest.getStartTime());
             availability.setEndTime(availabilityRequest.getEndTime());
+            availability.setTitle(availabilityRequest.getTitle());
 
             return ResponseEntity.status(201).body(this.availabilityRepository.save(availability));
         } else {
@@ -224,7 +237,11 @@ class ScheduleController {
             if (availabilityRequest.getDate() != null) {
                 existingAvailability.setDate(availabilityRequest.getDate());
             }
-            if (availabilityRequest.getStartTime() == null && availabilityRequest.getDate() == null && availabilityRequest.getEndTime() == null) {
+            if(availabilityRequest.getTitle() != null){
+                existingAvailability.setTitle(availabilityRequest.getTitle());
+            }
+            if (availabilityRequest.getStartTime() == null && availabilityRequest.getDate() == null &&
+                    availabilityRequest.getEndTime() == null && availabilityRequest.getTitle() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required availability fields.");
 
             }

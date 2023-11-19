@@ -21,8 +21,14 @@ public class UserService {
 
     public User createUser(UserRequest userRequest){
         if (isValidUserRequest(userRequest)) {
-            return saveUserToDatabase(userRequest);
-        }else{
+            if(isUsernameUnique(userRequest.getUsername()) && isEmailUnique(userRequest.getEmail())){
+                return saveUserToDatabase(userRequest);
+            }
+            else {
+                throw new IllegalArgumentException("Username or email already exists.");
+            }
+        }
+        else{
             throw new IllegalArgumentException("Malformed request. Missing required user fields");
         }
     }
@@ -65,6 +71,15 @@ public class UserService {
         else{
             return null; // Authentication failed
         }
+    }
+
+    private boolean isUsernameUnique(String username){
+        User existingUser = userRepository.findByUsername(username);
+        return existingUser == null;
+    }
+    private boolean isEmailUnique(String email){
+        User existingUser = userRepository.findByEmail(email);
+        return existingUser == null;
     }
 
 

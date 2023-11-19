@@ -15,16 +15,18 @@ public class AvailabilityRequest {
     private LocalTime startTime;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime endTime;
+    private String title;
 
     public AvailabilityRequest(){
 
     }
     //Constructor to access availability_Id, days, and time for Availability entry
-    public AvailabilityRequest(String availability_Id, String user_id, LocalDate date, LocalTime startTime, LocalTime endTime) {
+    public AvailabilityRequest(String availability_Id, String user_id, LocalDate date, LocalTime startTime, LocalTime endTime, String title) {
         this.availability_Id = availability_Id;
         this.user_id = user_id;
         this.date = date;
         this.startTime = startTime;
+        this.title = title;
     }
 
     public void setAvailability_Id(String availability_Id) {
@@ -57,5 +59,7 @@ public class AvailabilityRequest {
 
     public String getUser_id(){return user_id;}
     public void setUserId(String user_id){this.user_id = user_id;}
+    public String getTitle(){return title;}
+    public void setTitle(String title){this.title = title;}
 
 }

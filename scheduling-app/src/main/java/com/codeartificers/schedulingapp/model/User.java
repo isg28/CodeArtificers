@@ -18,6 +18,7 @@ public class User {
     private LocalDate dob;
     private String username;
     private String password;
+    private String newPassword;
 
 
     public User(){
@@ -25,7 +26,7 @@ public class User {
     }
 
     public User(String user_id, String firstName, String lastName, String email,
-                LocalDate dob, String username, String password){
+                LocalDate dob, String username, String password, String newPassword){
         this.user_id = user_id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -33,6 +34,7 @@ public class User {
         this.dob = dob;
         this.username = username;
         this.password = password;
+        this.password = newPassword;
     }
 
     //Getter and Setter methods for each instance variable
@@ -71,5 +73,7 @@ public class User {
     }
     public String getPassword(){ return password;}
     public void setPassword(String password){ this.password = password;}
+    public String getNewPassword(){ return password;}
+    public void setNewPassword(String newPassword){ this.password = password; }
 
 }

@@ -17,16 +17,18 @@ public class Availability {
     private LocalTime startTime;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime endTime;
+    private String title;
 
     public Availability(){
 
     }
-    public Availability(String availability_Id, String user_id, LocalDate date, LocalTime startTime, LocalTime endTime) {
+    public Availability(String availability_Id, String user_id, LocalDate date, LocalTime startTime, LocalTime endTime, String title) {
         this.availability_Id = availability_Id;
         this.user_id = user_id;
         this.date = date;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.title = title;
     }
 
     public String getAvailability_Id() {
@@ -63,4 +65,6 @@ public class Availability {
 
     public void setUser_id(String user_id){this.user_id = user_id;}
     public String getUser_id(){return user_id;}
+    public void setTitle(String title){this.title = title;}
+    public String getTitle(){return title;}
 }
