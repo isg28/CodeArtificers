@@ -15,6 +15,67 @@ const LoginSignup = () => {
     const[username,setUsername]=useState('');
     const[dob,setDob]=useState('');
     const[password, setPassword] = useState('');
+    const[token,setToken] = useState('');
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        if (action === "Sign Up") {
+            // Logic for switching to Login page
+            setAction("Login");
+        } else if (action === "Login"){
+            console.log("Email:", email);
+            console.log("Password:", password);
+            const emailRegex = /\S+@\S+/;
+            const emailErrors = [];
+
+            if(!emailRegex.test(email)){
+                emailErrors.push("Invalid Email Address. It must contain an @ symbol.");
+            }
+
+            const passwordRegex = /^[A-Za-z0-9_]+$/;
+            const passwordErrors = [];
+
+            if(!passwordRegex.test(password)){
+                passwordErrors.push("Invalid password.")
+            }
+
+            const hasErrors = emailErrors.length > 0 || passwordErrors.length > 0;
+
+            if(hasErrors){
+                const allErrors = [...emailErrors, ...passwordErrors];
+                window.alert(allErrors.join('\n'));
+                return;
+            }
+
+        const loginData = {email, password};
+        try{ 
+            const response = await fetch("http://localhost:8080/api/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json" },
+            body: JSON.stringify(loginData),
+        });
+
+        //const data = await response.json();
+
+        if(response.ok){
+            if(response.headers.get('content-length')==='0'){
+                console.log("Login successful. No data received");
+            }else{
+                const data = await response.json();
+                console.log('Login successful. Data:', data);
+            }
+        }else{
+            console.log("Login failed");
+            window.alert("Invalid email or password. Please try again.");
+        }
+    } catch(error){
+        console.error("Error during login:", error);
+        window.alert("An error occured during login. Please try again.");
+        }
+    }   
+};
+
+
 
     const handleClick = async (e) => {
         e.preventDefault();
@@ -87,6 +148,7 @@ const LoginSignup = () => {
                 setUsername('');
                 setDob('');
                 setPassword('');
+                setAction("Login");
             })
     }
 };
@@ -113,7 +175,7 @@ const LoginSignup = () => {
                 
                 {action=== "Login"?<div className = 'input'>
                     <img src = {email_icon} alt= 'Email Icon'/>
-                    <input type = 'email' placeholder = 'Email Address' />
+                    <input type = 'email' placeholder = 'Email Address' onChange={(e) => setEmail(e.target.value)} />
                 </div>: <div className = 'input'>
                     <img src = {email_icon} alt= 'Email Icon'/>
                     <input type = 'email' placeholder = 'Email Address' value = {email} onChange ={(e)=>setEmail(e.target.value)}/>
@@ -132,7 +194,7 @@ const LoginSignup = () => {
                 {/* This lets only Login have a password option. This is temporary since we dont have a password field yet in User. This was done so front end can create a User without a password until password field is made (11/16)- Danica */}
                 {action === "Login"?<div className = 'input'>
                     <img src = {password_icon} alt= 'Password Icon'/>
-                    <input type = 'password' placeholder = 'Password' />
+                    <input type = 'password' placeholder = 'Password' onChange= {(e) => setPassword(e.target.value)} />
                 </div>: <div className = 'input'>
                     <img src = {password_icon} alt= 'Password Icon'/>
                     <input type = 'password' placeholder = 'Password' value={password} onChange ={(e) => setPassword(e.target.value)}/>
@@ -143,7 +205,8 @@ const LoginSignup = () => {
             {action=== "Sign Up"?<div></div>:<div className = 'forgot-password'>Lost Password? <span>Click Here!</span> </div>}
             <div className= 'submit-container'>
                 <div className = {action === "Login"?"submit gray":"submit"} onClick = {handleClick}>Sign Up</div>
-                <div className = {action === "Sign Up"?"submit gray": "submit"} onClick = {() => {setAction("Login")}}>Login</div>
+                <div className = {action === "Sign Up"?"submit gray": "submit"} onClick = {handleLogin}>Login</div>
+                
             </div>
 
         </div>
