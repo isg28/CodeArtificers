@@ -408,7 +408,7 @@ class ScheduleController {
             User authenticatedUser = userService.authenticateUser(email, password);
 
             if(authenticatedUser != null){
-                return ResponseEntity.status(200).body("Connected");
+                return ResponseEntity.status(200).build();
             }
             else {
                 return ResponseEntity.status(401).body("Authentication failed.");
