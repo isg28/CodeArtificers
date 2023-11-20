@@ -55,10 +55,8 @@ const LoginSignup = () => {
             body: JSON.stringify(loginData),
         });
 
-        //const data = await response.json();
-
         if(response.ok){
-            if(response.headers.get('content-length')==='0'){
+            if(response.headers.get('content-length') ==='0'){
                 console.log("Login successful. No data received");
             }else{
                 const data = await response.json();
