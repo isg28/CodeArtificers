@@ -2,10 +2,7 @@ package com.codeartificers.schedulingapp.controller;
 
 import com.codeartificers.schedulingapp.model.*;
 import com.codeartificers.schedulingapp.repository.*;
-import com.codeartificers.schedulingapp.resource.AvailabilityRequest;
-import com.codeartificers.schedulingapp.resource.MeetingRequest;
-import com.codeartificers.schedulingapp.resource.TimeSlotRequest;
-import com.codeartificers.schedulingapp.resource.UserRequest;
+import com.codeartificers.schedulingapp.resource.*;
 import com.codeartificers.schedulingapp.service.TimeSlotService;
 import com.codeartificers.schedulingapp.service.TokenUtil;
 import com.codeartificers.schedulingapp.service.UserService;
@@ -25,7 +22,6 @@ import java.util.*;
 
 
 @RestController
-@RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:3000")
 class ScheduleController {
 
@@ -404,16 +400,24 @@ class ScheduleController {
     }
 
     @PostMapping("/api/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody UserRequest userRequest){
-        User authenticatedUser = userService.authenticateUser(userRequest.getEmail(), userRequest.getPassword());
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest){
+        if(loginRequest.getEmail() != null && loginRequest.getPassword() != null){
+            String email = loginRequest.getEmail();
+            String password = loginRequest.getPassword();
 
-        if(authenticatedUser != null){
-            String token = TokenUtil.generateToken(authenticatedUser);
-            return ResponseEntity.ok(token);
+            User authenticatedUser = userService.authenticateUser(email, password);
+
+            if(authenticatedUser != null){
+                return ResponseEntity.status(200).body("Connected");
+            }
+            else {
+                return ResponseEntity.status(401).body("Authentication failed.");
+            }
         }
         else{
-            return ResponseEntity.status(401).body("Authentication failed.");
+            return ResponseEntity.status(400).body("Bad Request - Missing email or password");
         }
+
 
     }
 
