@@ -3,6 +3,8 @@ import Fullcalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 
 function Calendar(){
     const [events, setEvents] = useState([]);
@@ -122,8 +124,19 @@ function Calendar(){
       return regex.test(time);
     };
 
+
     return(
       <div>
+        <h1> </h1>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end','& button': { m: 1, backgroundColor: 'black' } }}>
+      <div>
+        <Button variant="contained" size="large">
+          Common TimeSlots
+        </Button>
+      </div>
+    </Box>
+        <h1> </h1>
+
         <Fullcalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView={"dayGridMonth"}
@@ -136,6 +149,7 @@ function Calendar(){
           events = {events}
           dateClick={handleDateClick}
           />
+          
       </div>
       );
     } 
