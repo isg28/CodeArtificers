@@ -12,7 +12,6 @@ import SendIcon from '@mui/icons-material/Send';
 
 export default function User() {
     
-       
         const[firstName,setName]=useState('')
         const[lastName,setLastName]=useState('')
         const[email,setEmail]=useState('')

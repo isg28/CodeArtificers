@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import './LoginSignup.css'
 
 import user_icon from './assets/person.png';
@@ -16,7 +17,7 @@ const LoginSignup = () => {
     const[dob,setDob]=useState('');
     const[password, setPassword] = useState('');
     const[token,setToken] = useState('');
-
+    
     const handleLogin = async (e) => {
         e.preventDefault();
         if (action === "Sign Up") {
@@ -61,6 +62,7 @@ const LoginSignup = () => {
             }else{
                 const data = await response.json();
                 console.log('Login successful. Data:', data);
+                
             }
         }else{
             console.log("Login failed");
@@ -82,7 +84,7 @@ const LoginSignup = () => {
           // Logic for switching to Sign Up page
             setAction("Sign Up");
         } else if (action === "Sign Up") {
-            const nameRegex = /^[A-Za-z]+$/;
+            const nameRegex = /^[A-Za-z\s-]+$/;
             const nameErrors = [];
 
             if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
@@ -181,7 +183,7 @@ const LoginSignup = () => {
 
                 {action === "Login"?<div></div>:<div className = 'input'>
                     <img src = {user_icon} alt= 'User Icon'/>
-                    <input type = 'text' placeholder = 'Date of Birth' value = {dob} onChange ={(e)=> setDob(e.target.value)}/>
+                    <input type = 'text' placeholder = 'Date of Birth (YYYY-MM-DD)' value = {dob} onChange ={(e)=> setDob(e.target.value)}/>
                 </div>}
                 
                 {action === "Login"?<div></div>:<div className = 'input'>

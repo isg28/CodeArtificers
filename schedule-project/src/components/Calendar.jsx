@@ -6,7 +6,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 function Calendar(){
     const [events, setEvents] = useState([]);
-    //const [userId, setUserId] = useState(null);
+    /*const [userId, setUserId] = useState(null);*/
     //hardcoded user so you can post events, will fix this when we get user authentication working
     const userId = 1;
     /*useEffect(() => {
@@ -21,23 +21,48 @@ function Calendar(){
       };
       fetchUserData();
     }, []);*/
+    /*const UserAuthentication = () => {
+      const [userId, setUserId] = useState(null);
+
+      useEffect(() => {
+        const authenticateUser = async () => {
+          try {
+            // Replace this with your actual logic to get the currently logged-in user's email and password
+            const currentUserEmail = getCurrentUserEmail();
+            const currentUserPassword = getCurrentUserPassword();
+    
+            const loginRequest = {
+              email: currentUserEmail,
+              password: currentUserPassword,
+            };
+    
+            const response = await fetch('/api/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(loginRequest),
+            });
+    
+            if (response.ok) {
+              const authenticatedUserId = await response.json();
+              setUserId(authenticatedUserId);
+            } else {
+              // Handle authentication failure
+              console.error('Authentication failed');
+            }
+          } catch (error) {
+            console.error('Error authenticating user: ', error);
+          }
+        };
+    
+        authenticateUser();
+      }, []);
+    };*/
+
 
     const handleDateClick = async (info) => {
       const title = prompt('Enter event title: ');
-      /*const startTime = prompt('Enter start time (HH:mm). If after 12pm, please put in military time:');
-      const endTime = prompt('Enter end time: (HH:mm). If after 12pm, please put in military time:');
-      if(title && isValidInputTimeValue(startTime) && isValidInputTimeValue(endTime)){
-        const startDateTime = `${info.dateStr}T${startTime}`;
-        const endDateTime = `${info.dateStr}T${endTime}`;
-
-
-        const newEvent = {
-          title: title,
-          start: startDateTime,
-          end: endDateTime,
-          allDay: false,
-        };
-        setEvents((prevEvents) => [...prevEvents, newEvent]);*/
         const isAllDay = window.confirm('Is this an all-day event?');
 
         let startDateTime, endDateTime;
@@ -100,19 +125,18 @@ function Calendar(){
     return(
       <div>
         <Fullcalendar
-         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-         initialView={"dayGridMonth"}
-         headerToolbar={{
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView={"dayGridMonth"}
+          headerToolbar={{
           start: "today prev,next",
           center: "title",
           end: "dayGridMonth, timeGridWeek, timeGridDay",
-         }}
-         height={"98vh"}
-         events = {events}
-         dateClick={handleDateClick}
-         />
+          }}
+          height={"98vh"}
+          events = {events}
+          dateClick={handleDateClick}
+          />
       </div>
       );
     } 
-    
     export default Calendar;
