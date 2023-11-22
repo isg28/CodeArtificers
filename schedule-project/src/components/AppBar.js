@@ -21,7 +21,6 @@ export default function ButtonAppBar() {
             aria-label="menu"
             sx={{ mr: 2 }}
           >
-            <MenuIcon />
           </IconButton>
           <Button color="inherit" component={Link} to="/">
           <Typography variant="h6" component="div" sx={{ flexGrow: 1}}>
@@ -31,8 +30,6 @@ export default function ButtonAppBar() {
           <Box>
           <Button color="inherit" component={Link} to= "/custom-login"> 
           Login</Button>
-          <Button color="inherit" component={Link} to= "/calendar">
-          Calendar</Button>
           </Box>
         </Toolbar>
       </AppBar>

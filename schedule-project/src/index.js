@@ -6,6 +6,10 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LoginPage from './pages/LoginPage';
 import CalendarPage from './pages/CalendarPage';
+import HomepagePage from './pages/HomepagePage';
+import ProfilePage from './pages/ProfilePage';
+import AccountPage from './pages/AccountPage';
+import LogoutPage from './pages/LogoutPage';
 
 ReactDOM.render(
   <React.StrictMode>
@@ -14,6 +18,10 @@ ReactDOM.render(
         <Route path="/" element={<App />} />
         <Route path="/custom-login" element={<LoginPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/homepage" element={<HomepagePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/account-settings" element = {<AccountPage />} />
+        <Route path="/logout" element ={<LogoutPage />} />
         {/* ... etc. */}
       </Routes>
     </Router>

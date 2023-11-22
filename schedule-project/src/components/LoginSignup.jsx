@@ -63,7 +63,8 @@ const LoginSignup = () => {
             }else{
                 const data = await response.json();
                 console.log('Login successful. Data:', data);
-                navigate('/');
+                window.alert('Login successful!')
+                navigate('/homepage');
             }
         }else{
             console.log("Login failed");

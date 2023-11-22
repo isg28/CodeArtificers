@@ -12,9 +12,10 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import { Link } from 'react-router-dom';
 
-const pages = ['Products', 'Pricing', 'Blog'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const pages = ['New Calendar', 'Invite', 'Blog'];
+const settings = ['Profile', 'Account', 'Calendars', 'Logout'];
 
 function ResponsiveAppBar() {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -43,7 +44,7 @@ function ResponsiveAppBar() {
             <Typography
             variant="h6"
             noWrap
-            component="a"
+            component={Link} to ="/homepage"
             href="#app-bar-with-responsive-menu"
             sx={{
                 mr: 2,
@@ -55,7 +56,7 @@ function ResponsiveAppBar() {
                 textDecoration: 'none',
             }}
             >
-            LOGO
+            SCHEDULING APP
             </Typography>
 
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -88,7 +89,7 @@ function ResponsiveAppBar() {
                 }}
             >
                 {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem key={page} component = {Link} to="/calendar" onClick={handleCloseNavMenu}>
                     <Typography textAlign="center">{page}</Typography>
                 </MenuItem>
                 ))}
@@ -149,7 +150,27 @@ function ResponsiveAppBar() {
             >
                 {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                    {/*{setting === 'Calendars'?  <Typography textAlign="center" component={Link} to="/calendar" style ={{textDecoration: 'none', color: 'inherit'}}>
+                    {setting} </Typography> :<Typography textAlign="center">{setting}</Typography> }*/}
+                    {setting === 'Calendars' ? (
+                    <Typography textAlign="center" component={Link} to="/calendar" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    {setting}
+                    </Typography>
+                    ) : setting === 'Profile' ? (
+                    <Typography textAlign="center" component={Link} to="/profile" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    {setting}
+                    </Typography>
+                    ) : setting === 'Account' ? (
+                        <Typography textAlign="center" component={Link} to="/account-settings" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        {setting}
+                        </Typography>
+                        ) : setting === 'Logout' ? (
+                            <Typography textAlign="center" component={Link} to="/logout" style={{ textDecoration: 'none', color: 'inherit' }}>
+                            {setting}
+                            </Typography>
+                            ) : (
                     <Typography textAlign="center">{setting}</Typography>
+                    )}
                 </MenuItem>
                 ))}
             </Menu>

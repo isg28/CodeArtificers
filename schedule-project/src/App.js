@@ -1,7 +1,6 @@
 import './App.css';
 import React from 'react';
 import AppBar from './components/AppBar';
-import User from './components/User';
 
 const headingStyle = {
   fontSize: '2rem',
@@ -17,7 +16,7 @@ function App() {
     <div className="App">
       <AppBar />
       <div style={headingStyle}>
-      Schedule Your Availabilities Now
+      Welcome to the SCHEDULING APP!
       </div>
       
     </div>
