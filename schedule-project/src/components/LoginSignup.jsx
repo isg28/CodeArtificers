@@ -17,6 +17,7 @@ const LoginSignup = () => {
     const[dob,setDob]=useState('');
     const[password, setPassword] = useState('');
     const[token,setToken] = useState('');
+    const navigate = useNavigate();
     
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -62,7 +63,7 @@ const LoginSignup = () => {
             }else{
                 const data = await response.json();
                 console.log('Login successful. Data:', data);
-                
+                navigate('/');
             }
         }else{
             console.log("Login failed");
