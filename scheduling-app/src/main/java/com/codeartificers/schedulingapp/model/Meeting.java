@@ -3,38 +3,40 @@ package com.codeartificers.schedulingapp.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 @Document("Meeting")
 public class Meeting {
     @Id
     private String meeting_id;
-
     private LocalDate date;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime startTime;
     @JsonFormat(pattern = "HH:mm")
     private LocalTime endTime;
 
-    private String participants;
     private String location;
-
     private String meeting_Description;
+    private List<Invitation> invitations;
+
 
 
     public Meeting(){
 
     }
-    public Meeting(String meeting_id,LocalDate date,LocalTime startTime,LocalTime endTime,String participants, String location, String meeting_Descriptions){
+    public Meeting(String meeting_id,LocalDate date,LocalTime startTime,LocalTime endTime,
+                   String location, String meeting_Descriptions, List<Invitation> invitations){
         this.meeting_id=meeting_id;
         this.startTime=startTime;
         this.endTime = endTime;
         this.date = date;
-        this.participants=participants;
         this.location = location;
         this.meeting_Description=meeting_Descriptions;
+        this.invitations = invitations;
     }
 
     public String getMeeting_id() {
@@ -69,13 +71,6 @@ public class Meeting {
         this.endTime = endTime;
     }
 
-    public String getParticipants() {
-        return participants;
-    }
-
-    public void setParticipants(String participants) {
-        this.participants = participants;
-    }
     public String getLocation(){return location;}
     public void setLocation(String location){ this.location = location;}
 
@@ -85,5 +80,11 @@ public class Meeting {
 
     public void setMeeting_Description(String meeting_Description) {
         this.meeting_Description = meeting_Description;
+    }
+    public List<Invitation> getInvitations(){
+        return invitations;
+    }
+    public void setInvitations(List<Invitation> invitations){
+        this.invitations = invitations;
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public class MeetingRequest {
     private String meeting_id;
@@ -12,7 +13,6 @@ public class MeetingRequest {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime endTime;
     private LocalDate date;
-    private String participants;
     private String location;
     private String meeting_Description;
 
@@ -52,13 +52,6 @@ public class MeetingRequest {
         this.endTime = endTime;
     }
 
-    public String getParticipants() {
-        return participants;
-    }
-
-    public void setParticipants(String participants) {
-        this.participants = participants;
-    }
     public String getLocation(){ return location;}
     public void setLocation(String location){ this.location = location;}
 

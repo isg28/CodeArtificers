@@ -3,9 +3,7 @@ package com.codeartificers.schedulingapp.controller;
 import com.codeartificers.schedulingapp.model.*;
 import com.codeartificers.schedulingapp.repository.*;
 import com.codeartificers.schedulingapp.resource.*;
-import com.codeartificers.schedulingapp.service.TimeSlotService;
-import com.codeartificers.schedulingapp.service.TokenUtil;
-import com.codeartificers.schedulingapp.service.UserService;
+import com.codeartificers.schedulingapp.service.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.coyote.Response;
 import org.bson.Document;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -60,10 +59,21 @@ class ScheduleController {
     private UserService userService;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+    @Autowired InvitationRepository invitationRepository;
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private InvitationCounter invitationCounter;
+    @Autowired
+    private InvitationCounterRepository invitationCounterRepository;
+
+
 
     @Autowired
     public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1,
-                              MeetingRepository meetingRepository, MeetingCounterRepository meetingCounterRepository, TimeSlotRepository timeSlotRepository, TimeSlotService timeSlotService, UserService userService) {
+                              MeetingRepository meetingRepository, MeetingCounterRepository meetingCounterRepository, TimeSlotRepository timeSlotRepository, TimeSlotService timeSlotService,
+                              UserService userService, InvitationRepository invitationRepository, NotificationService notificationService, InvitationCounter invitationCounter
+                                ,InvitationCounterRepository invitationCounterRepository) {
         this.userRepository = userRepository;
         this.availabilityRepository = availabilityRepository;
         this.userCounterRepository = userCounterRepository;
@@ -73,6 +83,10 @@ class ScheduleController {
         this.timeSlotRepository = timeSlotRepository;
         this.timeSlotService = timeSlotService;
         this.userService = userService;
+        this.invitationRepository = invitationRepository;
+        this.notificationService = notificationService;
+        this.invitationCounter = invitationCounter;
+        this.invitationCounterRepository = invitationCounterRepository;
     }
 
 
@@ -274,7 +288,8 @@ class ScheduleController {
     public ResponseEntity<?> createMeeting(@RequestBody MeetingRequest meetingRequest) {
         MeetingCounter counter = meetingCounterRepository.findByName("meeting_id");
 
-        if (meetingRequest.getDate() != null && meetingRequest.getStartTime() != null && meetingRequest.getEndTime() != null && meetingRequest.getParticipants() != null && meetingRequest.getLocation() != null && meetingRequest.getMeeting_Description() != null) {
+        if (meetingRequest.getDate() != null && meetingRequest.getStartTime() != null && meetingRequest.getEndTime() != null
+                && meetingRequest.getLocation() != null && meetingRequest.getMeeting_Description() != null) {
             if (counter == null) {
                 counter = new MeetingCounter();
                 counter.setName("meeting_id");
@@ -289,7 +304,6 @@ class ScheduleController {
             meeting.setDate(meetingRequest.getDate());
             meeting.setStartTime(meetingRequest.getStartTime());
             meeting.setEndTime(meetingRequest.getEndTime());
-            meeting.setParticipants(meetingRequest.getParticipants());
             meeting.setLocation(meetingRequest.getLocation());
             meeting.setMeeting_Description(meetingRequest.getMeeting_Description());
 
@@ -339,9 +353,6 @@ class ScheduleController {
             if (meetingRequest.getDate() != null) {
                 existingProfile.setDate(meetingRequest.getDate());
             }
-            if (meetingRequest.getParticipants() != null) {
-                existingProfile.setParticipants(meetingRequest.getParticipants());
-            }
             if (meetingRequest.getLocation() != null) {
                 existingProfile.setLocation(meetingRequest.getLocation());
             }
@@ -350,7 +361,7 @@ class ScheduleController {
             }
             //error check for invalid JSON request format
             if (meetingRequest.getMeeting_id() == null && meetingRequest.getStartTime() == null && meetingRequest.getEndTime() == null && meetingRequest.getDate()
-                    == null && meetingRequest.getParticipants() == null && meetingRequest.getLocation() == null && meetingRequest.getMeeting_Description() == null) {
+                    == null && meetingRequest.getLocation() == null && meetingRequest.getMeeting_Description() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
 
@@ -436,6 +447,78 @@ class ScheduleController {
 
 
     //// ********************* INVITATION AND NOTIFICATION ENDPOINTS ***********************************
+
+    @PostMapping("/api/invite")
+    public ResponseEntity<?> sendMeetingInvitations(@RequestBody InvitationRequest invitationRequest){
+        try{
+            if(invitationRequest == null || invitationRequest.getMeetingId() == null || invitationRequest.getSenderId() == null){
+                return ResponseEntity.status(400).body("Invalid input parameters");
+            }
+            String senderId = invitationRequest.getSenderId();
+            if(!userService.isUserIdValid(senderId)){
+                return ResponseEntity.status(400).body("Invalid senderId");
+            }
+
+            Optional<Meeting> optionalMeeting = meetingRepository.findById(invitationRequest.getMeetingId());
+            if (!optionalMeeting.isPresent()) {
+                return ResponseEntity.status(404).body("Meeting not found for meetingId: " + invitationRequest.getMeetingId());
+            }
+
+            List<InvitedUser> invitedUsers = new ArrayList<>();
+            List<String> invitedUserIds = invitationRequest.getInvitedUsers();
+
+
+            if(invitedUserIds != null && !invitedUserIds.isEmpty()){
+                for(String userId : invitedUserIds){
+                    Optional <User> optionalUser = userRepository.findById(userId);
+                    if(optionalUser.isPresent()){
+                        User user = optionalUser.get();
+                        InvitedUser invitedUser = new InvitedUser(user.getUser_id(), user.getFirstName(), user.getLastName(), user.getUsername());
+                        invitedUsers.add(invitedUser);
+                        System.out.println("Invited Users : " + invitedUser);
+                    }
+                }
+            }
+
+            InvitationCounter counter = invitationCounterRepository.findByName("invitationId");
+            Meeting meeting = optionalMeeting.get();
+
+            if(counter == null){
+                counter = new InvitationCounter();
+                counter.setName("invitationId");
+                counter.setSequence(1L); //sets initial variable to 1
+            }
+            long nextInivtationId = counter.getSequence() + 1;
+            counter.setSequence(nextInivtationId);
+            invitationCounterRepository.save(counter);
+
+            //Creating new Invitation
+            Invitation invitation = new Invitation();
+            invitation.setInvitationId(String.valueOf(nextInivtationId));
+            invitation.setMeetingId(invitationRequest.getMeetingId());
+            invitation.setSenderId(invitationRequest.getSenderId());
+            invitation.setInvitedUsers(invitedUsers);
+
+            //Update the meeting's list of invitation
+            List<Invitation> invitations = meeting.getInvitations();
+            if(invitations == null){
+                invitations = new ArrayList<>();
+            }
+            invitations.add(invitation);
+            meeting.setInvitations(invitations);
+
+            meetingRepository.save(meeting);
+
+            Invitation savedInvitation = invitationRepository.save(invitation);
+
+            //Send notifications to participants - need to alter
+            notificationService.sendInvitationNotification(savedInvitation);
+
+            return ResponseEntity.status(201).body("Invitations sent successfully");
+        }catch(Exception e){
+            return ResponseEntity.status(500).body("Internal server error");
+        }
+    }
 
 
 

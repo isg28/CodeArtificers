@@ -96,5 +96,8 @@ public class UserService {
         }
 
     }
+    public boolean isUserIdValid(String userId){
+        return userRepository.existsById(userId);
+    }
 
 }
