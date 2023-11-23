@@ -56,26 +56,30 @@ const LoginSignup = () => {
             headers: {"Content-Type": "application/json" },
             body: JSON.stringify(loginData),
         });
-
+        
         if(response.ok){
-            if(response.headers.get('content-length') ==='0'){
-                console.log("Login successful. No data received");
+            const data = await response.json();
+            
+            if(data.token){
+                localStorage.setItem("token", data.token);
+
+                console.log("Login successful. Data: ", data);
+                window.alert("Login successful!");
+                navigate("/homepage");
             }else{
-                const data = await response.json();
-                console.log('Login successful. Data:', data);
-                window.alert('Login successful!')
-                navigate('/homepage');
+                console.log("Login failed. No token received");
+                window.alert("Login failed. Please try again.");
             }
         }else{
-            console.log("Login failed");
+            console.login("Login failed.");
             window.alert("Invalid email or password. Please try again.");
         }
-    } catch(error){
+    }catch(error){
         console.error("Error during login:", error);
         window.alert("An error occured during login. Please try again.");
-        }
-    }   
-};
+    } 
+    };
+}
 
 
 

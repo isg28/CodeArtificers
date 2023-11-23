@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import profile_icon from './assets/profile.png';
 import person from './assets/person.png';
 import './Profile.css'
@@ -10,11 +10,11 @@ import { deepOrange, deepPurple } from '@mui/material/colors';
 const UserProfile = () => {
   // Initial user data
   const initialUserData = {
-    firstName: 'John',
-    lastName: 'Doe',
-    username: 'johndoe',
-    email: 'john.doe@example.com',
-    dob: '1990-01-01',
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    dob: '',
   };
 
   // State to track user data
@@ -66,6 +66,29 @@ const UserProfile = () => {
     setEditingField(null);
     // Add logic to save changes to the server or perform other actions
   };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try{
+        const response = await fetch("http://localhost/api/user/{user_id}",{
+          method: "GET",
+          headers:{
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${yourAuthToken}',
+          },
+        });
+        if(response.ok){
+          const userDataFromServer = await response.json();
+          setUserData(userDataFromServer);
+        } else{
+          console.error('Failed to fetch user data:', response.statusText);
+        }
+      }catch(error){
+        console.error('Error during fetch:', error);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   return (
     <div className="profile-container">

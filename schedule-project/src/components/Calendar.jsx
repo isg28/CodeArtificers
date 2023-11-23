@@ -11,56 +11,6 @@ function Calendar(){
     /*const [userId, setUserId] = useState(null);*/
     //hardcoded user so you can post events, will fix this when we get user authentication working
     const userId = 1;
-    /*useEffect(() => {
-      const fetchUserData = async () => {
-        try{
-          const response = await fetch('/api/user/{user_id}');
-          const userData = await response.json();
-          setUserId(userData.id);
-        }catch (error){
-          console.error("Error fetching user data: ", error);
-        }
-      };
-      fetchUserData();
-    }, []);*/
-    /*const UserAuthentication = () => {
-      const [userId, setUserId] = useState(null);
-
-      useEffect(() => {
-        const authenticateUser = async () => {
-          try {
-            // Replace this with your actual logic to get the currently logged-in user's email and password
-            const currentUserEmail = getCurrentUserEmail();
-            const currentUserPassword = getCurrentUserPassword();
-    
-            const loginRequest = {
-              email: currentUserEmail,
-              password: currentUserPassword,
-            };
-    
-            const response = await fetch('/api/login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(loginRequest),
-            });
-    
-            if (response.ok) {
-              const authenticatedUserId = await response.json();
-              setUserId(authenticatedUserId);
-            } else {
-              // Handle authentication failure
-              console.error('Authentication failed');
-            }
-          } catch (error) {
-            console.error('Error authenticating user: ', error);
-          }
-        };
-    
-        authenticateUser();
-      }, []);
-    };*/
 
 
     const handleDateClick = async (info) => {
@@ -73,8 +23,8 @@ function Calendar(){
           startDateTime = info.dateStr;
           endDateTime = info.dateStr;
         }else{
-          const startTime = prompt('Enter start time (HH:mm). If after 12pm, please put in military time:');
-          const endTime = prompt('Enter end time: (HH:mm). If after 12pm, please put in military time:');
+          const startTime = prompt('Enter start time (HH:mm). If mornings (1 AM- 9 AM) please input time with the left most digit in the hour as 0. For example, 01:30. If after 12pm, please put in military time:');
+          const endTime = prompt('Enter end time: (HH:mm). If mornings (1 AM- 9 AM) please input time with the left most digit in the hour as 0. If after 12pm, please put in military time:');
 
           if(title && isValidInputTimeValue(startTime)&& isValidInputTimeValue(endTime)){
             startDateTime = `${info.dateStr}T${startTime}`;
@@ -120,7 +70,7 @@ function Calendar(){
     };
 
     const isValidInputTimeValue = (time) => {
-      const regex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+      const regex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]([APMapm]{2})?$/;
       return regex.test(time);
     };
 
