@@ -21,6 +21,7 @@ public class User {
     private String password;
     @Field("newPassword")
     private String newPassword;
+    private String token;
 
 
     public User(){
@@ -28,7 +29,7 @@ public class User {
     }
 
     public User(String user_id, String firstName, String lastName, String email,
-                LocalDate dob, String username, String password, String newPassword){
+                LocalDate dob, String username, String password, String newPassword, String token){
         this.user_id = user_id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -37,6 +38,7 @@ public class User {
         this.username = username;
         this.password = password;
         this.newPassword = newPassword;
+        this.token = token;
     }
 
     //Getter and Setter methods for each instance variable
@@ -77,5 +79,8 @@ public class User {
     public void setPassword(String password){ this.password = password;}
     public String getNewPassword(){ return password;}
     public void setNewPassword(String newPassword){ this.password = password; }
+    public String getToken(){return token;}
+    public void setToken(String token){this.token = token;}
+
 
 }

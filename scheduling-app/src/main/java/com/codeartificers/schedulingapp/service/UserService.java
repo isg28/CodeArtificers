@@ -20,6 +20,8 @@ public class UserService {
     private UserCounterRepository userCounterRepository;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public User createUser(UserRequest userRequest){
         if (isValidUserRequest(userRequest)) {
@@ -57,6 +59,9 @@ public class UserService {
         String hashPassword = passwordEncoder.encode(userRequest.getPassword());
         user.setPassword(hashPassword);
 
+        String token = jwtUtil.generateToken(user.getUsername());
+        user.setToken(token);
+
         return userRepository.save(user);
     }
     private boolean isValidUserRequest(UserRequest userRequest){
@@ -68,6 +73,8 @@ public class UserService {
         User user = userRepository.findByEmail(email);
 
         if(user != null && passwordEncoder.matches(password, user.getPassword())){
+            String token = jwtUtil.generateToken(user.getUsername());
+            user.setToken(token);
             return user;
         }
         else{

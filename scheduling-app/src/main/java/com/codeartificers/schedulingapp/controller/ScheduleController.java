@@ -66,6 +66,8 @@ class ScheduleController {
     private InvitationCounter invitationCounter;
     @Autowired
     private InvitationCounterRepository invitationCounterRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
 
 
 
@@ -73,7 +75,7 @@ class ScheduleController {
     public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1,
                               MeetingRepository meetingRepository, MeetingCounterRepository meetingCounterRepository, TimeSlotRepository timeSlotRepository, TimeSlotService timeSlotService,
                               UserService userService, InvitationRepository invitationRepository, NotificationService notificationService, InvitationCounter invitationCounter
-                                ,InvitationCounterRepository invitationCounterRepository) {
+                                ,InvitationCounterRepository invitationCounterRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.availabilityRepository = availabilityRepository;
         this.userCounterRepository = userCounterRepository;
@@ -87,6 +89,7 @@ class ScheduleController {
         this.notificationService = notificationService;
         this.invitationCounter = invitationCounter;
         this.invitationCounterRepository = invitationCounterRepository;
+        this.jwtUtil = jwtUtil;
     }
 
 
@@ -403,7 +406,11 @@ class ScheduleController {
     public ResponseEntity<?> registerUser(@RequestBody UserRequest userRequest){
         try {
             User newUser = userService.createUser(userRequest);
-            return ResponseEntity.status(201).body("User registered successfully");
+
+            String token = userRequest.getToken();
+
+            return ResponseEntity.status(HttpStatus.CREATED).header("Authorization", "Bearer " + token)
+                    .body("User registered successfully");
         }catch(IllegalArgumentException e){
             return ResponseEntity.status(400).body(e.getMessage());
         }
