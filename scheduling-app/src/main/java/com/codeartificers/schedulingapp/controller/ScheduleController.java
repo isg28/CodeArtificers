@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 
 @RestController
@@ -201,6 +205,7 @@ class ScheduleController {
             availability.setStartTime(availabilityRequest.getStartTime());
             availability.setEndTime(availabilityRequest.getEndTime());
             availability.setTitle(availabilityRequest.getTitle());
+            availability.setAllDay(availabilityRequest.isAllDay());
 
             return ResponseEntity.status(201).body(this.availabilityRepository.save(availability));
         } else {
@@ -250,16 +255,23 @@ class ScheduleController {
             if (availabilityRequest.getDate() != null) {
                 existingAvailability.setDate(availabilityRequest.getDate());
             }
-            if(availabilityRequest.getTitle() != null){
+            if(availabilityRequest.getTitle() != null) {
                 existingAvailability.setTitle(availabilityRequest.getTitle());
             }
+            if(availabilityRequest.isAllDay() != false){
+                existingAvailability.setAllDay(availabilityRequest.isAllDay());
+            }
             if (availabilityRequest.getStartTime() == null && availabilityRequest.getDate() == null &&
-                    availabilityRequest.getEndTime() == null && availabilityRequest.getTitle() == null) {
+                    availabilityRequest.getEndTime() == null && availabilityRequest.getTitle() == null
+                    && availabilityRequest.isAllDay() == false) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required availability fields.");
 
             }
 
             availabilityRepository.save(existingAvailability);
+            System.out.println("Received Date (Backend): " + availabilityRequest.getDate());
+            System.out.println("Received Start Time (Backend): " + availabilityRequest.getStartTime());
+            System.out.println("Received End Time (Backend): " + availabilityRequest.getEndTime());
             return ResponseEntity.status(200).body(existingAvailability);
 
         } else {

@@ -15,9 +15,11 @@ public class JwtUtil {
     private long expirationTime;
     private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
-    public String generateToken(String username){
+    public String generateToken(String username, String userId){
+        Claims claims = Jwts.claims().setSubject(username);
+        claims.put("user_id", userId);
         return Jwts.builder()
-                .setSubject(username)
+                .setClaims(claims)
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(secretKey)
                 .compact();

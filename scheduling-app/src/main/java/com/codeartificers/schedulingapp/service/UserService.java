@@ -59,7 +59,7 @@ public class UserService {
         String hashPassword = passwordEncoder.encode(userRequest.getPassword());
         user.setPassword(hashPassword);
 
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getUsername(), userRequest.getUser_Id());
         user.setToken(token);
 
         return userRepository.save(user);
@@ -73,7 +73,7 @@ public class UserService {
         User user = userRepository.findByEmail(email);
 
         if(user != null && passwordEncoder.matches(password, user.getPassword())){
-            String token = jwtUtil.generateToken(user.getUsername());
+            String token = jwtUtil.generateToken(user.getUsername(), user.getUser_id());
             user.setToken(token);
             return user;
         }

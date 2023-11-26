@@ -3,12 +3,12 @@ package com.codeartificers.schedulingapp.resource;
 public class LoginRequest {
     private String email;
     private String password;
-    private String token;
+    private String user_id;
 
-    public LoginRequest(String email, String password, String token) {
+    public LoginRequest(String email, String password, String user_id) {
         this.email = email;
         this.password = password;
-        this.token = token;
+        this.user_id = user_id;
     }
 
     public String getEmail() {
@@ -26,10 +26,10 @@ public class LoginRequest {
     public void setPassword(String password) {
         this.password = password;
     }
-    public String getToken(){
-        return token;
+    public String getUser_id(){
+        return user_id;
     }
-    public void setToken(String token){
-        this.token = token;
+    public void setUser_id(String user_id){
+        this.user_id = user_id;
     }
 }
