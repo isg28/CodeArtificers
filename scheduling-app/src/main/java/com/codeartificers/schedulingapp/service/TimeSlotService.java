@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,12 +45,12 @@ public class TimeSlotService {
 
     private boolean areTimeSlotsEqual(TimeSlot timeSlot1, TimeSlot timeSlot2) {
         LocalDate date1 = timeSlot1.getDate();
-        LocalTime startTime1 = timeSlot1.getStartTime();
-        LocalTime endTime1 = timeSlot1.getEndTime();
+        ZonedDateTime startTime1 = timeSlot1.getStartTime();
+        ZonedDateTime endTime1 = timeSlot1.getEndTime();
 
         LocalDate date2 = timeSlot2.getDate();
-        LocalTime startTime2 = timeSlot2.getStartTime();
-        LocalTime endTime2 = timeSlot2.getEndTime();
+        ZonedDateTime startTime2 = timeSlot2.getStartTime();
+        ZonedDateTime endTime2 = timeSlot2.getEndTime();
 
         return date1.equals(date2) && ((startTime1.isBefore(endTime2)&& startTime2.isBefore(endTime1)) || (startTime2.isBefore(endTime1) && startTime1.isBefore(endTime2)) || (startTime1.equals(startTime2) && (endTime1.equals(endTime2))));
     }

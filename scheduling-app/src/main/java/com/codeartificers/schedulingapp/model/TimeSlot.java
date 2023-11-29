@@ -4,19 +4,22 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 
 public class TimeSlot {
     private String user_id;
     private LocalDate date;
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime startTime;
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime endTime;
+    //@JsonFormat(pattern = "HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+    private ZonedDateTime startTime;
+    //@JsonFormat(pattern = "HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+    private ZonedDateTime endTime;
 
     public TimeSlot(){
 
     }
-    public TimeSlot(String user_id, LocalDate date, LocalTime startTime, LocalTime endTime){
+    public TimeSlot(String user_id, LocalDate date, ZonedDateTime startTime, ZonedDateTime endTime){
         this.user_id = user_id;
         this.date = date;
         this.startTime = startTime;
@@ -39,19 +42,19 @@ public class TimeSlot {
         this.date = date;
     }
 
-    public LocalTime getStartTime() {
+    public ZonedDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalTime startTime) {
+    public void setStartTime(ZonedDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public LocalTime getEndTime() {
+    public ZonedDateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(LocalTime endTime) {
+    public void setEndTime(ZonedDateTime endTime) {
         this.endTime = endTime;
     }
 }
