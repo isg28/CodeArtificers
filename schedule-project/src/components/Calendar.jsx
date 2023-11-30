@@ -1,4 +1,4 @@
-import React, {useState, useEffect } from "react";
+import React, {useState, useEffect, useRef } from "react";
 import Fullcalendar from "@fullcalendar/react"; 
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -10,7 +10,6 @@ import moment from 'moment-timezone';
 
 function Calendar(){
     const [events, setEvents] = useState([]);
-
     const [user_id, setUserId] = useState(null);
 
     useEffect(() => {
@@ -36,7 +35,6 @@ function Calendar(){
       console.log('User ID from token:', user_id); //for checking purposes
     }, [user_id]);
 
-
     const fetchEvents = async () => {
       try{
         const token = getToken();
@@ -53,8 +51,12 @@ function Calendar(){
 
         if(response.ok){
           const data = await response.json();
-          //Update the events state with the fetched data
-          setEvents(data);
+          
+          // Update the events state with the fetched data
+          const formattedEvents = data.map(event => ({
+            ...event,
+          }));
+          setEvents(formattedEvents);
         } else{
           console.error('Failed to fetch events');
         }
@@ -64,14 +66,23 @@ function Calendar(){
         }
       };
 
-    const findEventByDate = (date) => {
-      return events.filter((event) => event.date === date);
-    };
+      const findEventByDate = (date) => {
+        const clickedDateUtc = moment.tz(date, 'UTC').format();
 
+        return events.filter((event) => {
+          const eventStartDate = moment.tz(event.start, 'UTC').format();
+      
+          // Compare dates without considering time for all-day events
+          if (event.allDay) {
+            return moment(eventStartDate).isSame(clickedDateUtc, 'day');
+          }
+      
+          return eventStartDate === clickedDateUtc;
+        });
+      };
 
     /*const [userId, setUserId] = useState(null);*/
     //hardcoded user so you can post events, will fix this when we get user authentication working
-    const userId = 1;
     const [showCreateMeetingForm, setShowCreateMeetingForm] = useState(false);
     const [newMeeting, setNewMeeting] = useState({
       date: "",
@@ -93,8 +104,13 @@ function Calendar(){
         };
 
     const handleDateClick = async (info) => {
-
+      /*
+      // Convert clicked date to UTC
+       const clickedDateUtc = moment.tz(info.dateStr, 'UTC').format();
+       const existingEvents = findEventByDate(clickedDateUtc);
+       */
       const existingEvents = findEventByDate(info.dateStr);
+
 
       if(existingEvents.length > 0){
         const userChoice = prompt('Choose an action: \n1. Add a new event \n2.Edit existing events');
@@ -169,52 +185,53 @@ function Calendar(){
       
       const title = prompt('Enter event title: ');
       const isAllDay = window.confirm('Is this an all-day event?');
+      console.log('isAllDay:', isAllDay);
 
-      const formattedDate = moment(info.date).format('YYYY-MM-DD');
-      let startDateTime, endDateTime;
+      const formattedDate = new Date(info.date);
+      formattedDate.setHours(0, 0, 0, 0);
+      const formattedDateString = moment(formattedDate).format('YYYY-MM-DD');
+      let startDateTime, endDateTime
+
 
         if(isAllDay){
-          startDateTime = moment(`${formattedDate}T00:00:00.000`);
-          endDateTime = moment(`${formattedDate}T23:59:59.999`);
+          // When isAllDay is true
+          startDateTime = moment.tz(`${formattedDateString}T00:00:00.000`, 'local');
+          endDateTime = moment.tz(`${formattedDateString}T23:59:59.999`, 'local');
         }else{
           const startTime = prompt('Enter start time (HH:mm). If mornings (1 AM- 9 AM) please input time with the left most digit in the hour as 0. For example, 01:30. If after 12pm, please put in military time:');
           const endTime = prompt('Enter end time: (HH:mm). If mornings (1 AM- 9 AM) please input time with the left most digit in the hour as 0. If after 12pm, please put in military time:');
 
           if(title && isValidInputTimeValue(startTime)&& isValidInputTimeValue(endTime)){
-            startDateTime = moment(`${formattedDate}T${startTime}`);
-            endDateTime = moment(`${formattedDate}T${endTime}`);
+            startDateTime = moment(`${formattedDateString}T${startTime}`);
+            endDateTime = moment(`${formattedDateString}T${endTime}`);                   
           }else{
             alert('Invalid input. Please make sure to enter a title and valid start/end time.');
             return
           }
         }
-        
-        //startDateTime = startDateTime.local();
-        //endDateTime = endDateTime.local();
-        startDateTime = startDateTime.tz('America/New York'); // Replace 'YourTargetTimeZone' with the desired time zone
-        endDateTime = endDateTime.tz('America/New York'); // Replace 'YourTargetTimeZone' with the desired time zone
 
+        startDateTime = startDateTime.tz('local');
+        endDateTime = endDateTime.tz('local');
 
-
-      console.log('Formatted Start Time:', startDateTime.format("HH:mm"));
-      console.log('Formatted End Time:', endDateTime.format("HH:mm"));
-      console.log('Start Time (Local Timezone):', startDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'));
-      console.log('End Time (Local Timezone):', endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'));
 
         const newEvent = {
           user_id: user_id,
           title: title,
-          date: formattedDate,
-          startTime:  isAllDay ? "00:00": startDateTime.format("HH:mm"),
-          endTime: isAllDay ? "23:59" : endDateTime.format("HH:mm"),
+          date: formattedDateString,
+          start: isAllDay
+          ? startDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS') // Include time for all-day events
+          : startDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'), // Include time for non-all-day events
+        end: isAllDay
+          ? endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS') // Include time for all-day events
+          : endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'),   // Include time for non-all-day events      
           allDay: isAllDay,
         };
+        
         setEvents((prevEvents) => [...prevEvents, newEvent]);
         console.log("Event to be saved: ", newEvent);
         console.log('Formatted Date (Frontend):', formattedDate);
-        console.log('Formatted Start Time (Frontend):', startDateTime.format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
-        console.log('Formatted End Time (Frontend):', endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
-
+        console.log('Formatted Start Time (Frontend):', startDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'));
+        console.log('Formatted End Time (Frontend):', endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'));
 
         try{
           const token = getToken();
@@ -222,6 +239,7 @@ function Calendar(){
             method: 'POST',
             headers:{
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify(newEvent),
           });
@@ -270,7 +288,6 @@ function Calendar(){
       setShowCreateMeetingForm(!showCreateMeetingForm);
     };
 
-/* global events, handleDateClick */
     return(
       <div>
         <h1> </h1>

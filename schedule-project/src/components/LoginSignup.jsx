@@ -71,7 +71,7 @@ const LoginSignup = () => {
                 window.alert("Login failed. Please try again.");
             }
         }else{
-            console.login("Login failed.");
+            console.log("Login failed.");
             window.alert("Invalid email or password. Please try again.");
         }
     }catch(error){
