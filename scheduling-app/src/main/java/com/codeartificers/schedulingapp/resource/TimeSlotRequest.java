@@ -1,7 +1,9 @@
 package com.codeartificers.schedulingapp.resource;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
@@ -9,16 +11,16 @@ public class TimeSlotRequest {
     private String user_id;
     private LocalDate date;
     //@JsonFormat(pattern = "HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    private ZonedDateTime startTime;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalDateTime startTime;
     //@JsonFormat(pattern = "HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    private ZonedDateTime endTime;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalDateTime endTime;
 
     public TimeSlotRequest(){
 
     }
-    public TimeSlotRequest(String user_id, LocalDate date, ZonedDateTime startTime, ZonedDateTime endTime){
+    public TimeSlotRequest(String user_id, LocalDate date, LocalDateTime startTime, LocalDateTime endTime){
         this.user_id = user_id;
         this.date = date;
         this.startTime = startTime;
@@ -41,19 +43,19 @@ public class TimeSlotRequest {
         this.date = date;
     }
 
-    public ZonedDateTime getStartTime() {
+    public LocalDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(ZonedDateTime startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public ZonedDateTime getEndTime() {
+    public LocalDateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(ZonedDateTime endTime) {
+    public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
     }
 }

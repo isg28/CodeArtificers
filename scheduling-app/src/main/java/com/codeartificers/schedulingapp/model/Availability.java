@@ -1,49 +1,33 @@
 package com.codeartificers.schedulingapp.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
 
 @Document("availability")
 public class Availability {
     @Id
     private String availability_Id;
     private String user_id;
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
-    //@JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    //@JsonFormat(pattern = "HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    private ZonedDateTime startTime;
-    //@JsonDeserialize(using = LocalDateTimeDeserializer.class)
-   // @JsonFormat(pattern = "HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    private ZonedDateTime endTime;
+    private LocalDateTime start;
+    private LocalDateTime end;
     private String title;
     private boolean allDay;
 
     public Availability(){
 
     }
-    public Availability(String availability_Id, String user_id, LocalDate date, ZonedDateTime startTime, ZonedDateTime endTime,
+    public Availability(String availability_Id, String user_id, LocalDate date, LocalDateTime startTime, LocalDateTime endTime,
                         String title, boolean allDay) {
         this.availability_Id = availability_Id;
         this.user_id = user_id;
         this.date = date;
         this.title = title;
         this.allDay = allDay;
-
-        if(!allDay) {
-            this.startTime = startTime;
-            this.endTime = endTime;
-        }else{
-            this.startTime = null;
-            this.endTime = null;
-        }
     }
 
     public String getAvailability_Id() {
@@ -62,20 +46,20 @@ public class Availability {
         this.date = date;
     }
 
-    public ZonedDateTime getStartTime() {
-        return startTime;
+    public LocalDateTime getStart() {
+        return start;
     }
 
-    public void setStartTime(ZonedDateTime startTime) {
-        this.startTime = startTime;
+    public void setStart(LocalDateTime start) {
+        this.start = start;
     }
 
-    public ZonedDateTime getEndTime() {
-        return endTime;
+    public LocalDateTime getEnd() {
+        return end;
     }
 
-    public void setEndTime(ZonedDateTime endTime) {
-        this.endTime = endTime;
+    public void setEnd(LocalDateTime end) {
+        this.end = end;
     }
 
     public void setUser_id(String user_id){this.user_id = user_id;}

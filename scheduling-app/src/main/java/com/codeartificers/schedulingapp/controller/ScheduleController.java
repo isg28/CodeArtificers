@@ -4,8 +4,6 @@ import com.codeartificers.schedulingapp.model.*;
 import com.codeartificers.schedulingapp.repository.*;
 import com.codeartificers.schedulingapp.resource.*;
 import com.codeartificers.schedulingapp.service.*;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.apache.coyote.Response;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -16,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
-
 
 
 @RestController
@@ -186,8 +184,7 @@ class ScheduleController {
     public ResponseEntity<?> createNewAvailability(@PathVariable String user_id, @RequestBody AvailabilityRequest availabilityRequest) {
         AvailabilityCounter availabilityCounter = availabilityCounterRepository.findByName("availability_id");
 
-        if (availabilityRequest.getUser_id() != null && availabilityRequest.getDate() != null
-                && availabilityRequest.getStartTime() != null && availabilityRequest.getEndTime() != null && availabilityRequest.getTitle() != null) {
+        if (availabilityRequest.getDate() != null && availabilityRequest.getTitle() != null) {
             //To ensure that the availabilityCounter remains consistent. If empty, starts at 0 then increments.
             if (availabilityCounter == null) {
                 availabilityCounter = new AvailabilityCounter();
@@ -197,16 +194,28 @@ class ScheduleController {
             long nextAvailabilityId = availabilityCounter.getSequence() + 1;
             availabilityCounter.setSequence(nextAvailabilityId);
             availabilityCounterRepository.save(availabilityCounter);
-
             Availability availability = new Availability();
             availability.setAvailability_Id(String.valueOf(nextAvailabilityId));
             availability.setUser_id(user_id);
             availability.setDate(availabilityRequest.getDate());
-            availability.setStartTime(availabilityRequest.getStartTime());
-            availability.setEndTime(availabilityRequest.getEndTime());
             availability.setTitle(availabilityRequest.getTitle());
             availability.setAllDay(availabilityRequest.isAllDay());
 
+            if (availabilityRequest.isAllDay()) {
+                LocalDateTime startDateTime = LocalDateTime.of(availabilityRequest.getDate(), LocalTime.MIN);
+                LocalDateTime endDateTime = LocalDateTime.of(availabilityRequest.getDate(), LocalTime.MAX);
+                availability.setStart(startDateTime);
+                availability.setEnd(endDateTime);
+            } else {
+                if (availabilityRequest.getStart() != null && availabilityRequest.getEnd() != null) {
+                    LocalDateTime startDateTime = availabilityRequest.getStart();
+                    LocalDateTime endDateTime = availabilityRequest.getEnd();
+                    availability.setStart(startDateTime);
+                    availability.setEnd(endDateTime);
+                } else {
+                    return ResponseEntity.status(400).body("Malformed request. Missing required start and end times.");
+                }
+            }
             return ResponseEntity.status(201).body(this.availabilityRepository.save(availability));
         } else {
             return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
@@ -217,22 +226,17 @@ class ScheduleController {
 
     //GET: Retrieve all availabilities for a user (useful for showing your own availability), Brandon
     @GetMapping("/api/user/{user_id}/availability")
-    public ResponseEntity<?> getAllAvailability(@RequestBody AvailabilityRequest availabilityRequest, @PathVariable String user_id) {
+    public ResponseEntity<?> getAllAvailability(@PathVariable String user_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
         if (!userProfile.isPresent()) {
             return ResponseEntity.status(404).body("User ID: " + user_id + " not found");
         }
-        List<Availability> allAvailabilities = this.availabilityRepository.findAll();
-        List<Availability> userAvailabilities = new ArrayList<>();
+        List<Availability> userAvailabilities = this.availabilityRepository.findByUser_id(user_id);
 
-        for (Availability availability : allAvailabilities) {
-            if (availability.getUser_id().equals(user_id)) {
-                userAvailabilities.add(availability);
-            }
-        }
         if (userAvailabilities.isEmpty()) {
             return ResponseEntity.status(404).body("There is no availability entry for User: " + user_id);
         }
+
         return ResponseEntity.status(200).body(userAvailabilities);
     }
 
@@ -246,11 +250,11 @@ class ScheduleController {
         if (userProfile.isPresent() && availability.isPresent()) {
             Availability existingAvailability = availability.get();
 
-            if (availabilityRequest.getStartTime() != null) {
-                existingAvailability.setStartTime(availabilityRequest.getStartTime());
+            if (availabilityRequest.getStart() != null) {
+                existingAvailability.setStart(LocalDateTime.from(LocalTime.from(availabilityRequest.getStart())));
             }
-            if (availabilityRequest.getEndTime() != null) {
-                existingAvailability.setEndTime(availabilityRequest.getEndTime());
+            if (availabilityRequest.getEnd() != null) {
+                existingAvailability.setEnd(LocalDateTime.from(LocalTime.from(availabilityRequest.getEnd())));
             }
             if (availabilityRequest.getDate() != null) {
                 existingAvailability.setDate(availabilityRequest.getDate());
@@ -261,8 +265,8 @@ class ScheduleController {
             if(availabilityRequest.isAllDay() != false){
                 existingAvailability.setAllDay(availabilityRequest.isAllDay());
             }
-            if (availabilityRequest.getStartTime() == null && availabilityRequest.getDate() == null &&
-                    availabilityRequest.getEndTime() == null && availabilityRequest.getTitle() == null
+            if (availabilityRequest.getStart() == null && availabilityRequest.getDate() == null &&
+                    availabilityRequest.getEnd() == null && availabilityRequest.getTitle() == null
                     && availabilityRequest.isAllDay() == false) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required availability fields.");
 
@@ -270,8 +274,8 @@ class ScheduleController {
 
             availabilityRepository.save(existingAvailability);
             System.out.println("Received Date (Backend): " + availabilityRequest.getDate());
-            System.out.println("Received Start Time (Backend): " + availabilityRequest.getStartTime());
-            System.out.println("Received End Time (Backend): " + availabilityRequest.getEndTime());
+            System.out.println("Received Start Time (Backend): " + availabilityRequest.getStart());
+            System.out.println("Received End Time (Backend): " + availabilityRequest.getEnd());
             return ResponseEntity.status(200).body(existingAvailability);
 
         } else {
