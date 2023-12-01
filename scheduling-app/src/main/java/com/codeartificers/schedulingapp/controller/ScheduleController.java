@@ -251,10 +251,10 @@ class ScheduleController {
             Availability existingAvailability = availability.get();
 
             if (availabilityRequest.getStart() != null) {
-                existingAvailability.setStart(LocalDateTime.from(LocalTime.from(availabilityRequest.getStart())));
+                existingAvailability.setStart(availabilityRequest.getStart());
             }
             if (availabilityRequest.getEnd() != null) {
-                existingAvailability.setEnd(LocalDateTime.from(LocalTime.from(availabilityRequest.getEnd())));
+                existingAvailability.setEnd(availabilityRequest.getEnd());
             }
             if (availabilityRequest.getDate() != null) {
                 existingAvailability.setDate(availabilityRequest.getDate());
