@@ -104,11 +104,6 @@ function Calendar(){
         };
 
     const handleDateClick = async (info) => {
-      /*
-      // Convert clicked date to UTC
-       const clickedDateUtc = moment.tz(info.dateStr, 'UTC').format();
-       const existingEvents = findEventByDate(clickedDateUtc);
-       */
       const existingEvents = findEventByDate(info.dateStr);
 
 
@@ -137,9 +132,14 @@ function Calendar(){
   };
 
     const editEvent = async (existingEvent, chosenIndex, chosenDate) => {
+      console.log('Existing Event: ', existingEvent);
       const newTitle = prompt('Edit event title:', existingEvent.title);
       const newStartTime = prompt('Edit start time:', existingEvent.start);
       const newEndTime = prompt('Edit end time:', existingEvent.end);
+
+      console.log('New Title:', newTitle);
+      console.log('New Start Time:', newStartTime);
+      console.log('New End Time:', newEndTime);
 
       if(newTitle && isValidInputTimeValue(newStartTime) && isValidInputTimeValue(newEndTime)) {
         const updatedEvent = {
@@ -147,15 +147,22 @@ function Calendar(){
           title: newTitle,
           start: `${chosenDate}T${newStartTime}`,
           end: `${chosenDate}T${newEndTime}`,
+
         };
+
+        console.log('Updated Event:', updatedEvent);
+
         setEvents((prevEvents) => [
           ...prevEvents.slice(0, chosenIndex),
           updatedEvent,
           ...prevEvents.slice(chosenIndex + 1),
         ]);
+        console.log(' Updated Event: ', existingEvent);
 
         try{
-          const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability/${existingEvent.availability_id}`,{
+          const { availability_Id } = existingEvent;
+          console.log('Availability ID:', availability_Id);
+          const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability/${availability_Id}`,{
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -168,6 +175,7 @@ function Calendar(){
             console.log('Event updated successfully');
           }else{
             console.error('Failed to update event');
+            console.log('Failed Event: ', existingEvent);
           }
           } catch (error) {
             console.error('Error updating event:', error);
