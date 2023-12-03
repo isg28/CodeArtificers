@@ -211,6 +211,7 @@ function Calendar(){
             console.log('Event updated successfully');
           } else {
             console.error('Failed to update event');
+            console.log('Failed Event: ', existingEvent);
           }
         } catch (error) {
           console.error('Error updating event:', error);
