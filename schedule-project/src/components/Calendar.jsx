@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import jwt from 'jsonwebtoken';
 import moment from 'moment-timezone';
 
+
 function Calendar(){
     const [events, setEvents] = useState([]);
     const [user_id, setUserId] = useState(null);
@@ -78,12 +79,6 @@ function Calendar(){
 
     };
       
-      
-      
-
-
-    /*const [userId, setUserId] = useState(null);*/
-    //hardcoded user so you can post events, will fix this when we get user authentication working
     const [showCreateMeetingForm, setShowCreateMeetingForm] = useState(false);
     const [newMeeting, setNewMeeting] = useState({
       date: "",
@@ -358,7 +353,7 @@ function Calendar(){
         ...prevMeeting,
         [name]: value,
       }));
-    };  
+    }; 
 
     const getToken = () => {
       const token = localStorage.getItem("token");
@@ -390,6 +385,7 @@ function Calendar(){
         <Button variant="contained" size="large">
           Common TimeSlots
         </Button>
+        <Button variant = "contained" size = "large"> Invite Users </Button>
       </div>
     </Box>
         <h1> </h1>
