@@ -52,10 +52,11 @@ function Calendar(){
         if(response.ok){
           const data = await response.json();
           
-          // Update the events state with the fetched data
-          const formattedEvents = data.map(event => ({
-            ...event,
-          }));
+
+      // Update the events state with the fetched data
+        const formattedEvents = data.map(event => ({
+          ...event,
+        }));
           setEvents(formattedEvents);
         } else{
           console.error('Failed to fetch events');
@@ -68,13 +69,14 @@ function Calendar(){
       
       const findEventByDate = (date) => {
         const clickedDateUtc = moment.tz(date, 'UTC').format('YYYY-MM-DD');
-      
+
         return events.filter((event) => {
           console.log('Raw event start:', event.start);
           const eventStartDate = moment.tz(event.start, 'UTC').format('YYYY-MM-DD');
           return eventStartDate === clickedDateUtc;
-        });
-      };
+      });
+
+    };
       
       
       
@@ -155,27 +157,20 @@ function Calendar(){
     const editEvent = async (existingEvent, chosenIndex, chosenDate) => {
       console.log('Existing Event: ', existingEvent);
       const newTitle = prompt('Edit event title:', existingEvent.title);
-      const isAllDay = window.confirm('Is this an all-day event?');
       let newStartTime, newEndTime;
 
-      if (isAllDay) {
-        // When isAllDay is true
-        newStartTime = '00:00';
-        newEndTime = '23:59';
-      } else {
-        newStartTime = prompt('Edit start time:', moment(existingEvent.start).format('HH:mm'));
-        newEndTime = prompt('Edit end time:', moment(existingEvent.end).format('HH:mm'));
+      newStartTime = prompt('Edit start time:', moment(existingEvent.start).format('HH:mm'));
+      newEndTime = prompt('Edit end time:', moment(existingEvent.end).format('HH:mm'));
     
-        if (!isValidInputTimeValue(newStartTime) || !isValidInputTimeValue(newEndTime)) {
-          alert('Invalid input. Please make sure to enter valid start/end times.');
-          return;
-        }
+      if (!isValidInputTimeValue(newStartTime) || !isValidInputTimeValue(newEndTime)) {
+        alert('Invalid input. Please make sure to enter valid start/end times.');
+        return;
       }
+      
 
       console.log('New Title:', newTitle);
       console.log('New Start Time:', newStartTime);
       console.log('New End Time:', newEndTime);
-      console.log('Is All Day:', isAllDay);
 
       const token = getToken();
       if (newTitle && isValidInputTimeValue(newStartTime) && isValidInputTimeValue(newEndTime)) {
@@ -185,9 +180,8 @@ function Calendar(){
           const updatedEvent = {
             ...existingEvent,
             title: newTitle,
-            start: isAllDay ? `${chosenDate}T${newStartTime}:00` : `${chosenDate}T${newStartTime}:00`,
-            end: isAllDay ? `${chosenDate}T${newEndTime}:00` : `${chosenDate}T${newEndTime}:00`,
-            allDay: isAllDay,
+            start: `${chosenDate}T${newStartTime}:00`,
+            end: `${chosenDate}T${newEndTime}:00`,
           };
 
           console.log('updatedEvent:', updatedEvent);
@@ -197,6 +191,13 @@ function Calendar(){
             updatedEvent,
             ...prevEvents.slice(chosenIndex + 1),
           ]);
+
+          if (!updatedEvent.availability_id) {
+            console.error('Availability ID is missing. Cannot update event.');
+            return;
+          }
+          
+        
     
           const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability/${existingEvent.availability_id}`, {
             method: 'PUT',
@@ -204,11 +205,13 @@ function Calendar(){
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
+            
             body: JSON.stringify(updatedEvent),
           });
     
           if (response.ok) {
             console.log('Event updated successfully');
+            window.location.reload(); 
           } else {
             console.error('Failed to update event');
             console.log('Failed Event: ', existingEvent);
@@ -220,6 +223,9 @@ function Calendar(){
         alert('Invalid input. Please make sure to enter a title and valid start/end time.');
       }
     };
+
+
+
     
     const addEvent = async(info) =>{
       if(!user_id){
@@ -232,7 +238,7 @@ function Calendar(){
 
        // Find the availability_id from the existing events
       const existingEvents = findEventByDate(info.dateStr);
-      const availability_id = existingEvents.length > 0 ? existingEvents[0].availability_id : null;
+      let availability_id = existingEvents.length > 0 ? existingEvents[0].availability_id : null;
       // Check if the availability_id is present in the decoded token
       const token = localStorage.getItem("token");
 
@@ -249,48 +255,35 @@ function Calendar(){
       
       
       const title = prompt('Enter event title: ');
-      const isAllDay = window.confirm('Is this an all-day event?');
-      console.log('isAllDay:', isAllDay);
 
       const formattedDate = new Date(info.date);
       formattedDate.setHours(0, 0, 0, 0);
       const formattedDateString = moment(formattedDate).format('YYYY-MM-DD');
       let startDateTime, endDateTime
 
+      const startTime = prompt('Enter start time (HH:mm). If mornings (1 AM- 9 AM) please input time with the left most digit in the hour as 0. For example, 01:30. If after 12pm, please put in military time:');
+      const endTime = prompt('Enter end time: (HH:mm). If mornings (1 AM- 9 AM) please input time with the left most digit in the hour as 0. If after 12pm, please put in military time:');
 
-        if(isAllDay){
-          // When isAllDay is true
-          startDateTime = moment.tz(`${formattedDateString}T00:00:00.000`, 'local');
-          endDateTime = moment.tz(`${formattedDateString}T23:59:59.999`, 'local');
-        }else{
-          const startTime = prompt('Enter start time (HH:mm). If mornings (1 AM- 9 AM) please input time with the left most digit in the hour as 0. For example, 01:30. If after 12pm, please put in military time:');
-          const endTime = prompt('Enter end time: (HH:mm). If mornings (1 AM- 9 AM) please input time with the left most digit in the hour as 0. If after 12pm, please put in military time:');
+      if(title && isValidInputTimeValue(startTime)&& isValidInputTimeValue(endTime)){
+        startDateTime = moment(`${formattedDateString}T${startTime}`);
+        endDateTime = moment(`${formattedDateString}T${endTime}`);                   
+      }else{
+          alert('Invalid input. Please make sure to enter a title and valid start/end time.');
+          return
+      }
+        
 
-          if(title && isValidInputTimeValue(startTime)&& isValidInputTimeValue(endTime)){
-            startDateTime = moment(`${formattedDateString}T${startTime}`);
-            endDateTime = moment(`${formattedDateString}T${endTime}`);                   
-          }else{
-            alert('Invalid input. Please make sure to enter a title and valid start/end time.');
-            return
-          }
-        }
-
-        startDateTime = startDateTime.tz('local');
-        endDateTime = endDateTime.tz('local');
+      startDateTime = startDateTime.tz('local');
+      endDateTime = endDateTime.tz('local');
 
 
-        const newEvent = {
-          user_id: user_id,
-          title: title,
-          date: formattedDateString,
-          start: isAllDay
-          ? startDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS') // Include time for all-day events
-          : startDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'), // Include time for non-all-day events
-        end: isAllDay
-          ? endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS') 
-          : endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'),       
-          allDay: isAllDay,
-          availability_id: availability_id,
+      const newEvent = {
+        user_id: user_id,
+        title: title,
+        date: formattedDateString,
+        start: startDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'), 
+        end: endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'),       
+        availability_id: availability_id,
         };
         
         setEvents((prevEvents) => [...prevEvents, newEvent]);
