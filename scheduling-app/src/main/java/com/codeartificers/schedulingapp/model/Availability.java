@@ -15,20 +15,19 @@ public class Availability {
     private LocalDateTime start;
     private LocalDateTime end;
     private String title;
-    private boolean allDay;
+    //private boolean allDay;
 
     public Availability(){
 
     }
     public Availability(String availability_Id, String user_id, LocalDate date, LocalDateTime start, LocalDateTime end,
-                        String title, boolean allDay) {
+                        String title) {
         this.availability_id = availability_Id;
         this.user_id = user_id;
         this.date = date;
         this.title = title;
         this.start = start;
         this.end = end;
-        this.allDay = allDay;
     }
 
     public String getAvailability_id() {
@@ -67,10 +66,5 @@ public class Availability {
     public String getUser_id(){return user_id;}
     public void setTitle(String title){this.title = title;}
     public String getTitle(){return title;}
-    public boolean isAllDay(){
-        return allDay;
-    }
-    public void setAllDay(boolean allDay){
-        this.allDay = allDay;
-    }
+
 }

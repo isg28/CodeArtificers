@@ -197,15 +197,9 @@ class ScheduleController {
             availability.setUser_id(user_id);
             availability.setDate(availabilityRequest.getDate());
             availability.setTitle(availabilityRequest.getTitle());
-            availability.setAllDay(availabilityRequest.isAllDay());
 
             String availabilityToken = TokenUtil.generateAvailabilityToken(availability, jwtUtil.getSecretKey());
-            if (availabilityRequest.isAllDay()) {
-                LocalDateTime startDateTime = LocalDateTime.of(availabilityRequest.getDate(), LocalTime.MIN);
-                LocalDateTime endDateTime = LocalDateTime.of(availabilityRequest.getDate(), LocalTime.MAX);
-                availability.setStart(startDateTime);
-                availability.setEnd(endDateTime);
-            } else {
+
                 if (availabilityRequest.getStart() != null && availabilityRequest.getEnd() != null) {
                     LocalDateTime startDateTime = availabilityRequest.getStart();
                     LocalDateTime endDateTime = availabilityRequest.getEnd();
@@ -214,7 +208,7 @@ class ScheduleController {
                 } else {
                     return ResponseEntity.status(400).body("Malformed request. Missing required start and end times.");
                 }
-            }
+
             return ResponseEntity.status(201)
                     .header("Authorization", "Bearer " + availabilityToken)
                     .body(this.availabilityRepository.save(availability));
@@ -263,12 +257,8 @@ class ScheduleController {
             if(availabilityRequest.getTitle() != null) {
                 existingAvailability.setTitle(availabilityRequest.getTitle());
             }
-            if(availabilityRequest.isAllDay() != false){
-                existingAvailability.setAllDay(availabilityRequest.isAllDay());
-            }
             if (availabilityRequest.getStart() == null && availabilityRequest.getDate() == null &&
-                    availabilityRequest.getEnd() == null && availabilityRequest.getTitle() == null
-                    && availabilityRequest.isAllDay() == false) {
+                    availabilityRequest.getEnd() == null && availabilityRequest.getTitle() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required availability fields.");
 
             }
