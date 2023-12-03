@@ -65,21 +65,20 @@ function Calendar(){
           console.error('Error fetching events: ', error);
         }
       };
-
+      
       const findEventByDate = (date) => {
-        const clickedDateUtc = moment.tz(date, 'UTC').format();
-
+        const clickedDateUtc = moment.tz(date, 'UTC').format('YYYY-MM-DD');
+      
         return events.filter((event) => {
-          const eventStartDate = moment.tz(event.start, 'UTC').format();
-      
-          // Compare dates without considering time for all-day events
-          if (event.allDay) {
-            return moment(eventStartDate).isSame(clickedDateUtc, 'day');
-          }
-      
+          console.log('Raw event start:', event.start);
+          const eventStartDate = moment.tz(event.start, 'UTC').format('YYYY-MM-DD');
           return eventStartDate === clickedDateUtc;
         });
       };
+      
+      
+      
+
 
     /*const [userId, setUserId] = useState(null);*/
     //hardcoded user so you can post events, will fix this when we get user authentication working
@@ -104,16 +103,14 @@ function Calendar(){
         };
 
     const handleDateClick = async (info) => {
-      /*
-      // Convert clicked date to UTC
-       const clickedDateUtc = moment.tz(info.dateStr, 'UTC').format();
-       const existingEvents = findEventByDate(clickedDateUtc);
-       */
       const existingEvents = findEventByDate(info.dateStr);
 
+      
+      console.log('Clicked Date:', info.dateStr);
+      console.log('Existing Events:', existingEvents);
 
       if(existingEvents.length > 0){
-        const userChoice = prompt('Choose an action: \n1. Add a new event \n2.Edit existing events');
+        const userChoice = prompt('Choose an action: \n1. Add a new event \n2. Edit an existing event\n3. Delete an existing event');
 
         if(userChoice === '1'){
           addEvent(info);
@@ -128,53 +125,99 @@ function Calendar(){
           }else {
             alert("Invalid choice. Please choose a valid event number.");
           }
-        }else{
-          alert('Invalid choice. Please choose 1 or 2.');
+        }else if(userChoice === '3'){
+          const eventOptions = existingEvents.map((event, index) => `${index + 1}. ${event.title}`);
+          const userChoiceIndex = parseInt(prompt(`Choose an event to delete:\n${eventOptions.join('\n')}`));
+    
+          if (!isNaN(userChoiceIndex) && userChoiceIndex >= 1 && userChoiceIndex <= existingEvents.length) {
+            const chosenIndex = userChoiceIndex - 1;
+            const chosenEvent = existingEvents[chosenIndex];
+            const shouldDelete = window.confirm(`Are you sure you want to delete the event "${chosenEvent.title}" on this date (${info.dateStr})?`);
+    
+            if (shouldDelete) {
+              deleteEvent([chosenEvent]); 
+            }
         }
     } else {
-      addEvent(info);
+      alert('Invalid choice. Please choose 1, 2, or 3.');
+    }
+  } else{
+      const userChoice = prompt('No existing events. Choose an action: \n1. Add a new event');
+      if (userChoice === '1') {
+        addEvent(info);
+      } else {
+        alert('Invalid choice. Please choose 1.');
+      }
     }
   };
 
+
     const editEvent = async (existingEvent, chosenIndex, chosenDate) => {
+      console.log('Existing Event: ', existingEvent);
       const newTitle = prompt('Edit event title:', existingEvent.title);
-      const newStartTime = prompt('Edit start time:', existingEvent.start);
-      const newEndTime = prompt('Edit end time:', existingEvent.end);
+      const isAllDay = window.confirm('Is this an all-day event?');
+      let newStartTime, newEndTime;
 
-      if(newTitle && isValidInputTimeValue(newStartTime) && isValidInputTimeValue(newEndTime)) {
-        const updatedEvent = {
-          ...existingEvent,
-          title: newTitle,
-          start: `${chosenDate}T${newStartTime}`,
-          end: `${chosenDate}T${newEndTime}`,
-        };
-        setEvents((prevEvents) => [
-          ...prevEvents.slice(0, chosenIndex),
-          updatedEvent,
-          ...prevEvents.slice(chosenIndex + 1),
-        ]);
+      if (isAllDay) {
+        // When isAllDay is true
+        newStartTime = '00:00';
+        newEndTime = '23:59';
+      } else {
+        newStartTime = prompt('Edit start time:', moment(existingEvent.start).format('HH:mm'));
+        newEndTime = prompt('Edit end time:', moment(existingEvent.end).format('HH:mm'));
+    
+        if (!isValidInputTimeValue(newStartTime) || !isValidInputTimeValue(newEndTime)) {
+          alert('Invalid input. Please make sure to enter valid start/end times.');
+          return;
+        }
+      }
 
-        try{
-          const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability/${existingEvent.availability_id}`,{
+      console.log('New Title:', newTitle);
+      console.log('New Start Time:', newStartTime);
+      console.log('New End Time:', newEndTime);
+      console.log('Is All Day:', isAllDay);
+
+      const token = getToken();
+      if (newTitle && isValidInputTimeValue(newStartTime) && isValidInputTimeValue(newEndTime)) {
+        try {
+          console.log('existingEvent:', existingEvent);
+
+          const updatedEvent = {
+            ...existingEvent,
+            title: newTitle,
+            start: isAllDay ? `${chosenDate}T${newStartTime}:00` : `${chosenDate}T${newStartTime}:00`,
+            end: isAllDay ? `${chosenDate}T${newEndTime}:00` : `${chosenDate}T${newEndTime}:00`,
+            allDay: isAllDay,
+          };
+
+          console.log('updatedEvent:', updatedEvent);
+    
+          setEvents((prevEvents) => [
+            ...prevEvents.slice(0, chosenIndex),
+            updatedEvent,
+            ...prevEvents.slice(chosenIndex + 1),
+          ]);
+    
+          const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability/${existingEvent.availability_id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify(updatedEvent),
-            }
-          );
-
-          if(response.ok){
+          });
+    
+          if (response.ok) {
             console.log('Event updated successfully');
-          }else{
+          } else {
             console.error('Failed to update event');
           }
-          } catch (error) {
-            console.error('Error updating event:', error);
-          }
-        }else{
-          alert('Invalid input. Please make sure to enter a title and valid start/end time.');
+        } catch (error) {
+          console.error('Error updating event:', error);
         }
+      } else {
+        alert('Invalid input. Please make sure to enter a title and valid start/end time.');
+      }
     };
     
     const addEvent = async(info) =>{
@@ -182,6 +225,27 @@ function Calendar(){
         console.error('User ID is undefined');
         return
       }
+
+      // Fetch events to get the availability_id
+      await fetchEvents();
+
+       // Find the availability_id from the existing events
+      const existingEvents = findEventByDate(info.dateStr);
+      const availability_id = existingEvents.length > 0 ? existingEvents[0].availability_id : null;
+      // Check if the availability_id is present in the decoded token
+      const token = localStorage.getItem("token");
+
+      if (token) {
+        try {
+          const decodedToken = jwt.decode(token);
+          if (decodedToken && decodedToken.availability_id) {
+            availability_id = decodedToken.availability_id;
+          }
+        } catch (error) {
+          console.error("Error decoding token: ", error);
+       }
+      }
+      
       
       const title = prompt('Enter event title: ');
       const isAllDay = window.confirm('Is this an all-day event?');
@@ -222,9 +286,10 @@ function Calendar(){
           ? startDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS') // Include time for all-day events
           : startDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'), // Include time for non-all-day events
         end: isAllDay
-          ? endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS') // Include time for all-day events
-          : endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'),   // Include time for non-all-day events      
+          ? endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS') 
+          : endDateTime.format('YYYY-MM-DDTHH:mm:ss.SSS'),       
           allDay: isAllDay,
+          availability_id: availability_id,
         };
         
         setEvents((prevEvents) => [...prevEvents, newEvent]);
@@ -235,33 +300,64 @@ function Calendar(){
 
         try{
           const token = getToken();
-          const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability`,{
+           const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability`, {
             method: 'POST',
-            headers:{
+            headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify(newEvent),
           });
-          console.log(response);
-          if(response.ok){
-            console.log('Event saved successfully');
-          }else{
-            console.error('Failed to save event');
-            //Optionally handle error cases
-            
-            console.error('Response status: ', response.status);
-            const errorMessage = await response.text();
-            console.error('Error message: ', errorMessage);
-          }
-        } catch (error) {
-          console.error('Error saving event:', error);
-          console.error('Response:', error.response);
+          
+            // Handle the response as needed
+            if (response.ok) {
+              console.log('Event saved successfully');
+            } else {
+              console.error('Failed to save event');
+              // Optionally handle error cases
+              console.error('Response status: ', response.status);
+              const errorMessage = await response.text();
+              console.error('Error message: ', errorMessage);
+            }
+          } catch (error) {
+          console.error('Error:', error);
         }
-      //} else {
-        //alert('Invalid input. Please make sure to enter a title and valid start/emd time.')
-      //}
-    };
+      };
+
+      const deleteEvent = async (eventsToDelete) => {
+        if (!eventsToDelete || !Array.isArray(eventsToDelete)) {
+          console.error('Invalid input for eventsToDelete');
+          return;
+        }
+
+        const token = getToken();
+
+        try{
+          for (const eventToDelete of eventsToDelete) {
+            const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability/${eventToDelete.availability_id}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+            });
+
+            if(response.ok) {
+              console.log('Event deleted successfully');
+            } else {
+              console.error('Failed to delete event');
+              // Optionally handle error cases
+              console.error('Response status: ', response.status);
+              const errorMessage = await response.text();
+              console.error('Error message: ', errorMessage);
+            }
+        }
+        setEvents((prevEvents) => prevEvents.filter((event) => eventsToDelete.indexOf(event) === -1));
+      } catch (error) {
+          console.error('Error deleting events:', error);
+        }
+      };
+    
     const handleInputChange = (e) => {
       const { name, value } = e.target;
       setNewMeeting((prevMeeting) => ({
@@ -277,6 +373,7 @@ function Calendar(){
       }
       return token;
     }
+    
 
     const isValidInputTimeValue = (time) => {
       const regex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]([APMapm]{2})?$/;
