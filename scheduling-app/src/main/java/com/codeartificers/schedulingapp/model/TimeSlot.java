@@ -1,29 +1,22 @@
 package com.codeartificers.schedulingapp.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 public class TimeSlot {
     private String user_id;
     private LocalDate date;
-    //@JsonFormat(pattern = "HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    private LocalDateTime startTime;
-    //@JsonFormat(pattern = "HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    private LocalDateTime endTime;
+    private LocalDateTime start;
+    private LocalDateTime end;
 
     public TimeSlot(){
 
     }
-    public TimeSlot(String user_id, LocalDate date, LocalDateTime startTime, LocalDateTime endTime){
+    public TimeSlot(String user_id, LocalDate date, LocalDateTime start, LocalDateTime end){
         this.user_id = user_id;
         this.date = date;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.start = start;
+        this.end = end;
 
     }
     public String getUser_id() {
@@ -42,19 +35,19 @@ public class TimeSlot {
         this.date = date;
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
+    public LocalDateTime getStart() {
+        return start;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
+    public void setStart(LocalDateTime start) {
+        this.start = start;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
+    public LocalDateTime getEnd() {
+        return end;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
+    public void setEnd(LocalDateTime end) {
+        this.end = end;
     }
 }

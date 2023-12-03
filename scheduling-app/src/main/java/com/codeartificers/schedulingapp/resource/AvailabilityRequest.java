@@ -3,11 +3,10 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Getter
 public class AvailabilityRequest {
-    private String availability_Id;
+    private String availability_id;
     private String user_id;
     private LocalDate date;
    private LocalDateTime start;
@@ -19,26 +18,19 @@ public class AvailabilityRequest {
 
     }
     //Constructor to access availability_Id, days, and time for Availability entry
-    public AvailabilityRequest(String availability_Id, String user_id, LocalDate date, LocalDateTime startTime,
-                               LocalDateTime endTime, String title, boolean allDay) {
-        this.availability_Id = availability_Id;
+    public AvailabilityRequest(String availability_id, String user_id, LocalDate date, LocalDateTime start,
+                               LocalDateTime end, String title, boolean allDay) {
+        this.availability_id = availability_id;
         this.user_id = user_id;
         this.date = date;
         this.title = title;
+        this.start = start;
+        this.end = end;
         this.allDay = allDay;
-        /*
-        if (!allDay) {
-            this.start = startTime;
-            this.end = endTime;
-        } else {
-            this.start = null;
-            this.end = null;
-        }
-         */
     }
 
-    public void setAvailability_Id(String availability_Id) {
-        this.availability_Id = availability_Id;
+    public void setAvailability_id(String availability_id) {
+        this.availability_id = availability_id;
     }
 
     public LocalDate getDate() {

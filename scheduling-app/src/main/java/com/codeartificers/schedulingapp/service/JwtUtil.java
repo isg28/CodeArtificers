@@ -32,5 +32,8 @@ public class JwtUtil {
             return false;
         }
     }
+    public Key getSecretKey() {
+        return secretKey;
+    }
 
 }

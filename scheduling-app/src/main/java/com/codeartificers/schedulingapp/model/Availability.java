@@ -5,12 +5,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Document("availability")
 public class Availability {
     @Id
-    private String availability_Id;
+    private String availability_id;
     private String user_id;
     private LocalDate date;
     private LocalDateTime start;
@@ -21,21 +20,23 @@ public class Availability {
     public Availability(){
 
     }
-    public Availability(String availability_Id, String user_id, LocalDate date, LocalDateTime startTime, LocalDateTime endTime,
+    public Availability(String availability_Id, String user_id, LocalDate date, LocalDateTime start, LocalDateTime end,
                         String title, boolean allDay) {
-        this.availability_Id = availability_Id;
+        this.availability_id = availability_Id;
         this.user_id = user_id;
         this.date = date;
         this.title = title;
+        this.start = start;
+        this.end = end;
         this.allDay = allDay;
     }
 
-    public String getAvailability_Id() {
-        return availability_Id;
+    public String getAvailability_id() {
+        return availability_id;
     }
 
-    public void setAvailability_Id(String availability_Id) {
-        this.availability_Id = availability_Id;
+    public void setAvailability_id(String availability_id) {
+        this.availability_id = availability_id;
     }
 
     public LocalDate getDate() {

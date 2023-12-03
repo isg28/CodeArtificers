@@ -16,10 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
+
 
 
 @RestController
@@ -195,12 +193,13 @@ class ScheduleController {
             availabilityCounter.setSequence(nextAvailabilityId);
             availabilityCounterRepository.save(availabilityCounter);
             Availability availability = new Availability();
-            availability.setAvailability_Id(String.valueOf(nextAvailabilityId));
+            availability.setAvailability_id(String.valueOf(nextAvailabilityId));
             availability.setUser_id(user_id);
             availability.setDate(availabilityRequest.getDate());
             availability.setTitle(availabilityRequest.getTitle());
             availability.setAllDay(availabilityRequest.isAllDay());
 
+            String availabilityToken = TokenUtil.generateAvailabilityToken(availability, jwtUtil.getSecretKey());
             if (availabilityRequest.isAllDay()) {
                 LocalDateTime startDateTime = LocalDateTime.of(availabilityRequest.getDate(), LocalTime.MIN);
                 LocalDateTime endDateTime = LocalDateTime.of(availabilityRequest.getDate(), LocalTime.MAX);
@@ -216,7 +215,9 @@ class ScheduleController {
                     return ResponseEntity.status(400).body("Malformed request. Missing required start and end times.");
                 }
             }
-            return ResponseEntity.status(201).body(this.availabilityRepository.save(availability));
+            return ResponseEntity.status(201)
+                    .header("Authorization", "Bearer " + availabilityToken)
+                    .body(this.availabilityRepository.save(availability));
         } else {
             return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
         }
@@ -273,9 +274,6 @@ class ScheduleController {
             }
 
             availabilityRepository.save(existingAvailability);
-            System.out.println("Received Date (Backend): " + availabilityRequest.getDate());
-            System.out.println("Received Start Time (Backend): " + availabilityRequest.getStart());
-            System.out.println("Received End Time (Backend): " + availabilityRequest.getEnd());
             return ResponseEntity.status(200).body(existingAvailability);
 
         } else {
@@ -294,7 +292,7 @@ class ScheduleController {
         if (userProfile.isPresent() && availabilityEntry.isPresent()) {
             Availability deletedEntry = availabilityEntry.get();
             this.availabilityRepository.deleteById(availability_id);
-            String errorMessage = "Availability entry with ID " + deletedEntry.getAvailability_Id() + " has been deleted";
+            String errorMessage = "Availability entry with ID " + deletedEntry.getAvailability_id() + " has been deleted";
             return ResponseEntity.status(200).body(errorMessage);
         }
         return ResponseEntity.status(404).body("Availability entry " + availability_id + " not found for User " + user_id);
