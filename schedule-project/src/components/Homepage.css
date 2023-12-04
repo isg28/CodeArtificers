@@ -1,0 +1,54 @@
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    justify-content: flex-start;
+    height: 100vh;
+}
+.white-box {
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 60%;
+    max-width: 600px;
+    text-align: left; /* Align text to the left */
+}
+.white-box h1 {
+    margin-bottom: 20px;
+    margin-top: 0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.button-container {
+    display: flex;
+    gap: 200px; /* Adjust the gap between buttons as needed */
+}
+
+.calendar-list {
+    display: grid;
+    grid-template-columns: column;
+    gap: 20px;
+}
+
+.calendar-card {
+    background-color: #f9f9f9;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.calendar-card h3 {
+    margin-bottom: 10px;
+}
+
+.calendar-link {
+    text-decoration: none;
+    color: inherit;
+}

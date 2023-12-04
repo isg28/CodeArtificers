@@ -1,13 +1,13 @@
 import React from 'react';
 import AppBarLogin from '../components/AppBarLogin';
+import Homepage from '../components/Homepage';
 
 function HomepagePage() {
     return(
         <div>
             <AppBarLogin />
             <div>
-            Welcome to the SCHEDULING APP!
-            Access a Calendar to  start scheduling your availabilities!
+            <Homepage />
             </div>
         </div>
     );

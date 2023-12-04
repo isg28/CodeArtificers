@@ -14,7 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { Link } from 'react-router-dom';
 
-const pages = ['New Calendar', 'Invite', 'Blog'];
+const pages = [];
 const settings = ['Profile', 'Account', 'Calendars', 'Logout'];
 
 function ResponsiveAppBar() {
