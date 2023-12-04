@@ -454,6 +454,10 @@ function Calendar(){
           <button onClick={handleCreateMeeting} >
             Create Meeting</button>
             </div>
+            {/* Cancel button */}
+          <div>
+          <button onClick={() => setShowCreateMeetingForm(false)}>Cancel</button>
+          </div>
           </div>
         )}
       </div>
