@@ -68,6 +68,12 @@ class ScheduleController {
     private InvitationCounterRepository invitationCounterRepository;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private CalenderCounter calenderCounter;
+    @Autowired
+    private CalenderCounterRepository calenderCounterRepository;
+    @Autowired
+    private CalenderRepository calenderRepository;
 
 
 
@@ -75,7 +81,8 @@ class ScheduleController {
     public ScheduleController(UserRepository userRepository, AvailabilityRepository availabilityRepository, UserCounterRepository userCounterRepository, AvailabilityCounterRepository availabilityCounterRepository1,
                               MeetingRepository meetingRepository, MeetingCounterRepository meetingCounterRepository, TimeSlotRepository timeSlotRepository, TimeSlotService timeSlotService,
                               UserService userService, InvitationRepository invitationRepository, NotificationService notificationService, InvitationCounter invitationCounter
-                                ,InvitationCounterRepository invitationCounterRepository, JwtUtil jwtUtil) {
+                                ,InvitationCounterRepository invitationCounterRepository, JwtUtil jwtUtil, CalenderCounter calenderCounter,
+                              CalenderCounterRepository calenderCounterRepository, CalenderRepository calenderRepository) {
         this.userRepository = userRepository;
         this.availabilityRepository = availabilityRepository;
         this.userCounterRepository = userCounterRepository;
@@ -90,6 +97,9 @@ class ScheduleController {
         this.invitationCounter = invitationCounter;
         this.invitationCounterRepository = invitationCounterRepository;
         this.jwtUtil = jwtUtil;
+        this.calenderCounter = calenderCounter;
+        this.calenderCounterRepository = calenderCounterRepository;
+        this.calenderRepository = calenderRepository;
     }
 
 
@@ -531,6 +541,90 @@ class ScheduleController {
         }
     }
 
+    //// ********************* Calender ENDPOINTS ***********************************
+    @PostMapping("/api/user/{user_id}/calender")
+    public ResponseEntity<?> createNewCalender(@PathVariable String user_id, @RequestBody CalenderRequest calenderRequest){
+        CalenderCounter calenderCounter = calenderCounterRepository.findByName("calender_id");
+
+        if (calenderRequest.getCalenderTitle() != null) {
+            if (calenderCounter == null) {
+                calenderCounter = new CalenderCounter();
+                calenderCounter.setName("calender_id");
+                calenderCounter.setSequence(1L); //sets initial variable to 1
+            }
+            long nextCalenderId = calenderCounter.getSequence() + 1;
+            calenderCounter.setSequence(nextCalenderId);
+            calenderCounterRepository.save(calenderCounter);
+
+            Calender calender = new Calender();
+            calender.setCalender_id(String.valueOf(nextCalenderId));
+            calender.setUser_id(user_id);
+            calender.setCalenderTitle(calenderRequest.getCalenderTitle());
+
+            String calenderToken = TokenUtil.generateCalenderToken(calender, jwtUtil.getSecretKey());
+
+            return ResponseEntity.status(201)
+                    .header("Authorization", "Bearer " + calenderToken)
+                    .body(this.calenderRepository.save(calender));
+        } else {
+            return ResponseEntity.status(400).body("Malformed request. Missing required Calender fields.");
+        }
+    }
+
+    @GetMapping("/api/user/{user_id}/calender")
+    public ResponseEntity<?> getAllCalender(@PathVariable String user_id) {
+        Optional<User> userProfile = this.userRepository.findById(user_id);
+        if (!userProfile.isPresent()) {
+            return ResponseEntity.status(404).body("User ID: " + user_id + " not found");
+        }
+        List<Calender> userCalenders = this.calenderRepository.findByUser_id(user_id);
+
+        if (userCalenders.isEmpty()) {
+            return ResponseEntity.status(404).body("There is no calender entry for User: " + user_id);
+        }
+
+        return ResponseEntity.status(200).body(userCalenders);
+    }
+
+    @PutMapping("/api/user/{user_id}/calender/{calender_id}")
+    public ResponseEntity<?> edit_calenderEntry(@RequestBody CalenderRequest calenderRequest, @PathVariable String user_id, @PathVariable String calender_id) {
+        Optional<User> userProfile = this.userRepository.findById(user_id);
+        Optional<Calender> calender = this.calenderRepository.findById(calender_id);
+
+        if (userProfile.isPresent() && calender.isPresent()) {
+            Calender existingCalender = calender.get();
+
+            if (calenderRequest.getCalenderTitle() != null) {
+                existingCalender.setCalenderTitle(calenderRequest.getCalenderTitle());
+            }
+            if (calenderRequest.getCalenderTitle() == null) {
+                return ResponseEntity.status(400).body("Malformed request. Missing required Calender fields.");
+
+            }
+
+            calenderRepository.save(existingCalender);
+            return ResponseEntity.status(200).body(existingCalender);
+
+        } else {
+            return ResponseEntity.status(404).body("Calender " + calender_id + " for User " + user_id + " does not exist.");
+
+        }
+    }
+
+
+    @DeleteMapping("/api/user/{user_id}/calender/{calender_id}")
+    public ResponseEntity<?> deleteCalenderEntry(@PathVariable String user_id, @PathVariable String calender_id) {
+        Optional<User> userProfile = this.userRepository.findById(user_id);
+        Optional<Calender> calenderEntry = this.calenderRepository.findById(calender_id);
+
+        if (userProfile.isPresent() && calenderEntry.isPresent()) {
+            Calender deletedEntry = calenderEntry.get();
+            this.calenderRepository.deleteById(calender_id);
+            String errorMessage = "Calender entry with ID " + deletedEntry.getCalender_id() + " has been deleted";
+            return ResponseEntity.status(200).body(errorMessage);
+        }
+        return ResponseEntity.status(404).body("Calender entry " + calender_id + " not found for User " + user_id);
+    }
 
 
 }
