@@ -1,12 +1,11 @@
 package com.codeartificers.schedulingapp.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.cglib.core.Local;
+//import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 @Document("Meeting")
@@ -14,10 +13,9 @@ public class Meeting {
     @Id
     private String meeting_id;
     private LocalDate date;
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime startTime;
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime endTime;
+    //@JsonFormat(pattern = "HH:mm")
+    private LocalDateTime start;
+    private LocalDateTime end;
 
     private String location;
     private String meeting_Description;
@@ -28,11 +26,11 @@ public class Meeting {
     public Meeting(){
 
     }
-    public Meeting(String meeting_id,LocalDate date,LocalTime startTime,LocalTime endTime,
+    public Meeting(String meeting_id,LocalDate date,LocalDateTime start,LocalDateTime end,
                    String location, String meeting_Descriptions, List<Invitation> invitations){
         this.meeting_id=meeting_id;
-        this.startTime=startTime;
-        this.endTime = endTime;
+        this.start =start;
+        this.end = end;
         this.date = date;
         this.location = location;
         this.meeting_Description=meeting_Descriptions;
@@ -55,20 +53,20 @@ public class Meeting {
         this.date = date;
     }
 
-    public LocalTime getStartTime() {
-        return startTime;
+    public LocalDateTime getStart() {
+        return start;
     }
 
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
+    public void setStart(LocalDateTime start) {
+        this.start = start;
     }
 
-    public LocalTime getEndTime() {
-        return endTime;
+    public LocalDateTime getEnd() {
+        return end;
     }
 
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
+    public void setEnd(LocalDateTime end) {
+        this.end = end;
     }
 
     public String getLocation(){return location;}
