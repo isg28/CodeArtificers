@@ -88,16 +88,61 @@ function Calendar(){
       meeting_Description: "",
     });
     const handleCreateMeeting = async () => {
-      console.log("Meeting created:", newMeeting);
-      setNewMeeting({
-            date: "",
-            startTime: "",
-            endTime: "",
-            location: "",
-            meeting_Description: "",
-          });
-          setShowCreateMeetingForm(false);
-        };
+      try {
+        const token = getToken();
+        const response = await fetch("http://localhost:8080/api/meeting", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        date: newMeeting.date,
+        startTime: newMeeting.startTime,
+        endTime: newMeeting.endTime,
+        location: newMeeting.location,
+        meeting_Description: newMeeting.meeting_Description,
+      }),
+    });
+
+    if (response.ok) {
+      const createdMeeting = await response.json();
+      console.log("Meeting created successfully:", createdMeeting);
+    
+      //setEvents((prevEvents) => [...prevEvents, createdMeeting]);
+      alert('Meeting created successfully');
+    } else {
+      console.error("Failed to create meeting");
+      // handle some error cases
+      console.error("Response status: ", response.status);
+      const errorMessage = await response.text();
+      console.error("Error message: ", errorMessage);
+    }
+  } catch (error) {
+    console.error("Error creating meeting:", error);
+  }
+
+  // Reset the form and hide the create meeting form
+  setNewMeeting({
+    date: "",
+    startTime: "",
+    endTime: "",
+    location: "",
+    meeting_Description: "",
+  });
+  setShowCreateMeetingForm(false);
+};
+    // const handleCreateMeeting = async () => {
+    //   console.log("Meeting created:", newMeeting);
+    //   setNewMeeting({
+    //         date: "",
+    //         startTime: "",
+    //         endTime: "",
+    //         location: "",
+    //         meeting_Description: "",
+    //       });
+    //       setShowCreateMeetingForm(false);
+    //     };
 
     const handleDateClick = async (info) => {
       const existingEvents = findEventByDate(info.dateStr);
