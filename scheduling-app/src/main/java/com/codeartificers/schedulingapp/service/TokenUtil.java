@@ -2,6 +2,7 @@ package com.codeartificers.schedulingapp.service;
 
 import com.codeartificers.schedulingapp.model.Availability;
 import com.codeartificers.schedulingapp.model.Calender;
+import com.codeartificers.schedulingapp.model.Meeting;
 import com.codeartificers.schedulingapp.model.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -16,6 +17,7 @@ public class TokenUtil {
     public static String generateAvailabilityToken(Availability availability, Key secretKey) {
         long expirationTimeMillis = System.currentTimeMillis() + 3600000; // 1 hour
         Date expirationDate = new Date(expirationTimeMillis);
+
 
         String token = Jwts.builder()
                 .setSubject(availability.getAvailability_id())
@@ -40,5 +42,17 @@ public class TokenUtil {
 
         return token;
     }
+    public static String generateMeetingToken(Meeting meeting, Key secretKey) {
+        long expirationTimeMillis = System.currentTimeMillis() + 3600000; // 1 hour
+        Date expirationDate = new Date(expirationTimeMillis);
 
+        String token = Jwts.builder()
+                .setSubject(meeting.getMeeting_id())
+                .claim("meeting_id", meeting.getMeeting_id())
+                .setExpiration(expirationDate)
+                .signWith(secretKey, SignatureAlgorithm.HS512)
+                .compact();
+
+        return token;
+    }
 }
