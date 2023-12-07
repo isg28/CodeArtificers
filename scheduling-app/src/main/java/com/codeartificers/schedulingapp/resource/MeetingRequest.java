@@ -1,17 +1,17 @@
 package com.codeartificers.schedulingapp.resource;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+//import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.time.LocalDateTime;
 
 public class MeetingRequest {
     private String meeting_id;
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime startTime;
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime endTime;
+   // @JsonFormat(pattern = "HH:mm")
+    private LocalDateTime start;
+   // @JsonFormat(pattern = "HH:mm")
+    private LocalDateTime end;
     private LocalDate date;
     private String location;
     private String meeting_Description;
@@ -28,16 +28,16 @@ public class MeetingRequest {
         this.meeting_id = meeting_id;
     }
 
-    public LocalTime getStartTime() {
-        return startTime;
+    public LocalDateTime getStart() {
+        return start;
     }
 
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
+    public void setStart(LocalDateTime start) {
+        this.start = start;
     }
 
-    public LocalTime getEndTime() {
-        return endTime;
+    public LocalDateTime getEnd() {
+        return end;
     }
 
     public LocalDate getDate() {
@@ -48,8 +48,8 @@ public class MeetingRequest {
         this.date = date;
     }
 
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
+    public void setEnd(LocalDateTime end) {
+        this.end = end;
     }
 
     public String getLocation(){ return location;}
