@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 
 
@@ -305,7 +304,7 @@ class ScheduleController {
     public ResponseEntity<?> createMeeting(@RequestBody MeetingRequest meetingRequest) {
         MeetingCounter counter = meetingCounterRepository.findByName("meeting_id");
 
-        if (meetingRequest.getDate() != null && meetingRequest.getStartTime() != null && meetingRequest.getEndTime() != null
+        if (meetingRequest.getDate() != null && meetingRequest.getStart() != null && meetingRequest.getEnd() != null
                 && meetingRequest.getLocation() != null && meetingRequest.getMeeting_Description() != null) {
             if (counter == null) {
                 counter = new MeetingCounter();
@@ -319,12 +318,16 @@ class ScheduleController {
             Meeting meeting = new Meeting();
             meeting.setMeeting_id(String.valueOf(nextMeetingId));
             meeting.setDate(meetingRequest.getDate());
-            meeting.setStartTime(meetingRequest.getStartTime());
-            meeting.setEndTime(meetingRequest.getEndTime());
+            meeting.setStart(meetingRequest.getStart());
+            meeting.setEnd(meetingRequest.getEnd());
             meeting.setLocation(meetingRequest.getLocation());
             meeting.setMeeting_Description(meetingRequest.getMeeting_Description());
 
-            return ResponseEntity.status(201).body(this.meetingRepository.save(meeting));
+            String meetingToken = TokenUtil.generateMeetingToken(meeting, jwtUtil.getSecretKey());
+
+            return ResponseEntity.status(201)
+                    .header("Authorization", "Bearer " + meetingToken)
+                    .body(this.meetingRepository.save(meeting));
         } else {
             return ResponseEntity.status(400).body("Malformed request. Missing required user data fields.");
         }
@@ -361,11 +364,11 @@ class ScheduleController {
             if (meetingRequest.getMeeting_id() != null) {
                 existingProfile.setMeeting_id(meetingRequest.getMeeting_id());
             }
-            if (meetingRequest.getStartTime() != null) {
-                existingProfile.setStartTime(meetingRequest.getStartTime());
+            if (meetingRequest.getStart() != null) {
+                existingProfile.setStart(meetingRequest.getStart());
             }
-            if (meetingRequest.getEndTime() != null) {
-                existingProfile.setEndTime(meetingRequest.getEndTime());
+            if (meetingRequest.getEnd() != null) {
+                existingProfile.setEnd(meetingRequest.getEnd());
             }
             if (meetingRequest.getDate() != null) {
                 existingProfile.setDate(meetingRequest.getDate());
@@ -377,7 +380,7 @@ class ScheduleController {
                 existingProfile.setMeeting_Description(meetingRequest.getMeeting_Description());
             }
             //error check for invalid JSON request format
-            if (meetingRequest.getMeeting_id() == null && meetingRequest.getStartTime() == null && meetingRequest.getEndTime() == null && meetingRequest.getDate()
+            if (meetingRequest.getMeeting_id() == null && meetingRequest.getStart() == null && meetingRequest.getEnd() == null && meetingRequest.getDate()
                     == null && meetingRequest.getLocation() == null && meetingRequest.getMeeting_Description() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
