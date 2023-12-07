@@ -31,12 +31,14 @@ function Calendar(){
 
     useEffect(() => {
       if(user_id){
-        fetchEvents();
+        fetchAvailabilityEvents();
+        fetchMeetingEvents();
       }
       console.log('User ID from token:', user_id); //for checking purposes
     }, [user_id]);
 
-    const fetchEvents = async () => {
+    const fetchAvailabilityEvents = async () => {
+
       try{
         const token = getToken();
         if(!user_id){
@@ -55,10 +57,10 @@ function Calendar(){
           
 
       // Update the events state with the fetched data
-        const formattedEvents = data.map(event => ({
+        const formattedAvailabilityEvents = data.map(event => ({
           ...event,
         }));
-          setEvents(formattedEvents);
+        setEvents(prevEvents => [...prevEvents, ...formattedAvailabilityEvents]);
         } else{
           console.error('Failed to fetch events');
         }
@@ -79,71 +81,6 @@ function Calendar(){
 
     };
       
-    const [showCreateMeetingForm, setShowCreateMeetingForm] = useState(false);
-    const [newMeeting, setNewMeeting] = useState({
-      date: "",
-      startTime: "",
-      endTime: "",
-      location: "",
-      meeting_Description: "",
-    });
-    const handleCreateMeeting = async () => {
-      try {
-        const token = getToken();
-        const response = await fetch("http://localhost:8080/api/meeting", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        date: newMeeting.date,
-        startTime: newMeeting.startTime,
-        endTime: newMeeting.endTime,
-        location: newMeeting.location,
-        meeting_Description: newMeeting.meeting_Description,
-      }),
-    });
-
-    if (response.ok) {
-      const createdMeeting = await response.json();
-      console.log("Meeting created successfully:", createdMeeting);
-    
-      //setEvents((prevEvents) => [...prevEvents, createdMeeting]);
-      alert('Meeting created successfully');
-    } else {
-      console.error("Failed to create meeting");
-      // handle some error cases
-      console.error("Response status: ", response.status);
-      const errorMessage = await response.text();
-      console.error("Error message: ", errorMessage);
-    }
-  } catch (error) {
-    console.error("Error creating meeting:", error);
-  }
-
-  // Reset the form and hide the create meeting form
-  setNewMeeting({
-    date: "",
-    startTime: "",
-    endTime: "",
-    location: "",
-    meeting_Description: "",
-  });
-  setShowCreateMeetingForm(false);
-};
-    // const handleCreateMeeting = async () => {
-    //   console.log("Meeting created:", newMeeting);
-    //   setNewMeeting({
-    //         date: "",
-    //         startTime: "",
-    //         endTime: "",
-    //         location: "",
-    //         meeting_Description: "",
-    //       });
-    //       setShowCreateMeetingForm(false);
-    //     };
-
     const handleDateClick = async (info) => {
       const existingEvents = findEventByDate(info.dateStr);
 
@@ -274,7 +211,7 @@ function Calendar(){
       }
 
       // Fetch events to get the availability_id
-      await fetchEvents();
+      await fetchAvailabilityEvents();
 
        // Find the availability_id from the existing events
       const existingEvents = findEventByDate(info.dateStr);
@@ -391,6 +328,117 @@ function Calendar(){
           console.error('Error deleting events:', error);
         }
       };
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////
+/*                          MEETING  FUNCTIONS                          */
+      const [showCreateMeetingForm, setShowCreateMeetingForm] = useState(false);
+      const [newMeeting, setNewMeeting] = useState({
+        date: "",
+        startTime: "",
+        endTime: "",
+        location: "",
+        meeting_Description: "",
+      });
+
+      const fetchMeetingEvents = async () => {
+        try{
+          const token = getToken();
+          const response = await fetch(`http://localhost:8080/api/meeting`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          
+          if(response.ok) {
+            const data = await response.json();
+
+            //Update the events state with the fetched meeting data
+            const formattedMeetingEvents = data.map(meeting => ({
+              id: meeting.meeting_id,
+              title: meeting.meeting_Description,
+              start: meeting.start,
+              end: meeting.end,
+            }));
+            setEvents(prevEvents => [...prevEvents, ...formattedMeetingEvents]);
+          }
+          else {
+            console.error('Failed to fetch meeting events');
+          }
+        } catch(error){
+          console.error('Error fetching meeting events:', error);
+        }
+      };
+
+      const handleCreateMeeting = async () => {
+        try {
+          const token = getToken();
+  
+          const startDateTime = `${newMeeting.date}T${newMeeting.startTime}`;
+          const endDateTime = `${newMeeting.date}T${newMeeting.endTime}`;
+  
+          const response = await fetch("http://localhost:8080/api/meeting", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          date: newMeeting.date,
+          start: startDateTime,
+          end: endDateTime,
+          location: newMeeting.location,
+          meeting_Description: newMeeting.meeting_Description,
+        }),
+      });
+  
+      if (response.ok) {
+        const createdMeeting = await response.json();
+        console.log("Meeting created successfully:", createdMeeting);
+
+        // Reset the form and hide the create meeting form
+        setNewMeeting({
+          date: "",
+          startTime: "",
+          endTime: "",
+          location: "",
+          meeting_Description: "",
+        });
+        setShowCreateMeetingForm(false);
+
+        // Fetch meeting events to update the state
+        await fetchMeetingEvents();
+
+        // Log the updated events state
+        console.log('Updated Events:', events);
+
+       alert('Meeting created successfully');
+      
+        //setEvents((prevEvents) => [...prevEvents, createdMeeting]);
+        alert('Meeting created successfully');
+      } else {
+        console.error("Failed to create meeting");
+        // handle some error cases
+        console.error("Response status: ", response.status);
+        const errorMessage = await response.text();
+        console.error("Error message: ", errorMessage);
+      }
+    } catch (error) {
+      console.error("Error creating meeting:", error);
+    }
+  
+    // Reset the form and hide the create meeting form
+    setNewMeeting({
+      date: "",
+      startTime: "",
+      endTime: "",
+      location: "",
+      meeting_Description: "",
+    });
+    setShowCreateMeetingForm(false);
+  };
+  
     
     const handleInputChange = (e) => {
       const { name, value } = e.target;
