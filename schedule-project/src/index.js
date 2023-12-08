@@ -17,7 +17,8 @@ ReactDOM.render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/custom-login" element={<LoginPage />} />
-        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path = "/calendar" element = {CalendarPage} />
+        <Route path="/calendar/:calendar_id" element={<CalendarPage />} />
         <Route path="/homepage" element={<HomepagePage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/account-settings" element = {<AccountPage />} />

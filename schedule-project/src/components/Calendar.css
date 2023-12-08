@@ -1,0 +1,10 @@
+.custom-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #191970; /* Customize the color of the dot */
+    border-radius: 50%;
+    margin-right: 5px; /* Adjust spacing between the dot and other event content */
+}
+.bold-time {
+    font-weight: bold;
+}

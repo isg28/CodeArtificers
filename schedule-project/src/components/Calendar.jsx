@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef } from "react";
+import React, {useState, useEffect } from "react";
 import Fullcalendar from "@fullcalendar/react"; 
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -7,9 +7,12 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import jwt from 'jsonwebtoken';
 import moment from 'moment-timezone';
+import {useParams} from 'react-router-dom';
+import './Calendar.css'
 
 
 function Calendar(){
+    const {calender_id} = useParams();
     const [events, setEvents] = useState([]);
     const [user_id, setUserId] = useState(null);
 
@@ -413,7 +416,7 @@ function Calendar(){
         // Log the updated events state
         console.log('Updated Events:', events);
 
-       alert('Meeting created successfully');
+        alert('Meeting created successfully');
       
         //setEvents((prevEvents) => [...prevEvents, createdMeeting]);
         alert('Meeting created successfully');
@@ -467,13 +470,28 @@ function Calendar(){
       setShowCreateMeetingForm(!showCreateMeetingForm);
     };
 
+    const eventContent = (eventInfo) => {
+      //const isMeeting = eventInfo.event.extendedProps.isMeeting;
+      return (
+        <>
+          <div className= "custom-dot" />
+          <div className = "fc-content">
+            {eventInfo.timeText && (
+              <div className = "fc-time bold-time">{eventInfo.timeText}</div>
+            )}
+            <div className= "fc-time">{eventInfo.event.title}</div>
+          </div>
+        </>
+      );
+    };
+
     return(
       <div>
         <h1> </h1>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end','& button': { m: 1, backgroundColor: 'black' } }}>
         <Button variant="contained" size="large" onClick={toggleCreateMeetingForm}>
         Create Meeting
-        </Button>   
+        </Button>  
       <div>
         <Button variant="contained" size="large">
           Common TimeSlots
@@ -494,6 +512,7 @@ function Calendar(){
           height={"98vh"}
           events = {events}
           dateClick={handleDateClick}
+          eventContent={eventContent}
           />
           {showCreateMeetingForm && (
         // Renders the pop up box to create a meeting

@@ -6,7 +6,7 @@ const CalendarList = ({ calendars }) => {
     return (
         <div className="calendar-list">
             {calendars.map((calendar) => (
-                <CalendarCard key={calendar.id} calendar={calendar} />
+                <CalendarCard key={calendar.calender_id} calendar={calendar} />
             ))}
         </div>
     );
