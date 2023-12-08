@@ -8,37 +8,37 @@ import java.util.List;
 @Document("Invitation")
 public class Invitation {
     @Id
-    private String invitationId;
-    private String meetingId;
-    private String senderId;
+    private String invitation_id;
+    private String calendar_id;
+    private String user_id;
     private List<InvitedUser> invitedUsers;
 
     public Invitation(){}
 
-    public Invitation(String invitationId, String meetingId, String senderId, List<InvitedUser> invitedUsers) {
-        this.invitationId = invitationId;
-        this.meetingId = meetingId;
-        this.senderId = senderId;
+    public Invitation(String invitation_id, String calendar_id, String user_id, List<InvitedUser> invitedUsers) {
+        this.invitation_id = invitation_id;
+        this.calendar_id = calendar_id;
+        this.user_id = user_id;
         this.invitedUsers = invitedUsers;
     }
 
-    public String getInvitationId() {
-        return invitationId;
+    public String getInvitation_id() {
+        return invitation_id;
     }
-    public void setInvitationId(String invitationId) {
-        this.invitationId = invitationId;
+    public void setInvitation_id(String invitation_id) {
+        this.invitation_id = invitation_id;
     }
-    public String getMeetingId() {
-        return meetingId;
+    public String getCalendar_id() {
+        return calendar_id;
     }
-    public void setMeetingId(String meetingId) {
-        this.meetingId = meetingId;
+    public void setCalendar_id(String calendar_id) {
+        this.calendar_id = calendar_id;
     }
-    public String getSenderId(){
-        return senderId;
+    public String getUser_id(){
+        return user_id;
     }
-    public void setSenderId(String senderId){
-        this.senderId = senderId;
+    public void setUser_id(String user_id){
+        this.user_id = user_id;
     }
     public List<InvitedUser> getInvitedUsers() {
         return invitedUsers;

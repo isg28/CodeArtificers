@@ -472,41 +472,40 @@ class ScheduleController {
 
     //// ********************* INVITATION AND NOTIFICATION ENDPOINTS ***********************************
 
-    @PostMapping("/api/invite")
-    public ResponseEntity<?> sendMeetingInvitations(@RequestBody InvitationRequest invitationRequest){
+    @PostMapping("/api/user/{user_id}/calendar/{calendar_id}/invite")
+    public ResponseEntity<?> createInvitations(@RequestBody InvitationRequest invitationRequest, @PathVariable String user_id, @PathVariable String calendar_id){
         try{
-            if(invitationRequest == null || invitationRequest.getMeetingId() == null || invitationRequest.getSenderId() == null){
+            if (invitationRequest == null ||
+                    invitationRequest.getUser_id() == null ||
+                    invitationRequest.getCalendar_id() == null ||
+                    !invitationRequest.getUser_id().equals(user_id) ||
+                    !invitationRequest.getCalendar_id().equals(calendar_id)) {
                 return ResponseEntity.status(400).body("Invalid input parameters");
             }
-            String senderId = invitationRequest.getSenderId();
+            String senderId = invitationRequest.getUser_id();
             if(!userService.isUserIdValid(senderId)){
                 return ResponseEntity.status(400).body("Invalid senderId");
             }
 
-            Optional<Meeting> optionalMeeting = meetingRepository.findById(invitationRequest.getMeetingId());
-            if (!optionalMeeting.isPresent()) {
-                return ResponseEntity.status(404).body("Meeting not found for meetingId: " + invitationRequest.getMeetingId());
-            }
-
             List<InvitedUser> invitedUsers = new ArrayList<>();
-            List<String> invitedUserIds = invitationRequest.getInvitedUsers();
+            List<InvitedUser> invitedUserRequests = invitationRequest.getInvitedUsers();
 
+            if (invitedUserRequests != null && !invitedUserRequests.isEmpty()) {
+                for (InvitedUser invitedUserRequest : invitedUserRequests) {
+                    User userData = userRepository.findByEmail(invitedUserRequest.getEmail());
 
-            if(invitedUserIds != null && !invitedUserIds.isEmpty()){
-                for(String userId : invitedUserIds){
-                    Optional <User> optionalUser = userRepository.findById(userId);
-                    if(optionalUser.isPresent()){
-                        User user = optionalUser.get();
-                        InvitedUser invitedUser = new InvitedUser(user.getUser_id(), user.getFirstName(), user.getLastName(), user.getUsername());
-                        invitedUsers.add(invitedUser);
-                        System.out.println("Invited Users : " + invitedUser);
-                    }
+                    String email = userData.getEmail();
+                    String firstName = userData.getFirstName();
+                    String lastName = userData.getLastName();
+                    String username = userData.getUsername();
+                    String userId = userData.getUser_id();
+
+                    InvitedUser newUser = new InvitedUser(userId, firstName, lastName, username, email);
+                    invitedUsers.add(newUser);
                 }
             }
 
             InvitationCounter counter = invitationCounterRepository.findByName("invitationId");
-            Meeting meeting = optionalMeeting.get();
-
             if(counter == null){
                 counter = new InvitationCounter();
                 counter.setName("invitationId");
@@ -518,20 +517,10 @@ class ScheduleController {
 
             //Creating new Invitation
             Invitation invitation = new Invitation();
-            invitation.setInvitationId(String.valueOf(nextInivtationId));
-            invitation.setMeetingId(invitationRequest.getMeetingId());
-            invitation.setSenderId(invitationRequest.getSenderId());
+            invitation.setInvitation_id(String.valueOf(nextInivtationId));
+            invitation.setCalendar_id(calendar_id);
+            invitation.setUser_id(user_id);
             invitation.setInvitedUsers(invitedUsers);
-
-            //Update the meeting's list of invitation
-            List<Invitation> invitations = meeting.getInvitations();
-            if(invitations == null){
-                invitations = new ArrayList<>();
-            }
-            invitations.add(invitation);
-            meeting.setInvitations(invitations);
-
-            meetingRepository.save(meeting);
 
             Invitation savedInvitation = invitationRepository.save(invitation);
 
@@ -543,6 +532,110 @@ class ScheduleController {
             return ResponseEntity.status(500).body("Internal server error");
         }
     }
+
+    @GetMapping("/api/user/{user_id}/calendar/{calendar_id}/invite/{invitation_id}")
+    public ResponseEntity<?> getInvitation(@PathVariable String user_id, @PathVariable String calendar_id,
+                                           @PathVariable String invitation_id) {
+        Optional invitationData = this.invitationRepository.findById(invitation_id);
+        if (invitationData.isPresent()) {
+            return ResponseEntity.status(200).body(invitationData.get()); // returns meeting details
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/api/user/{user_id}/calendar/{calendar_id}/invite/{invitation_id}")
+    public ResponseEntity<?> updateInvitation(@RequestBody InvitationRequest invitationRequest, @PathVariable String user_id,
+                                              @PathVariable String calendar_id, @PathVariable String invitation_id)  {
+        Optional<Invitation> invitationProfile = this.invitationRepository.findById(invitation_id);
+        if (invitationProfile.isPresent()) {
+            Invitation existingProfile = invitationProfile.get();
+
+            // Ensure that sender_id and calendar_id are not changed
+            if (!invitationRequest.getUser_id().equals(existingProfile.getUser_id()) ||
+                    !invitationRequest.getCalendar_id().equals(existingProfile.getCalendar_id()) ||
+                    !user_id.equals(existingProfile.getUser_id())) {
+                return ResponseEntity.status(400).body("Cannot modify sender_id or calendar_id.");
+            }
+
+            List<InvitedUser> updatedInvitedUsers = existingProfile.getInvitedUsers();
+            if (invitationRequest.getInvitedUsers() != null) {
+                for (InvitedUser updatedUser : invitationRequest.getInvitedUsers()) {
+                    boolean userExists = updatedInvitedUsers.stream()
+                            .anyMatch(user -> user.getEmail().equals(updatedUser.getEmail()));
+
+                    if (!userExists) {
+                        // Fetch user data from userRepository based on email
+                        User userData = userRepository.findByEmail(updatedUser.getEmail());
+
+                        String email = userData.getEmail();
+                        String firstName = userData.getFirstName();
+                        String lastName = userData.getLastName();
+                        String username = userData.getUsername();
+                        String userId = userData.getUser_id();
+
+                        InvitedUser newUser = new InvitedUser(userId, firstName, lastName, username, email);
+
+                        if (updatedUser.getUser_id() != null) {
+                            newUser.setUser_id(updatedUser.getUser_id());
+                        }
+                        if (updatedUser.getFirstName() != null) {
+                            newUser.setFirstName(updatedUser.getFirstName());
+                        }
+                        if (updatedUser.getLastName() != null) {
+                            newUser.setLastName(updatedUser.getLastName());
+                        }
+                        if (updatedUser.getUsername() != null) {
+                            newUser.setUsername(updatedUser.getUsername());
+                        }
+
+                        updatedInvitedUsers.add(newUser);
+                    }
+                }
+
+                existingProfile.setInvitedUsers(updatedInvitedUsers);
+            }
+            invitationRepository.save(existingProfile);//store in DB
+            return ResponseEntity.status(200).body(existingProfile);
+        } else {
+            return ResponseEntity.status(404).body("Invitation " + invitation_id + " does not exist.");
+        }
+    }
+
+    @DeleteMapping("/api/user/{user_id}/calendar/{calendar_id}/invite/{invitation_id}/delete-invited-user/{emailToDelete}")
+    public ResponseEntity<?> deleteInvitedUser(@PathVariable String user_id, @PathVariable String calendar_id,
+                                               @PathVariable String invitation_id, @PathVariable String emailToDelete) {
+
+        Optional<Invitation> invitationProfile = this.invitationRepository.findById(invitation_id);
+        if (invitationProfile.isPresent()) {
+            Invitation existingProfile = invitationProfile.get();
+
+            if (!user_id.equals(existingProfile.getUser_id())) {
+                return ResponseEntity.status(403).body("You are not authorized to delete invited users for this invitation.");
+            }
+
+            List<InvitedUser> invitedUsers = existingProfile.getInvitedUsers();
+
+            // Find and remove the InvitedUser with the specified email
+            InvitedUser userToDelete = invitedUsers.stream()
+                    .filter(user -> emailToDelete.equals(user.getEmail()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (userToDelete != null) {
+                invitedUsers.remove(userToDelete);
+                existingProfile.setInvitedUsers(invitedUsers);
+
+                invitationRepository.save(existingProfile);
+                return ResponseEntity.status(200).body(existingProfile);
+            } else {
+                return ResponseEntity.status(404).body("InvitedUser with email " + emailToDelete + " not found.");
+            }
+        } else {
+            return ResponseEntity.status(404).body("Invitation " + invitation_id + " does not exist.");
+        }
+    }
+
 
     //// ********************* Calender ENDPOINTS ***********************************
     @PostMapping("/api/user/{user_id}/calender")

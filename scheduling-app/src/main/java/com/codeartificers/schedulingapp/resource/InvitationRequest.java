@@ -1,37 +1,41 @@
 package com.codeartificers.schedulingapp.resource;
 import com.codeartificers.schedulingapp.model.InvitedUser;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.annotation.Id;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class InvitationRequest {
-    private String meetingId;
-    private String senderId;
-    private List<String> invitedUsers;
+    @Id
+    private String invitation_id;
+    private String user_id;
+    private String calendar_id;
+    private List<InvitedUser> invitedUsers;
 
-    public InvitationRequest(String meetingId, String senderId, List<String> invitedUsers) {
-        this.meetingId = meetingId;
-        this.senderId = senderId;
+    public InvitationRequest(String invitation_id, String user_id, String calendar_id, List<InvitedUser> invitedUsers) {
+        this.invitation_id = invitation_id;
+        this.user_id = user_id;
+        this.calendar_id = calendar_id;
         this.invitedUsers = invitedUsers;
     }
 
-    public String getMeetingId() {
-        return meetingId;
+    public String getInvitation_id() {
+        return invitation_id;
     }
-    public void setMeetingId(String meetingId) {
-        this.meetingId = meetingId;
+    public void setInvitation_id(String invitation_id) {
+        this.invitation_id = invitation_id;
     }
-    public String getSenderId() {
-        return senderId;
+    public String getUser_id() {
+        return user_id;
     }
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
-    public List<String> getInvitedUsers() {
+    public String getCalendar_id(){ return calendar_id;}
+    public void setCalendar_id(String calendar_id){ this.calendar_id = calendar_id;}
+    public List<InvitedUser> getInvitedUsers() {
         return invitedUsers;
     }
-    public void setInvitedUsers(List<String> invitedUsers) {
+    public void setInvitedUsers(List<InvitedUser> invitedUsers) {
         this.invitedUsers = invitedUsers;
     }
 }

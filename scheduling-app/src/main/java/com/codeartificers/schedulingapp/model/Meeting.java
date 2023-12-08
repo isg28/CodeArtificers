@@ -19,7 +19,6 @@ public class Meeting {
 
     private String location;
     private String meeting_Description;
-    private List<Invitation> invitations;
 
 
 
@@ -27,14 +26,13 @@ public class Meeting {
 
     }
     public Meeting(String meeting_id,LocalDate date,LocalDateTime start,LocalDateTime end,
-                   String location, String meeting_Descriptions, List<Invitation> invitations){
+                   String location, String meeting_Descriptions){
         this.meeting_id=meeting_id;
         this.start =start;
         this.end = end;
         this.date = date;
         this.location = location;
         this.meeting_Description=meeting_Descriptions;
-        this.invitations = invitations;
     }
 
     public String getMeeting_id() {
@@ -78,11 +76,5 @@ public class Meeting {
 
     public void setMeeting_Description(String meeting_Description) {
         this.meeting_Description = meeting_Description;
-    }
-    public List<Invitation> getInvitations(){
-        return invitations;
-    }
-    public void setInvitations(List<Invitation> invitations){
-        this.invitations = invitations;
     }
 }

@@ -1,24 +1,30 @@
 package com.codeartificers.schedulingapp.resource;
 
 public class InvitedUserRequest {
-    private String userId;
+    private String user_id;
     private String firstName;
     private String lastName;
     private String username;
+    private String email;
 
-    public InvitedUserRequest(String userId, String firstName, String lastName, String username) {
-        this.userId = userId;
+    public InvitedUserRequest(String email){
+        this.email = email;
+    }
+
+    public InvitedUserRequest(String user_id, String firstName, String lastName, String username, String email) {
+        this.user_id = user_id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
+        this.email = email;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getUser_id() {
+        return user_id;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
     }
 
     public String getFirstName() {
@@ -43,5 +49,10 @@ public class InvitedUserRequest {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+    public String getEmail(){ return email;}
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
