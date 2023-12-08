@@ -9,6 +9,7 @@ const HomePage = () => {
     const [user_id, setUserId] = useState(null);
     const [calenders, setCalenders] = useState([]);
     const [sortedCalenders, setSortedCalenders] = useState([]);
+    const [calender_id, setCalenderId] = useState(null);
 
     const navigate = useNavigate();
 
@@ -107,9 +108,37 @@ const HomePage = () => {
         }
     };
 
+    const handleDeleteCalenderClick = () =>{
+        setCalenderId(calender_id);
+    };
 
-    console.log('Original Calendars:', calenders);
-    console.log('Sorted Calendars:', sortedCalenders);
+
+    const handleDeleteCalenderConfirm = async () =>{
+        if(calender_id){
+            const token = getToken();
+            try{
+                const response = await fetch (`http://localhost:8080/api/user/${user_id}/calender/${calender_id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                if(response.ok){
+                    const deletedMessage = await response.text();
+                    console.log(deletedMessage);
+
+                    fetchCalenders();
+                } else{
+                    console.error('Failed to delete the calendar');
+                }
+            } catch(error){
+                console.error('Error deleting the calendar:', error);
+            }finally{
+                setCalenderId(null);
+            }
+        }
+    };
 
     return (
         <div className="home-container">
@@ -127,9 +156,15 @@ const HomePage = () => {
                 </div>
             </div>
             <h1> </h1>
-            <div className="calendar-list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                <CalendarList calendars={sortedCalenders} />
-            </div>
+            {calenders.length === 0 ? (
+                <div className ="empty-message">
+                    <p>You have no calendars yet.</p>
+                </div>
+            ) : (
+                <div className="calendar-list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    <CalendarList calendars={sortedCalenders} />
+                </div>
+            )}
         </div>
     </div>
     );

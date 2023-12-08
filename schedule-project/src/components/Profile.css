@@ -61,3 +61,68 @@
     border-radius: 50%; /* Ensure a circular shape for a typical profile picture */
     object-fit: cover; /* Maintain aspect ratio and cover the container */
   }
+
+  .button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px; /* Adjust the margin as needed */
+  }
+
+.save-changes-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  
+.edit-btn {
+    background-color: #2196F3;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+.delete-btn {
+    background-color: #FF0000;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .confirm-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  .cancel-btn{
+    background-color: #FF0000;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .input-container {
+    margin-top: 10px; /* Add top margin for spacing */
+  }
+  .delete-confirmation {
+    text-align: center; /* Center the content */
+  }
+  

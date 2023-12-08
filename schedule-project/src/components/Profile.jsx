@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import { deepOrange, deepPurple } from '@mui/material/colors';
 import jwt from 'jsonwebtoken';
 import { useNavigate} from 'react-router-dom'
+
 const UserProfile = () => {
   // Initial user data
   const initialUserData = {
@@ -326,25 +327,32 @@ const UserProfile = () => {
         disabled={!isEditMode}
       />
 
-      {isEditMode && <button onClick={saveChanges}>Save Changes</button>}
-      {!isEditMode && <button onClick={toggleEditMode}>Edit</button>}
+      <div className = "button-container">
+      {isEditMode &&
+      <button className = 'save-changes-btn' onClick={saveChanges}>Save Changes</button>}
+      {!isEditMode && <button className = "edit-btn" onClick={toggleEditMode}>Edit</button>}
 
-      <button onClick={handleDeleteButtonClick}>Delete Account</button>
+      <button className = "delete-btn" onClick={handleDeleteButtonClick}>Delete Account</button>
+      </div>
 
       {showDeleteConfirmation && (
         <div className="delete-confirmation">
         <p>Are you sure you want to delete your account?</p>
         <p>Please enter your username to confirm:</p>
+        <div className = "input-container">
         <input
           type="text"
           value={confirmUsername}
           onChange={(e) => setConfirmUsername(e.target.value)}
         />
-        <button onClick={handleDeleteConfirm}>Confirm</button>
-        <button onClick={handleDeleteCancel}>Cancel</button>
         </div>
-      )}
-    </div>
+        <div className = "button-container">
+        <button className = "confirm-btn" onClick={handleDeleteConfirm}>Confirm</button>
+        <button className = "cancel-btn" onClick={handleDeleteCancel}>Cancel</button>
+        </div>
+      </div>
+    )}
+  </div>
   );
 };
 

@@ -15,7 +15,7 @@ import AdbIcon from '@mui/icons-material/Adb';
 import { Link } from 'react-router-dom';
 
 const pages = [];
-const settings = ['Profile', 'Account', 'Logout'];
+const settings = ['Profile', 'Calendars', 'Logout'];
 
 function ResponsiveAppBar() {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -153,7 +153,7 @@ function ResponsiveAppBar() {
                     {/*{setting === 'Calendars'?  <Typography textAlign="center" component={Link} to="/calendar" style ={{textDecoration: 'none', color: 'inherit'}}>
                     {setting} </Typography> :<Typography textAlign="center">{setting}</Typography> }*/}
                     {setting === 'Calendars' ? (
-                    <Typography textAlign="center" component={Link} to="/calendar" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Typography textAlign="center" component={Link} to="/homepage" style={{ textDecoration: 'none', color: 'inherit' }}>
                     {setting}
                     </Typography>
                     ) : setting === 'Profile' ? (
