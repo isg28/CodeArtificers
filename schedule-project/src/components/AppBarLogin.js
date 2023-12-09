@@ -13,11 +13,13 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const pages = [];
 const settings = ['Profile', 'Calendars', 'Logout'];
 
 function ResponsiveAppBar() {
+    const navigate = useNavigate();
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -34,6 +36,20 @@ function ResponsiveAppBar() {
 
     const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+    };
+
+    const handleLogout = () => {
+        // Clear tokens from localStorage or sessionStorage
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+
+        window.alert("You have logged out. See you again!");
+    
+        // Redirect the user to the login page or another destination
+        //navigate("/custom-login");
+    
+        // Close the user menu after logout
+        handleCloseUserMenu();
     };
 
     return (
@@ -149,7 +165,7 @@ function ResponsiveAppBar() {
                 onClose={handleCloseUserMenu}
             >
                 {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                <MenuItem key={setting} onClick={setting === "Logout" ? handleLogout : handleCloseUserMenu}>
                     {/*{setting === 'Calendars'?  <Typography textAlign="center" component={Link} to="/calendar" style ={{textDecoration: 'none', color: 'inherit'}}>
                     {setting} </Typography> :<Typography textAlign="center">{setting}</Typography> }*/}
                     {setting === 'Calendars' ? (
@@ -165,7 +181,7 @@ function ResponsiveAppBar() {
                         {setting}
                         </Typography>
                         ) : setting === 'Logout' ? (
-                            <Typography textAlign="center" component={Link} to="/logout" style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <Typography textAlign="center" component={Link} to="/custom-login" style={{ textDecoration: 'none', color: 'inherit' }}>
                             {setting}
                             </Typography>
                             ) : (

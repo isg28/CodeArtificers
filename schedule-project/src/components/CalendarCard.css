@@ -1,0 +1,27 @@
+.edit-icon,
+.delete-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 10px; /* Adjust the right distance as needed */
+    cursor: pointer;
+}
+
+.delete-icon {
+    color: red; /* Optional: Change color for delete icon */
+}
+
+.calendar-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #ccc; /* Optional: Add border for visualization */
+    padding: 10px; /* Optional: Add padding for spacing */
+}
+
+.card-content {
+    flex-grow: 1;
+}
+.card-icons {
+    display: flex;
+}

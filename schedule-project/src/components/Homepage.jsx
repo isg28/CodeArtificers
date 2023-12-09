@@ -150,9 +150,6 @@ const HomePage = () => {
                 <Button variant="contained" size="large" onClick = {handleNewCalenderClick}>
                     New Calendar
                 </Button>
-                <Button variant="contained" size="large" style={{ backgroundColor: 'grey', color: 'white'}}>
-                    Delete Calendar
-                </Button>
                 </div>
             </div>
             <h1> </h1>
