@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken';
 
 const CalendarCard = ({ calendar }) => {
     const [user_id, setUserId] = useState(null);
-    const [calenders, setCalenders] = useState([]);
+    const [calendars, setCalendars] = useState([]);
 
 
     useEffect(() => {
@@ -34,18 +34,18 @@ const CalendarCard = ({ calendar }) => {
         return token;
     };
 
-    const onDelete = (calender_id) => {
+    const onDelete = (calendar_id) => {
         // Update state to remove the deleted calendar
-        setCalenders((prevCalendars) => prevCalendars.filter((calendar) => calendar.calender_id !== calender_id));
+        setCalendars((prevCalendars) => prevCalendars.filter((calendar) => calendar.calendar_id !== calendar_id));
 
-        console.log("Updated Calendars:", calenders);
+        console.log("Updated Calendars:", calendars);
     };
 
     const handleDelete = async (clickEvent) => {
         clickEvent.preventDefault();
         const token = getToken();
         try{
-            const response = await fetch(`http://localhost:8080/api/user/${calendar.user_id}/calender/${calendar.calender_id}`,{
+            const response = await fetch(`http://localhost:8080/api/user/${calendar.user_id}/calendar/${calendar.calendar_id}`,{
                 method: 'DELETE',
                 headers:{
                     'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ const CalendarCard = ({ calendar }) => {
                 }
             });
             if(response.ok){
-                onDelete(calendar.calender_id);
+                onDelete(calendar.calendar_id);
                 //navigate(`/homepage`);
                 window.location.reload();
             } else{
@@ -66,7 +66,7 @@ const CalendarCard = ({ calendar }) => {
 
     const handleEdit = async (clickEvent) => {
         clickEvent.preventDefault();
-        const editedTitle = window.prompt('Enter the new calendar title:', calendar.calenderTitle);
+        const editedTitle = window.prompt('Enter the new calendar title:', calendar.calendarTitle);
         console.log(editedTitle);
 
         // If the user cancels the prompt or leaves the input empty, do nothing
@@ -76,19 +76,19 @@ const CalendarCard = ({ calendar }) => {
         const token = getToken();
         console.log('Going into PUT method');
         try {
-            const response = await fetch(`http://localhost:8080/api/user/${calendar.user_id}/calender/${calendar.calender_id}`, {
+            const response = await fetch(`http://localhost:8080/api/user/${calendar.user_id}/calendar/${calendar.calendar_id}`, {
                 method: 'PUT',
                 headers:{
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    calenderTitle: editedTitle,
+                    calendarTitle: editedTitle,
                 }),
             });
             if(response.ok){
-                setCalenders((prevCalendars) =>
-                prevCalendars.map((c) => (c.calender_id === calendar.calender_id ? { ...c, calenderTitle: editedTitle } : c))
+                setCalendars((prevCalendars) =>
+                prevCalendars.map((c) => (c.calendar_id === calendar.calendar_id ? { ...c, calendarTitle: editedTitle } : c))
                 );
                 window.location.reload();
             } else {
@@ -103,10 +103,10 @@ const CalendarCard = ({ calendar }) => {
     };
 
     return (
-        <Link to={`/calendar/${calendar.calender_id}`} className="calendar-link">
+        <Link to={`/calendar/${calendar.calendar_id}`} className="calendar-link">
             <div className="calendar-card">
                 <div className="card-content">
-                <h3>{calendar.calenderTitle}</h3>
+                <h3>{calendar.calendarTitle}</h3>
                 </div>
 
             <div className= "card-icons">

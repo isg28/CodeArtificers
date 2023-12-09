@@ -10,45 +10,90 @@ import moment from 'moment-timezone';
 import {useParams} from 'react-router-dom';
 import './Calendar.css'
 
+const getToken = () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.error('Token not found. User not authenticated.');
+  }
+  return token;
+};
+
+const getUserIdFromToken = (token) => {
+  try {
+    const decodedToken = jwt.decode(token);
+    return decodedToken ? decodedToken.user_id : null;
+  } catch (error) {
+    console.error("Error decoding token: ", error);
+    return null;
+  }
+};
 
 function Calendar(){
-    const {calender_id} = useParams();
+    const {calendar_id} = useParams();
     const [events, setEvents] = useState([]);
     const [user_id, setUserId] = useState(null);
 
     useEffect(() => {
-      const token = localStorage.getItem("token");
-
-      if(token){
-        try{
-          const decodedToken = jwt.decode(token);
-          console.log(decodedToken) // for checking purposes
-          const user_id = decodedToken.user_id;
-
-          setUserId(user_id);
-        }catch(error){
-          console.error("Error decoding token: ", error);
+      const token = getToken();
+  
+      const fetchUserData = async () => {
+        if (token) {
+          try {
+            const decodedToken = jwt.decode(token);
+            if (decodedToken) {
+              const userIdFromToken = decodedToken.user_id;
+              setUserId(userIdFromToken);
+  
+              if (userIdFromToken && calendar_id) {
+                await fetchAvailabilityEvents(userIdFromToken, calendar_id);
+                fetchMeetingEvents();
+              }
+            }
+          } catch (error) {
+            console.error("Error decoding token: ", error);
+          }
         }
+      };
+  
+      fetchUserData();
+    }, [calendar_id]);
+        
+    
+    useEffect(() => {
+      if (user_id && calendar_id) {
+        fetchAvailabilityEvents();
       }
-    }, []);
+      console.log('User ID from token:', user_id); // for checking purposes
+    }, [user_id, calendar_id]);
 
     useEffect(() => {
-      if(user_id){
-        fetchAvailabilityEvents();
-        fetchMeetingEvents();
-      }
-      console.log('User ID from token:', user_id); //for checking purposes
-    }, [user_id]);
+      const fetchData = async () => {
+        const token = getToken();
+        const userIdFromToken = getUserIdFromToken(token);
+    
+        if (userIdFromToken && calendar_id) {
+          await fetchAvailabilityEvents(userIdFromToken, calendar_id);
+          fetchMeetingEvents();
+        }
+      };
+    
+      fetchData();
+    }, [calendar_id]);
+    
 
     const fetchAvailabilityEvents = async () => {
+      const token = getToken();
+      const userIdFromToken = getUserIdFromToken(token); // Define userIdFromToken here
 
       try{
-        const token = getToken();
-        if(!user_id){
+        if(!userIdFromToken){
           console.error('User ID is undefined');
         }
+        if(!calendar_id){
+          console.error('Calendar ID is undefined');
+        }
           
-        const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability`, {
+        const response = await fetch(`http://localhost:8080/api/user/${userIdFromToken}/calendar/${calendar_id}/availability`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -62,8 +107,8 @@ function Calendar(){
       // Update the events state with the fetched data
         const formattedAvailabilityEvents = data.map(event => ({
           ...event,
-        }));
-        setEvents(prevEvents => [...prevEvents, ...formattedAvailabilityEvents]);
+        })); 
+        setEvents(formattedAvailabilityEvents);
         } else{
           console.error('Failed to fetch events');
         }
@@ -153,6 +198,7 @@ function Calendar(){
       console.log('New End Time:', newEndTime);
 
       const token = getToken();
+      const userIdFromToken = getUserIdFromToken(token);
       if (newTitle && isValidInputTimeValue(newStartTime) && isValidInputTimeValue(newEndTime)) {
         try {
           console.log('existingEvent:', existingEvent);
@@ -179,7 +225,7 @@ function Calendar(){
           
         
     
-          const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability/${existingEvent.availability_id}`, {
+          const response = await fetch(`http://localhost:8080/api/user/${userIdFromToken}/calendar/${calendar_id}/availability/${existingEvent.availability_id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -274,7 +320,8 @@ function Calendar(){
 
         try{
           const token = getToken();
-           const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability`, {
+          const userIdFromToken = getUserIdFromToken(token);
+           const response = await fetch(`http://localhost:8080/api/user/${userIdFromToken}/calendar/${calendar_id}/availability`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -305,10 +352,11 @@ function Calendar(){
         }
 
         const token = getToken();
+        const userIdFromToken = getUserIdFromToken(token);
 
         try{
           for (const eventToDelete of eventsToDelete) {
-            const response = await fetch(`http://localhost:8080/api/user/${user_id}/availability/${eventToDelete.availability_id}`, {
+            const response = await fetch(`http://localhost:8080/api/user/${userIdFromToken}/calendar/${calendar_id}/availability/${eventToDelete.availability_id}`, {
               method: 'DELETE',
               headers: {
                 'Content-Type': 'application/json',
@@ -332,6 +380,7 @@ function Calendar(){
         }
       };
 
+
       ////////////////////////////////////////////////////////////////////////////////////////////////
 /*                          MEETING  FUNCTIONS                          */
       const [showCreateMeetingForm, setShowCreateMeetingForm] = useState(false);
@@ -346,7 +395,8 @@ function Calendar(){
       const fetchMeetingEvents = async () => {
         try{
           const token = getToken();
-          const response = await fetch(`http://localhost:8080/api/meeting`, {
+          const userIdFromToken = getUserIdFromToken(token);
+          const response = await fetch(`http://localhost:8080/api/user/${userIdFromToken}/calendar/${calendar_id}/meeting`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -377,11 +427,12 @@ function Calendar(){
       const handleCreateMeeting = async () => {
         try {
           const token = getToken();
+          const userIdFromToken = getUserIdFromToken(token);
   
           const startDateTime = `${newMeeting.date}T${newMeeting.startTime}`;
           const endDateTime = `${newMeeting.date}T${newMeeting.endTime}`;
   
-          const response = await fetch("http://localhost:8080/api/meeting", {
+          const response = await fetch(`http://localhost:8080/api/user/${userIdFromToken}/calendar/${calendar_id}/meeting`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -450,16 +501,7 @@ function Calendar(){
         [name]: value,
       }));
     }; 
-
-    const getToken = () => {
-      const token = localStorage.getItem("token");
-      if(!token){
-        console.error('Token not found. User not authenticated.');
-      }
-      return token;
-    }
     
-
     const isValidInputTimeValue = (time) => {
       const regex = /^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]([APMapm]{2})?$/;
       return regex.test(time);

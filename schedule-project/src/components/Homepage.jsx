@@ -7,9 +7,9 @@ import jwt from 'jsonwebtoken';
 
 const HomePage = () => {
     const [user_id, setUserId] = useState(null);
-    const [calenders, setCalenders] = useState([]);
-    const [sortedCalenders, setSortedCalenders] = useState([]);
-    const [calender_id, setCalenderId] = useState(null);
+    const [calendars, setCalendars] = useState([]);
+    const [sortedCalendars, setSortedCalendars] = useState([]);
+    const [calendar_id, setCalendarId] = useState(null);
 
     const navigate = useNavigate();
 
@@ -36,11 +36,11 @@ const HomePage = () => {
         return token;
     };
 
-    const fetchCalenders = useCallback(async () => {
+    const fetchCalendars = useCallback(async () => {
         if (user_id) {
             const token = getToken();
             try {
-                const response = await fetch(`http://localhost:8080/api/user/${user_id}/calender`, {
+                const response = await fetch(`http://localhost:8080/api/user/${user_id}/calendar`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -49,8 +49,8 @@ const HomePage = () => {
                 });
 
                 if (response.ok) {
-                    const userCalenders = await response.json();
-                    setCalenders(userCalenders);
+                    const userCalendars = await response.json();
+                    setCalendars(userCalendars);
                 } else if (response.status === 404) {
                     console.log('User or calendars not found.');
                 } else {
@@ -64,41 +64,41 @@ const HomePage = () => {
 
     useEffect(() => {
         // Initial fetch when the component mounts
-        fetchCalenders();
-    }, [fetchCalenders]);
+        fetchCalendars();
+    }, [fetchCalendars]);
 
     useEffect(() => {
-        const sorted = calenders
+        const sorted = calendars
             .slice()
-            .sort((a, b) => parseInt(b.calender_id, 10) - parseInt(a.calender_id, 10));
-        setSortedCalenders(sorted);
-    }, [calenders]);
+            .sort((a, b) => parseInt(b.calendar_id, 10) - parseInt(a.calendar_id, 10));
+        setSortedCalendars(sorted);
+    }, [calendars]);
 
 
-    const handleNewCalenderClick = async () => {
+    const handleNewCalendarClick = async () => {
         const title = prompt('Enter the title for the new calendar:');
         if(title){
             const token = getToken();
             try{
-                const response = await fetch(`http://localhost:8080/api/user/${user_id}/calender`, {
+                const response = await fetch(`http://localhost:8080/api/user/${user_id}/calendar`, {
                     method: 'POST',
                     headers:{
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
                     },
                     body: JSON.stringify({
-                        calenderTitle: title,
+                        calendarTitle: title,
                         user_id: user_id,
                     }),
                 });
                 if(response.ok){
-                    const newCalender = await response.json();
-                    console.log('New Calender:', newCalender);
-                    const updatedCalender = {...newCalender, title};
-                    console.log('Updated Calender:', updatedCalender);
-                    setCalenders((prevCalenders) => [...prevCalenders, updatedCalender]);
-                    fetchCalenders();
-                    navigate(`/calendar/${newCalender.id}`);
+                    const newCalendar = await response.json();
+                    console.log('New Calendar:', newCalendar);
+                    const updatedCalendar = {...newCalendar, title};
+                    console.log('Updated Calendar:', updatedCalendar);
+                    setCalendars((prevCalendars) => [...prevCalendars, updatedCalendar]);
+                    fetchCalendars();
+                    navigate(`/calendar/${newCalendar.id}`);
                 } else {
                     console.error('Failed to create a new calendar');
                 }
@@ -108,16 +108,16 @@ const HomePage = () => {
         }
     };
 
-    const handleDeleteCalenderClick = () =>{
-        setCalenderId(calender_id);
+    const handleDeleteCalendarClick = () =>{
+        setCalendarId(calendar_id);
     };
 
 
-    const handleDeleteCalenderConfirm = async () =>{
-        if(calender_id){
+    const handleDeleteCalendarConfirm = async () =>{
+        if(calendar_id){
             const token = getToken();
             try{
-                const response = await fetch (`http://localhost:8080/api/user/${user_id}/calender/${calender_id}`, {
+                const response = await fetch (`http://localhost:8080/api/user/${user_id}/calendar/${calendar_id}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -128,14 +128,14 @@ const HomePage = () => {
                     const deletedMessage = await response.text();
                     console.log(deletedMessage);
 
-                    fetchCalenders();
+                    fetchCalendars();
                 } else{
                     console.error('Failed to delete the calendar');
                 }
             } catch(error){
                 console.error('Error deleting the calendar:', error);
             }finally{
-                setCalenderId(null);
+                setCalendarId(null);
             }
         }
     };
@@ -147,19 +147,19 @@ const HomePage = () => {
         <div className = "header">
             <h1>My Calendars</h1>
             <div className="button-container">
-                <Button variant="contained" size="large" onClick = {handleNewCalenderClick}>
+                <Button variant="contained" size="large" onClick = {handleNewCalendarClick}>
                     New Calendar
                 </Button>
                 </div>
             </div>
             <h1> </h1>
-            {calenders.length === 0 ? (
+            {calendars.length === 0 ? (
                 <div className ="empty-message">
                     <p>You have no calendars yet.</p>
                 </div>
             ) : (
                 <div className="calendar-list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                    <CalendarList calendars={sortedCalenders} />
+                    <CalendarList calendars={sortedCalendars} />
                 </div>
             )}
         </div>
