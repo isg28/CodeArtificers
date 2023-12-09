@@ -11,6 +11,7 @@ public class Availability {
     @Id
     private String availability_id;
     private String user_id;
+    private String calendar_id;
     private LocalDate date;
     private LocalDateTime start;
     private LocalDateTime end;
@@ -20,10 +21,11 @@ public class Availability {
     public Availability(){
 
     }
-    public Availability(String availability_Id, String user_id, LocalDate date, LocalDateTime start, LocalDateTime end,
+    public Availability(String availability_Id, String user_id, String calendar_id, LocalDate date, LocalDateTime start, LocalDateTime end,
                         String title) {
         this.availability_id = availability_Id;
         this.user_id = user_id;
+        this.calendar_id = calendar_id;
         this.date = date;
         this.title = title;
         this.start = start;
@@ -38,6 +40,8 @@ public class Availability {
         this.availability_id = availability_id;
     }
 
+    public String getCalendar_id() {return calendar_id;}
+    public void setCalendar_id(String calendar_id){ this.calendar_id = calendar_id;}
     public LocalDate getDate() {
         return date;
     }

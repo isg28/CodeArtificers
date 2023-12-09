@@ -4,7 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CalenderCounter {
+public class CalendarCounter {
     @Id
     private String id;
     private String name;

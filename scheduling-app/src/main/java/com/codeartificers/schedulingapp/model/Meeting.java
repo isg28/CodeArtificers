@@ -12,8 +12,9 @@ import java.util.List;
 public class Meeting {
     @Id
     private String meeting_id;
+    private String user_id;
+    private String calendar_id;
     private LocalDate date;
-    //@JsonFormat(pattern = "HH:mm")
     private LocalDateTime start;
     private LocalDateTime end;
 
@@ -25,9 +26,11 @@ public class Meeting {
     public Meeting(){
 
     }
-    public Meeting(String meeting_id,LocalDate date,LocalDateTime start,LocalDateTime end,
+    public Meeting(String meeting_id, String user_id, String calendar_id, LocalDate date,LocalDateTime start,LocalDateTime end,
                    String location, String meeting_Descriptions){
         this.meeting_id=meeting_id;
+        this.user_id = user_id;
+        this.calendar_id = calendar_id;
         this.start =start;
         this.end = end;
         this.date = date;
@@ -42,6 +45,10 @@ public class Meeting {
     public void setMeeting_id(String meeting_id) {
         this.meeting_id = meeting_id;
     }
+    public String getUser_id() { return user_id;}
+    public void setUser_id(String user_id){ this.user_id = user_id;}
+    public String getCalendar_id() { return calendar_id;}
+    public void setCalendar_id(String calendar_id){ this.calendar_id = calendar_id;}
 
     public LocalDate getDate() {
         return date;

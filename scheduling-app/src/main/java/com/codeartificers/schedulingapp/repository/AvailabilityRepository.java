@@ -10,4 +10,7 @@ import java.util.List;
 public interface AvailabilityRepository extends MongoRepository<Availability, String> {
     @Query("{'user_id': ?0}")
     List<Availability> findByUser_id(String user_id);
+
+    @Query("{'calendar_id': ?0}")
+    List<Availability> findByCalendar(String calendar_id);
 }

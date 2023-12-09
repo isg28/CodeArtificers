@@ -4,6 +4,7 @@ import com.codeartificers.schedulingapp.model.User;
 import com.codeartificers.schedulingapp.model.UserCounter;
 import com.codeartificers.schedulingapp.repository.UserCounterRepository;
 import com.codeartificers.schedulingapp.repository.UserRepository;
+import com.codeartificers.schedulingapp.resource.UpdatePasswordRequest;
 import com.codeartificers.schedulingapp.resource.UserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -91,14 +92,14 @@ public class UserService {
         return existingUser == null;
     }
 
-    public void updatePassword(String user_id, UserRequest userRequest){
+    public void updatePassword(String user_id, UpdatePasswordRequest passwordRequest){
         User existingUser = userRepository.findById(user_id).orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        if(passwordEncoder.matches(userRequest.getPassword(), existingUser.getPassword())){
-            String hashedNewPassword = passwordEncoder.encode(userRequest.getNewPassword());
+        if (passwordEncoder.matches(passwordRequest.getOldPassword(), existingUser.getPassword())) {
+            String hashedNewPassword = passwordEncoder.encode(passwordRequest.getNewPassword());
             existingUser.setPassword(hashedNewPassword);
             userRepository.save(existingUser);
-        }else{
+        } else {
             throw new IllegalArgumentException("Incorrect original password");
         }
 

@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 
 public class MeetingRequest {
     private String meeting_id;
-   // @JsonFormat(pattern = "HH:mm")
+    private String user_id;
+    private String calendar_id;
     private LocalDateTime start;
-   // @JsonFormat(pattern = "HH:mm")
     private LocalDateTime end;
     private LocalDate date;
     private String location;
@@ -27,6 +27,10 @@ public class MeetingRequest {
     public void setMeeting_id(String meeting_id) {
         this.meeting_id = meeting_id;
     }
+    public String getUser_id() { return user_id;}
+    public void setUser_id(String user_id){ this.user_id = user_id;}
+    public String getCalendar_id() { return calendar_id;}
+    public void setCalendar_id(String calendar_id){ this.calendar_id = calendar_id;}
 
     public LocalDateTime getStart() {
         return start;
