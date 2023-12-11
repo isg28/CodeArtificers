@@ -73,7 +73,7 @@ function Calendar(){
     
         if (userIdFromToken && calendar_id) {
           await fetchAvailabilityEvents(userIdFromToken, calendar_id);
-          fetchMeetingEvents();
+          await fetchMeetingEvents(userIdFromToken, calendar_id);
         }
       };
     
@@ -83,7 +83,7 @@ function Calendar(){
 
     const fetchAvailabilityEvents = async () => {
       const token = getToken();
-      const userIdFromToken = getUserIdFromToken(token); // Define userIdFromToken here
+      const userIdFromToken = getUserIdFromToken(token); 
 
       try{
         if(!userIdFromToken){
@@ -107,6 +107,8 @@ function Calendar(){
       // Update the events state with the fetched data
         const formattedAvailabilityEvents = data.map(event => ({
           ...event,
+          isMeeting: false,
+          availability_id: event.availability_id,  
         })); 
         setEvents(formattedAvailabilityEvents);
         } else{
@@ -148,7 +150,14 @@ function Calendar(){
           if(!isNaN(userChoiceIndex) && userChoiceIndex >= 1 && userChoiceIndex <= existingEvents.length){
             const chosenIndex = userChoiceIndex - 1;
             const chosenDate = existingEvents[chosenIndex].date;
-            editEvent(existingEvents[chosenIndex], chosenIndex,chosenDate);
+
+            if (existingEvents[chosenIndex].isMeeting) {
+              // Handle meeting edit
+              editMeeting(existingEvents[chosenIndex], chosenIndex, chosenDate);
+            } else {
+              // Handle availability event edit
+              editEvent(existingEvents[chosenIndex], chosenIndex, chosenDate);
+            }
           }else {
             alert("Invalid choice. Please choose a valid event number.");
           }
@@ -159,11 +168,24 @@ function Calendar(){
           if (!isNaN(userChoiceIndex) && userChoiceIndex >= 1 && userChoiceIndex <= existingEvents.length) {
             const chosenIndex = userChoiceIndex - 1;
             const chosenEvent = existingEvents[chosenIndex];
-            const shouldDelete = window.confirm(`Are you sure you want to delete the event "${chosenEvent.title}" on this date (${info.dateStr})?`);
     
-            if (shouldDelete) {
-              deleteEvent([chosenEvent]); 
+            if (chosenEvent.isMeeting) {
+              // Handle meeting delete
+              /*
+              const shouldDelete = window.confirm(`Are you sure you want to delete the event "${chosenEvent.title}" on this date (${info.dateStr})?`);
+              if (shouldDelete) {
+                deleteMeeting([chosenEvent]); 
+              }
+              */
+              console.log("deleteMeeting", chosenEvent.title);
+            } else {
+              // Handle availability event delete
+              const shouldDelete = window.confirm(`Are you sure you want to delete the event "${chosenEvent.title}" on this date (${info.dateStr})?`);
+              if (shouldDelete) {
+                deleteEvent([chosenEvent]); 
+              }
             }
+
         }
     } else {
       alert('Invalid choice. Please choose 1, 2, or 3.');
@@ -208,6 +230,7 @@ function Calendar(){
             title: newTitle,
             start: `${chosenDate}T${newStartTime}:00`,
             end: `${chosenDate}T${newEndTime}:00`,
+            availability_id: existingEvent.availability_id, 
           };
 
           console.log('updatedEvent:', updatedEvent);
@@ -333,6 +356,7 @@ function Calendar(){
             // Handle the response as needed
             if (response.ok) {
               console.log('Event saved successfully');
+              window.location.reload();
             } else {
               console.error('Failed to save event');
               // Optionally handle error cases
@@ -407,13 +431,17 @@ function Calendar(){
           if(response.ok) {
             const data = await response.json();
 
-            //Update the events state with the fetched meeting data
-            const formattedMeetingEvents = data.map(meeting => ({
-              id: meeting.meeting_id,
-              title: meeting.meeting_Description,
-              start: meeting.start,
-              end: meeting.end,
-            }));
+          // Clear existing meeting events before updating
+          setEvents(prevEvents => prevEvents.filter(event => !event.isMeeting));
+
+          // Update the events state with the fetched meeting data
+          const formattedMeetingEvents = data.map(meeting => ({
+            meeting_id: meeting.meeting_id,
+            title: meeting.meeting_Description,
+            start: meeting.start,
+            end: meeting.end,
+            isMeeting: true,
+          }));
             setEvents(prevEvents => [...prevEvents, ...formattedMeetingEvents]);
           }
           else {
@@ -450,6 +478,8 @@ function Calendar(){
       if (response.ok) {
         const createdMeeting = await response.json();
         console.log("Meeting created successfully:", createdMeeting);
+        console.log('New Meeting:', newMeeting);
+
 
         // Reset the form and hide the create meeting form
         setNewMeeting({
@@ -492,6 +522,78 @@ function Calendar(){
     });
     setShowCreateMeetingForm(false);
   };
+
+  const editMeeting = async (existingEvent, chosenIndex, chosenDate) => {
+    console.log('Existing Meeting: ', existingEvent);
+    const newDescription = prompt('Edit meeting description:', existingEvent.title);
+    const newLocation = prompt('Edit meeting location:', existingEvent.location);
+    let newStartTime, newEndTime;
+
+    console.log('New Start Time (before assignment):', newStartTime);
+    newStartTime = prompt('Edit start time:', moment(existingEvent.start).format('HH:mm'));
+    console.log('New Start Time (after assignment):', newStartTime);
+    
+    newEndTime = prompt('Edit end time:', moment(existingEvent.end).format('HH:mm'));
+  
+    if (!isValidInputTimeValue(newStartTime) || !isValidInputTimeValue(newEndTime)) {
+      alert('Invalid input. Please make sure to enter valid start/end times.');
+      return;
+    }
+  
+    console.log('New Description:', newDescription);
+    console.log('New Location:', newLocation);
+    console.log('New Start Time:', newStartTime);
+    console.log('New End Time:', newEndTime);
+  
+    const token = getToken();
+    const userIdFromToken = getUserIdFromToken(token);
+    
+    if (newDescription && newLocation !== null && isValidInputTimeValue(newStartTime) && isValidInputTimeValue(newEndTime)) {
+      try {
+        const updatedMeeting = {
+          ...existingEvent,
+          title: newDescription,
+          location: newLocation,
+          start: `${chosenDate}T${newStartTime}:00`,
+          end: `${chosenDate}T${newEndTime}:00`, 
+        };
+  
+        console.log('Updated Meeting:', updatedMeeting);
+  
+        setEvents((prevEvents) => [
+          ...prevEvents.slice(0, chosenIndex),
+          updatedMeeting,
+          ...prevEvents.slice(chosenIndex + 1),
+        ]);
+  
+        if (!updatedMeeting.meeting_id) {
+          console.error('Meeting ID is missing. Cannot update meeting.');
+          return;
+        }
+  
+        const response = await fetch(`http://localhost:8080/api/user/${userIdFromToken}/calendar/${calendar_id}/meeting/${existingEvent.meeting_id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(updatedMeeting),
+        });
+  
+        if (response.ok) {
+          console.log('Meeting updated successfully');
+        } else {
+          console.error('Failed to update meeting');
+          console.log('Failed Meeting: ', existingEvent);
+        }
+      } catch (error) {
+        console.error('Error updating meeting:', error);
+      }
+    } else {
+      alert('Invalid input. Please make sure to enter a description and valid start/end time.');
+    }
+  };
+  
   
     
     const handleInputChange = (e) => {
@@ -513,7 +615,7 @@ function Calendar(){
     };
 
     const eventContent = (eventInfo) => {
-      //const isMeeting = eventInfo.event.extendedProps.isMeeting;
+      const isMeeting = eventInfo.event.extendedProps.isMeeting;
       return (
         <>
           <div className= "custom-dot" />
@@ -521,7 +623,7 @@ function Calendar(){
             {eventInfo.timeText && (
               <div className = "fc-time bold-time">{eventInfo.timeText}</div>
             )}
-            <div className= "fc-time">{eventInfo.event.title}</div>
+            <div className={`fc-time ${isMeeting ? 'meeting-event' : ''}`}>{eventInfo.event.title}</div>
           </div>
         </>
       );
