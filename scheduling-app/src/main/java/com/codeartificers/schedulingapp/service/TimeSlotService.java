@@ -54,8 +54,8 @@ public class TimeSlotService {
         return date1.equals(date2) && ((startTime1.isBefore(endTime2)&& startTime2.isBefore(endTime1)) || (startTime2.isBefore(endTime1) && startTime1.isBefore(endTime2)) || (startTime1.equals(startTime2) && (endTime1.equals(endTime2))));
     }
 
-    public List<UserTimeSlots> getCommonTimeSlotsForAllUsers() {
-        List<Availability> allAvailability = availabilityRepository.findAll();
+    public List<UserTimeSlots> getCommonTimeSlotsForCalendar(String  calendar_id) {
+        List<Availability> allAvailability = availabilityRepository.findByCalendar_id(calendar_id);
         List<UserTimeSlots> commonTimeSlotsList = new ArrayList<>();
 
         for (Availability availability : allAvailability) {

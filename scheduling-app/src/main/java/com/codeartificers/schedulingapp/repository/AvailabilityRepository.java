@@ -12,5 +12,5 @@ public interface AvailabilityRepository extends MongoRepository<Availability, St
     List<Availability> findByUser_id(String user_id);
 
     @Query("{'calendar_id': ?0}")
-    List<Availability> findByCalendar(String calendar_id);
+    List<Availability> findByCalendar_id(String calendar_id);
 }

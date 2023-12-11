@@ -20,11 +20,12 @@ public class Meeting {
 
     private String location;
     private String meeting_Description;
+    private Boolean isMeeting;
 
 
 
     public Meeting(){
-
+        this.isMeeting = true;
     }
     public Meeting(String meeting_id, String user_id, String calendar_id, LocalDate date,LocalDateTime start,LocalDateTime end,
                    String location, String meeting_Descriptions){
@@ -84,4 +85,6 @@ public class Meeting {
     public void setMeeting_Description(String meeting_Description) {
         this.meeting_Description = meeting_Description;
     }
+    public boolean isMeeting(){return isMeeting;}
+    public void setIsMeeting(boolean meeting){isMeeting = meeting;}
 }

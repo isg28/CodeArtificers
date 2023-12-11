@@ -209,6 +209,7 @@ class ScheduleController {
             availability.setCalendar_id(calendar_id);
             availability.setDate(availabilityRequest.getDate());
             availability.setTitle(availabilityRequest.getTitle());
+            availability.setMeeting(false);
 
             String availabilityToken = TokenUtil.generateAvailabilityToken(availability, jwtUtil.getSecretKey());
 
@@ -242,7 +243,7 @@ class ScheduleController {
             return ResponseEntity.status(404).body("Calendar ID: " + calendar_id + " not found");
 
         }
-        List<Availability> userAvailabilities = this.availabilityRepository.findByCalendar(calendar_id);
+        List<Availability> userAvailabilities = this.availabilityRepository.findByCalendar_id(calendar_id);
 
         if (userAvailabilities.isEmpty()) {
             return ResponseEntity.status(404).body("There is no availability entry for User: " + user_id);
@@ -333,6 +334,7 @@ class ScheduleController {
             meeting.setEnd(meetingRequest.getEnd());
             meeting.setLocation(meetingRequest.getLocation());
             meeting.setMeeting_Description(meetingRequest.getMeeting_Description());
+            meeting.setIsMeeting(true);
 
             String meetingToken = TokenUtil.generateMeetingToken(meeting, jwtUtil.getSecretKey());
 
@@ -435,9 +437,22 @@ class ScheduleController {
     }
 
     //// ********************* SEARCH FOR AVAILABLE TIMESLOTS ENDPOINTS ***********************************
-    @GetMapping("/api/timeslots")
-    public ResponseEntity<List<UserTimeSlots>> getCommonTimeSlots() {
-        List<UserTimeSlots> commonTimeSlotsList = timeSlotService.getCommonTimeSlotsForAllUsers();
+    @GetMapping("/api/calendar/{calendar_id}/timeslots")
+    public ResponseEntity<List<UserTimeSlots>> getCommonTimeSlots(@PathVariable String calendar_id) {
+        System.out.println("Calendar ID: " + calendar_id); // Add this line for debugging
+
+        List<UserTimeSlots> commonTimeSlotsList = timeSlotService.getCommonTimeSlotsForCalendar(calendar_id);
+
+        List<Availability> allAvailability = availabilityRepository.findByCalendar_id(calendar_id);
+
+        if (allAvailability.isEmpty()) {
+            System.out.println("No availabilities found for Calendar ID: " + calendar_id);
+        } else {
+            System.out.println("Availabilities found for Calendar ID: " + calendar_id);
+            for (Availability availability : allAvailability) {
+                System.out.println("Availability: " + availability);
+            }
+        }
 
         if (commonTimeSlotsList.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -445,6 +460,8 @@ class ScheduleController {
 
         return ResponseEntity.ok(commonTimeSlotsList);
     }
+
+
 
     //// ********************* USER REGISTRATION AND AUTHENTICATION ENDPOINTS ***********************************
     @PostMapping("/api/register")

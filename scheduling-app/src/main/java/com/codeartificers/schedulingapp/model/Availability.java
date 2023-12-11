@@ -16,9 +16,10 @@ public class Availability {
     private LocalDateTime start;
     private LocalDateTime end;
     private String title;
-    //private boolean allDay;
+    private boolean isMeeting;
 
     public Availability(){
+        this.isMeeting = false;
 
     }
     public Availability(String availability_Id, String user_id, String calendar_id, LocalDate date, LocalDateTime start, LocalDateTime end,
@@ -70,5 +71,7 @@ public class Availability {
     public String getUser_id(){return user_id;}
     public void setTitle(String title){this.title = title;}
     public String getTitle(){return title;}
+    public boolean isMeeting(){ return isMeeting;}
+    public void setMeeting(boolean meeting){ this.isMeeting = meeting;}
 
 }
