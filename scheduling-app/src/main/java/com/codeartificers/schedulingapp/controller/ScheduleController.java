@@ -439,7 +439,6 @@ class ScheduleController {
     //// ********************* SEARCH FOR AVAILABLE TIMESLOTS ENDPOINTS ***********************************
     @GetMapping("/api/calendar/{calendar_id}/timeslots")
     public ResponseEntity<List<UserTimeSlots>> getCommonTimeSlots(@PathVariable String calendar_id) {
-        System.out.println("Calendar ID: " + calendar_id); // Add this line for debugging
 
         List<UserTimeSlots> commonTimeSlotsList = timeSlotService.getCommonTimeSlotsForCalendar(calendar_id);
 
