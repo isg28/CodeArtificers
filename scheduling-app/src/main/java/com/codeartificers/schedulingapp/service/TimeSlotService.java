@@ -2,8 +2,10 @@ package com.codeartificers.schedulingapp.service;
 
 import com.codeartificers.schedulingapp.model.Availability;
 import com.codeartificers.schedulingapp.model.TimeSlot;
+import com.codeartificers.schedulingapp.model.User;
 import com.codeartificers.schedulingapp.model.UserTimeSlots;
 import com.codeartificers.schedulingapp.repository.AvailabilityRepository;
+import com.codeartificers.schedulingapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import java.util.List;
 public class TimeSlotService {
     @Autowired
     private AvailabilityRepository availabilityRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     private TimeSlot mapAvailabilityToTimeSlot(Availability availability){
         TimeSlot timeSlot = new TimeSlot();
@@ -60,14 +64,27 @@ public class TimeSlotService {
 
         for (Availability availability : allAvailability) {
             String userId = availability.getUser_id();
+            String username = getUsernameByUserId(userId);
+            System.out.println("User ID: " + userId + ", Username: " + username);
+
             TimeSlot timeSlot = mapAvailabilityToTimeSlot(availability);
 
             if(hasSameDateAndTimeAsOthers(timeSlot, allAvailability, userId)){
-                UserTimeSlots userTimeSlotsObj = new UserTimeSlots(userId, List.of(timeSlot));
+                UserTimeSlots userTimeSlotsObj = new UserTimeSlots(userId, username, List.of(timeSlot));
                 commonTimeSlotsList.add(userTimeSlotsObj);
             }
         }
 
+
         return commonTimeSlotsList;
+    }
+
+    private String getUsernameByUserId(String userId) {
+        User user = userRepository.findByUser_id(userId);
+        if (user != null) {
+            return user.getUsername();
+        } else {
+            return null;
+        }
     }
 }
