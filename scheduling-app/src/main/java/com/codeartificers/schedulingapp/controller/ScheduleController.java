@@ -384,7 +384,7 @@ class ScheduleController {
     }
 
     //PUT: Update an existing meeting (add, remove participants), Mansoor
-    @PutMapping("/api/user/{user_id}/calendar/{calendar_id}/meeting")
+    @PutMapping("/api/user/{user_id}/calendar/{calendar_id}/meeting/{meeting_id}")
     public ResponseEntity update_meeting(@RequestBody MeetingRequest meetingRequest, @PathVariable String user_id, @PathVariable String calendar_id, @PathVariable String meeting_id) {
         Optional<Meeting> meetingProfile = this.meetingRepository.findById(meeting_id);
         Optional<User> userProfile = this.userRepository.findById(user_id);
