@@ -585,7 +585,7 @@ function Calendar(){
     
     if (newDescription && newLocation !== null && isValidInputTimeValue(newStartTime) && isValidInputTimeValue(newEndTime)) {
       try {
-        const updatedMeeting = { //ADD DATE 
+        const updatedMeeting = {
           ...existingEvent,
           title: newDescription,
           location: newLocation,
@@ -665,7 +665,7 @@ function Calendar(){
       );
     };
 
-          ////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
 /*                          INVITE FUNCTION                          */
     const inviteUsers = async () => {
       try{
@@ -709,7 +709,7 @@ function Calendar(){
     };
 
 
-      ////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
 /*                          COMMON TIMESLOT FUNCTION                          */
 
 
