@@ -171,12 +171,12 @@ function Calendar(){
     
             if (chosenEvent.isMeeting) {
               // Handle meeting delete
-              /*
+              
               const shouldDelete = window.confirm(`Are you sure you want to delete the event "${chosenEvent.title}" on this date (${info.dateStr})?`);
               if (shouldDelete) {
                 deleteMeeting([chosenEvent]); 
               }
-              */
+              
               console.log("deleteMeeting", chosenEvent.title);
             } else {
               // Handle availability event delete
@@ -521,6 +521,42 @@ function Calendar(){
       meeting_Description: "",
     });
     setShowCreateMeetingForm(false);
+  };
+  const deleteMeeting = async (meetingToDelete) => {
+    if (!meetingToDelete || !Array.isArray(meetingToDelete)) {
+      console.error('Invalid input for meetingToDelete');
+      return;
+    }
+
+    const token = getToken();
+    const userIdFromToken = getUserIdFromToken(token);
+
+    try {
+      for (const meeting of meetingToDelete) {
+        const response = await fetch(`http://localhost:8080/api/user/${userIdFromToken}/calendar/${calendar_id}/meeting/${meeting.meeting_id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          console.log('Meeting deleted successfully');
+        } else {
+          console.error('Failed to delete meeting');
+          // Optionally handle error cases
+          console.error('Response status: ', response.status);
+          const errorMessage = await response.text();
+          console.error('Error message: ', errorMessage);
+        }
+      }
+
+      // Update the events state to remove the deleted meetings
+      setEvents((prevEvents) => prevEvents.filter((event) => !meetingToDelete.includes(event)));
+    } catch (error) {
+      console.error('Error deleting meetings:', error);
+    }
   };
 
   const editMeeting = async (existingEvent, chosenIndex) => {
