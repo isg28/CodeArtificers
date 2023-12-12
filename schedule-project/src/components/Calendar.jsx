@@ -496,8 +496,6 @@ function Calendar(){
 
         // Log the updated events state
         console.log('Updated Events:', events);
-
-        alert('Meeting created successfully');
       
         //setEvents((prevEvents) => [...prevEvents, createdMeeting]);
         alert('Meeting created successfully');
