@@ -479,6 +479,7 @@ function Calendar(){
         const createdMeeting = await response.json();
         console.log("Meeting created successfully:", createdMeeting);
         console.log('New Meeting:', newMeeting);
+        window.location.reload(); 
 
 
         // Reset the form and hide the create meeting form
@@ -617,6 +618,7 @@ function Calendar(){
   
         if (response.ok) {
           console.log('Meeting updated successfully');
+          window.location.reload(); 
         } else {
           console.error('Failed to update meeting');
           console.log('Failed Meeting: ', existingEvent);
