@@ -1,15 +1,19 @@
 package com.codeartificers.schedulingapp.service;
 
+import com.codeartificers.schedulingapp.model.Calendar;
 import com.codeartificers.schedulingapp.model.User;
 import com.codeartificers.schedulingapp.model.UserCounter;
+import com.codeartificers.schedulingapp.repository.CalendarRepository;
 import com.codeartificers.schedulingapp.repository.UserCounterRepository;
 import com.codeartificers.schedulingapp.repository.UserRepository;
 import com.codeartificers.schedulingapp.resource.UpdatePasswordRequest;
 import com.codeartificers.schedulingapp.resource.UserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 
@@ -23,6 +27,13 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired
     private JwtUtil jwtUtil;
+    private CalendarRepository calendarRepository;
+
+    @Autowired
+    public UserService(UserRepository userRepository, CalendarRepository calendarRepository) {
+        this.userRepository = userRepository;
+        this.calendarRepository = calendarRepository;
+    }
 
     public User createUser(UserRequest userRequest){
         if (isValidUserRequest(userRequest)) {
@@ -107,5 +118,21 @@ public class UserService {
     public boolean isUserIdValid(String userId){
         return userRepository.existsById(userId);
     }
+
+    // Stores a list of calendarIds on the homepage
+    public void addCalendarToHomePage(User user, String calendar_id) {
+        try {
+            List<String> userHomePageCalendars = user.getHomepageCalendars();
+
+            // Check if the calendarId is not already in the list
+            if (!userHomePageCalendars.contains(calendar_id)) {
+                userHomePageCalendars.add(calendar_id);
+                userRepository.save(user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }

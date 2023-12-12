@@ -2,11 +2,16 @@ package com.codeartificers.schedulingapp.model;
 
 import org.springframework.data.annotation.Id;
 
+import java.util.Collection;
+import java.util.List;
+
 public class Calendar {
     @Id
     String calendar_id;
     String user_id;
     String calendarTitle;
+    @ElementCollection
+    private List<String> sharedWith;
 
     public Calendar(){
 
@@ -40,5 +45,13 @@ public class Calendar {
 
     public void setCalendarTitle(String calendarTitle) {
         this.calendarTitle = calendarTitle;
+    }
+
+    public List<String> getSharedWith() {
+        return sharedWith;
+    }
+
+    public void setSharedWith(List<String> sharedWith) {
+        this.sharedWith = sharedWith;
     }
 }

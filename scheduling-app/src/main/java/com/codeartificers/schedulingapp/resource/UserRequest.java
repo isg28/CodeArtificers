@@ -3,6 +3,8 @@ package com.codeartificers.schedulingapp.resource;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class UserRequest {
@@ -15,6 +17,7 @@ public class UserRequest {
     private String password;
     private String newPassword;
     private String token;
+    private List<String> homepageCalendars = new ArrayList<>();
 
     public UserRequest() {
     }
@@ -72,6 +75,12 @@ public class UserRequest {
     public void setToken(String token){this.token = token;}
     public String getToken(){return token;}
 
+    public List<String> getHomepageCalendars() {
+        return homepageCalendars;
+    }
 
+    public void setHomepageCalendars(List<String> homepageCalendars) {
+        this.homepageCalendars = homepageCalendars;
+    }
 
 }

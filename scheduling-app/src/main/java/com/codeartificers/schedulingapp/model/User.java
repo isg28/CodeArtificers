@@ -7,7 +7,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 @Document("user")
 public class User {
@@ -22,6 +24,9 @@ public class User {
     @Field("newPassword")
     private String newPassword;
     private String token;
+    @ElementCollection
+    private List<String> homepageCalendars = new ArrayList<>();
+
 
 
     public User(){
@@ -81,6 +86,13 @@ public class User {
     public void setNewPassword(String newPassword){ this.password = password; }
     public String getToken(){return token;}
     public void setToken(String token){this.token = token;}
+    public List<String> getHomepageCalendars() {
+        return homepageCalendars;
+    }
+
+    public void setHomepageCalendars(List<String> homepageCalendars) {
+        this.homepageCalendars = homepageCalendars;
+    }
 
 
 }

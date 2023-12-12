@@ -517,8 +517,8 @@ class ScheduleController {
     //// ********************* INVITATION AND NOTIFICATION ENDPOINTS ***********************************
 
     @PostMapping("/api/user/{user_id}/calendar/{calendar_id}/invite")
-    public ResponseEntity<?> createInvitations(@RequestBody InvitationRequest invitationRequest, @PathVariable String user_id, @PathVariable String calendar_id){
-        try{
+    public ResponseEntity<?> createInvitations(@RequestBody InvitationRequest invitationRequest, @PathVariable String user_id, @PathVariable String calendar_id) {
+        try {
             if (invitationRequest == null ||
                     invitationRequest.getUser_id() == null ||
                     invitationRequest.getCalendar_id() == null ||
@@ -526,8 +526,9 @@ class ScheduleController {
                     !invitationRequest.getCalendar_id().equals(calendar_id)) {
                 return ResponseEntity.status(400).body("Invalid input parameters");
             }
+
             String senderId = invitationRequest.getUser_id();
-            if(!userService.isUserIdValid(senderId)){
+            if (!userService.isUserIdValid(senderId)) {
                 return ResponseEntity.status(400).body("Invalid senderId");
             }
 
@@ -538,41 +539,67 @@ class ScheduleController {
                 for (InvitedUser invitedUserRequest : invitedUserRequests) {
                     User userData = userRepository.findByEmail(invitedUserRequest.getEmail());
 
-                    String email = userData.getEmail();
-                    String firstName = userData.getFirstName();
-                    String lastName = userData.getLastName();
-                    String username = userData.getUsername();
-                    String userId = userData.getUser_id();
+                    if (userData != null) {
+                        String email = userData.getEmail();
+                        String firstName = userData.getFirstName();
+                        String lastName = userData.getLastName();
+                        String username = userData.getUsername();
+                        String userId = userData.getUser_id();
 
-                    InvitedUser newUser = new InvitedUser(userId, firstName, lastName, username, email);
-                    invitedUsers.add(newUser);
+                        InvitedUser newUser = new InvitedUser(userId, firstName, lastName, username, email);
+                        invitedUsers.add(newUser);
+                    } else {
+                        System.out.println("User not found for email: " + invitedUserRequest.getEmail());
+                    }
                 }
             }
 
             InvitationCounter counter = invitationCounterRepository.findByName("invitationId");
-            if(counter == null){
+            if (counter == null) {
                 counter = new InvitationCounter();
                 counter.setName("invitationId");
-                counter.setSequence(1L); //sets initial variable to 1
+                counter.setSequence(1L); // sets initial variable to 1
             }
-            long nextInivtationId = counter.getSequence() + 1;
-            counter.setSequence(nextInivtationId);
+            long nextInvitationId = counter.getSequence() + 1;
+            counter.setSequence(nextInvitationId);
             invitationCounterRepository.save(counter);
 
-            //Creating new Invitation
+            // Creating new Invitation
             Invitation invitation = new Invitation();
-            invitation.setInvitation_id(String.valueOf(nextInivtationId));
+            invitation.setInvitation_id(String.valueOf(nextInvitationId));
             invitation.setCalendar_id(calendar_id);
             invitation.setUser_id(user_id);
             invitation.setInvitedUsers(invitedUsers);
 
-            Invitation savedInvitation = invitationRepository.save(invitation);
+            // Update invited users' profiles with the shared calendar
+            Optional<Calendar> sharedCalendarOptional = calendarRepository.findById(calendar_id);
+            if (sharedCalendarOptional.isPresent()) {
+                Calendar sharedCalendar = sharedCalendarOptional.get();
+                List<String> sharedWith = sharedCalendar.getSharedWith();
 
-            //Send notifications to participants - need to alter
-            notificationService.sendInvitationNotification(savedInvitation);
+                for (InvitedUser invitedUser : invitedUsers) {
+                    User invitedUserProfile = userRepository.findByEmail(invitedUser.getEmail());
+
+                    if (invitedUserProfile != null) {
+                        userService.addCalendarToHomePage(invitedUserProfile, calendar_id);
+
+                        String invitedUserId = invitedUserProfile.getUser_id();
+
+                        if (!sharedWith.contains(invitedUserId)) {
+                            sharedWith.add(invitedUserId);
+                        }
+                    }
+                }
+
+                sharedCalendar.setSharedWith(sharedWith);
+                calendarRepository.save(sharedCalendar);
+            } else {
+                System.out.println("Calendar not found for calendar_id: " + calendar_id);
+            }
 
             return ResponseEntity.status(201).body("Invitations sent successfully");
-        }catch(Exception e){
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error");
         }
     }
@@ -582,7 +609,7 @@ class ScheduleController {
                                            @PathVariable String invitation_id) {
         Optional invitationData = this.invitationRepository.findById(invitation_id);
         if (invitationData.isPresent()) {
-            return ResponseEntity.status(200).body(invitationData.get()); // returns meeting details
+            return ResponseEntity.status(200).body(invitationData.get());
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -691,7 +718,6 @@ class ScheduleController {
                 calendarCounter = new CalendarCounter();
                 calendarCounter.setName("calendar_id");
                 calendarCounter.setSequence(1L); //sets initial variable to 1
-                calendarCounter.setSequence(1L); //sets initial variable to 1
             }
             long nextCalendarId = calendarCounter.getSequence() + 1;
             calendarCounter.setSequence(nextCalendarId);
@@ -701,8 +727,15 @@ class ScheduleController {
             calendar.setCalendar_id(String.valueOf(nextCalendarId));
             calendar.setUser_id(user_id);
             calendar.setCalendarTitle(calendarRequest.getCalendarTitle());
+            calendar.setSharedWith(new ArrayList<>());
 
             String calendarToken = TokenUtil.generateCalendarToken(calendar, jwtUtil.getSecretKey());
+
+            // Add the calendar to the user's homepage
+            User user = userRepository.findById(user_id).orElse(null);
+            if (user != null) {
+                userService.addCalendarToHomePage(user, String.valueOf(nextCalendarId));
+            }
 
             return ResponseEntity.status(201)
                     .header("Authorization", "Bearer " + calendarToken)
@@ -719,12 +752,17 @@ class ScheduleController {
             return ResponseEntity.status(404).body("User ID: " + user_id + " not found");
         }
         List<Calendar> userCalendars = this.calendarRepository.findByUser_id(user_id);
+        List<Calendar> sharedCalendars = this.calendarRepository.findBySharedWithContaining(user_id);
 
-        if (userCalendars.isEmpty()) {
+        List<Calendar> allCalendars = new ArrayList<>();
+        allCalendars.addAll(userCalendars);
+        allCalendars.addAll(sharedCalendars);
+
+        if (allCalendars.isEmpty()) {
             return ResponseEntity.status(404).body("There is no calendar entry for User: " + user_id);
         }
 
-        return ResponseEntity.status(200).body(userCalendars);
+        return ResponseEntity.status(200).body(allCalendars);
     }
 
     @PutMapping("/api/user/{user_id}/calendar/{calendar_id}")
