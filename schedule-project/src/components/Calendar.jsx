@@ -523,8 +523,9 @@ function Calendar(){
     setShowCreateMeetingForm(false);
   };
 
-  const editMeeting = async (existingEvent, chosenIndex, chosenDate) => {
+  const editMeeting = async (existingEvent, chosenIndex) => {
     console.log('Existing Meeting: ', existingEvent);
+    const chosenDate = moment(existingEvent.start).format('YYYY-MM-DD');
     const newDescription = prompt('Edit meeting description:', existingEvent.title);
     const newLocation = prompt('Edit meeting location:', existingEvent.location);
     let newStartTime, newEndTime;
@@ -550,7 +551,7 @@ function Calendar(){
     
     if (newDescription && newLocation !== null && isValidInputTimeValue(newStartTime) && isValidInputTimeValue(newEndTime)) {
       try {
-        const updatedMeeting = {
+        const updatedMeeting = { //ADD DATE 
           ...existingEvent,
           title: newDescription,
           location: newLocation,

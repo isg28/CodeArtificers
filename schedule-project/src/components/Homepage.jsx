@@ -98,7 +98,7 @@ const HomePage = () => {
                     console.log('Updated Calendar:', updatedCalendar);
                     setCalendars((prevCalendars) => [...prevCalendars, updatedCalendar]);
                     fetchCalendars();
-                    navigate(`/calendar/${newCalendar.id}`);
+                    //navigate(`/calendar/${newCalendar.id}`);
                 } else {
                     console.error('Failed to create a new calendar');
                 }
