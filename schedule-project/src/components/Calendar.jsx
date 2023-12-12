@@ -179,6 +179,16 @@ function Calendar(){
               
               console.log("deleteMeeting", chosenEvent.title);
             } else {
+                // Check if the user is the owner of each event
+              const unauthorizedEvents = existingEvents.filter(
+                (event) => event.user_id !== user_id
+              );
+
+              if (unauthorizedEvents.length > 0) {
+                alert("You don't have permission to delete the event.");
+                return;
+              }
+
               // Handle availability event delete
               const shouldDelete = window.confirm(`Are you sure you want to delete the event "${chosenEvent.title}" on this date (${info.dateStr})?`);
               if (shouldDelete) {
@@ -202,6 +212,13 @@ function Calendar(){
 
 
     const editEvent = async (existingEvent, chosenIndex, chosenDate) => {
+
+        // Check if the user is the owner of the event
+      if (existingEvent.user_id !== user_id) {
+        alert("You don't have permission to edit this event.");
+        return;
+      }
+
       console.log('Existing Event: ', existingEvent);
       const newTitle = prompt('Edit event title:', existingEvent.title);
       let newStartTime, newEndTime;
