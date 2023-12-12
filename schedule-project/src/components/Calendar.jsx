@@ -617,9 +617,10 @@ function Calendar(){
 
     const eventContent = (eventInfo) => {
       const isMeeting = eventInfo.event.extendedProps.isMeeting;
+      const dotColor = isMeeting ? '#52307c' : '#E6E6FA';
       return (
         <>
-          <div className= "custom-dot" />
+          <div className= "custom-dot" style={{ backgroundColor: dotColor }} />
           <div className = "fc-content">
             {eventInfo.timeText && (
               <div className = "fc-time bold-time">{eventInfo.timeText}</div>
@@ -629,6 +630,54 @@ function Calendar(){
         </>
       );
     };
+
+          ////////////////////////////////////////////////////////////////////////////////////////////////
+/*                          INVITE FUNCTION                          */
+    const inviteUsers = async () => {
+      try{
+        const token = getToken();
+        const userIdFromToken = getUserIdFromToken(token);
+
+        //Get user input for email addresses to invite
+        const emailList = prompt('Enter comma-separated email addresses to invite:');
+
+        if(emailList){
+          const emails = emailList.split(',').map((email) => email.trim());
+
+          const invitationRequest = {
+            user_id: userIdFromToken,
+            calendar_id: calendar_id,
+            invitedUsers: emails.map((email)=> ({email})),
+          };
+
+          const response = await fetch(`http://localhost:8080/api/user/${userIdFromToken}/calendar/${calendar_id}/invite`, {
+            method: 'POST',
+            headers:{
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(invitationRequest),
+          });
+          if(response.ok){
+            console.log('Invitations sent successfully');
+            console.log("Invitation Request:", invitationRequest);
+          } else{
+            console.error('Failed to send invitations');
+            console.error('Response status: ', response.status);
+            const errorMessage = await response.text();
+            console.error('Error message: ', errorMessage);
+            console.error('Error message: ', errorMessage);
+          }
+        }
+      } catch (error){
+        console.error('Error inviting users:', error);
+      }
+    };
+
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////
+/*                          COMMON TIMESLOT FUNCTION                          */
+
 
     return(
       <div>
@@ -641,7 +690,7 @@ function Calendar(){
         <Button variant="contained" size="large">
           Common TimeSlots
         </Button>
-        <Button variant = "contained" size = "large"> Invite Users </Button>
+        <Button variant = "contained" size = "large" onClick= {inviteUsers}> Invite Users </Button>
       </div>
     </Box>
         <h1> </h1>
