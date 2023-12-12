@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
+import PeopleIcon from '@mui/icons-material/People';
 import './CalendarCard.css';
 import jwt from 'jsonwebtoken';
 
@@ -110,9 +111,14 @@ const CalendarCard = ({ calendar }) => {
                 </div>
 
             <div className= "card-icons">
+            <IconButton aria-label = "users">
+                <PeopleIcon />
+            </IconButton>
+            
             <IconButton aria-label = "edit" onClick = {handleEdit}>
                 <ModeEditIcon />
             </IconButton>
+
 
             <IconButton aria-label = "delete" onClick = {handleDelete}>
                 <DeleteIcon />
