@@ -733,7 +733,7 @@ function Calendar(){
 ////////////////////////////////////////////////////////////////////////////////////////////////
 /*                          COMMON TIMESLOT FUNCTION                          */
 
-    
+
     const fetchCommonTimeSlots = async () => {
       try {
         const token = getToken();
@@ -753,7 +753,7 @@ function Calendar(){
             ...userTimeSlot,
             timeslots: userTimeSlot.timeslots.map(timeSlot => ({
             ...timeSlot,
-            username: userTimeSlot.username, 
+            username: userTimeSlot.username,
             })),
           }));
 
@@ -777,14 +777,14 @@ function Calendar(){
         }
         groups[date].push({
           userId: userTimeSlot.userId,
-          username: timeSlot.username, 
+          username: timeSlot.username,
           start: timeSlot.start,
           end: timeSlot.end,
         });
       });
       return groups;
     }, {}) : {};
-    
+
     return(
       <div>
         <h1> </h1>

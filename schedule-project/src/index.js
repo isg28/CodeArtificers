@@ -10,6 +10,7 @@ import HomepagePage from './pages/HomepagePage';
 import ProfilePage from './pages/ProfilePage';
 import AccountPage from './pages/AccountPage';
 import LogoutPage from './pages/LogoutPage';
+import UpdatedPasswordPage from './pages/UpdatedPasswordPage';
 
 ReactDOM.render(
   <React.StrictMode>
@@ -23,6 +24,7 @@ ReactDOM.render(
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/account-settings" element = {<AccountPage />} />
         <Route path="/logout" element ={<LogoutPage />} />
+        <Route path = "/update-password" element ={<UpdatedPasswordPage />} />
         {/* ... etc. */}
       </Routes>
     </Router>

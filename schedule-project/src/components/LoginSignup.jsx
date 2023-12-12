@@ -159,6 +159,11 @@ const LoginSignup = () => {
     }
 };
 
+const handleForgotPasswordClick = () => {
+    // Redirect to /updated-password
+    navigate("/update-password");
+};
+
 
 
     return(
@@ -208,7 +213,7 @@ const LoginSignup = () => {
                 
 
             </div>
-            {action=== "Sign Up"?<div></div>:<div className = 'forgot-password'>Lost Password? <span>Click Here!</span> </div>}
+            {action=== "Sign Up"?<div></div>:<div className = 'forgot-password' onClick = {handleForgotPasswordClick}>Lost Password? <span>Click Here!</span> </div>}
             <div className= 'submit-container'>
                 <div className = {action === "Login"?"submit gray":"submit"} onClick = {handleClick}>Sign Up</div>
                 <div className = {action === "Sign Up"?"submit gray": "submit"} onClick = {handleLogin}>Login</div>
