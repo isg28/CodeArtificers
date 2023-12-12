@@ -1,9 +1,9 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import { useNavigate } from 'react-router-dom';
 import CalendarList from './CalendarList';
 import './Homepage.css';
 import Button from '@mui/material/Button';
 import jwt from 'jsonwebtoken';
+import discord_logo from './assets/discord-icon.png';
 
 const HomePage = () => {
     const [user_id, setUserId] = useState(null);
@@ -11,7 +11,6 @@ const HomePage = () => {
     const [sortedCalendars, setSortedCalendars] = useState([]);
     const [calendar_id, setCalendarId] = useState(null);
 
-    const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -98,44 +97,11 @@ const HomePage = () => {
                     console.log('Updated Calendar:', updatedCalendar);
                     setCalendars((prevCalendars) => [...prevCalendars, updatedCalendar]);
                     fetchCalendars();
-                    //navigate(`/calendar/${newCalendar.id}`);
                 } else {
                     console.error('Failed to create a new calendar');
                 }
             }catch(error){
                 console.error('Failed creating a new calendar:', error);
-            }
-        }
-    };
-
-    const handleDeleteCalendarClick = () =>{
-        setCalendarId(calendar_id);
-    };
-
-
-    const handleDeleteCalendarConfirm = async () =>{
-        if(calendar_id){
-            const token = getToken();
-            try{
-                const response = await fetch (`http://localhost:8080/api/user/${user_id}/calendar/${calendar_id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                if(response.ok){
-                    const deletedMessage = await response.text();
-                    console.log(deletedMessage);
-
-                    fetchCalendars();
-                } else{
-                    console.error('Failed to delete the calendar');
-                }
-            } catch(error){
-                console.error('Error deleting the calendar:', error);
-            }finally{
-                setCalendarId(null);
             }
         }
     };
@@ -146,10 +112,20 @@ const HomePage = () => {
         <div className="white-box">
         <div className = "header">
             <h1>My Calendars</h1>
-            <div className="button-container">
+            <div className="button-and-icon-container">
                 <Button variant="contained" size="large" onClick = {handleNewCalendarClick}>
                     New Calendar
                 </Button>
+                <div className="spacing"></div>
+                <a
+                    href="https://discord.com/api/oauth2/authorize?client_id=1182507898639753286&permissions=8&scope=bot+applications.commands"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Click me to invite the Timeificer Bot to your servers!"
+                    className="chat-bubble"
+                >
+                    <img src={discord_logo} alt="Discord Logo" className="discord-icon"/>
+                </a>
                 </div>
             </div>
             <h1> </h1>

@@ -12,7 +12,7 @@ import './AppBar.css';
 export default function ButtonAppBar() {
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="static" sx={{ background: '#0F52BA' }}>
         <Toolbar className= "center-toolbar" sx ={{ justifyContent:'space-between'}}>
           <IconButton
             size="large"
@@ -23,8 +23,8 @@ export default function ButtonAppBar() {
           >
           </IconButton>
           <Button color="inherit" component={Link} to="/">
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1}}>
-            Scheduling App
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontFamily: 'monospace', fontWeight: 700, letterSpacing: '.3rem', color: 'inherit', textDecoration: 'none', }}>
+            TIMEIFICER
           </Typography>
           </Button>
           <Box>

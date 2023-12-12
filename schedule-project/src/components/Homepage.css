@@ -60,3 +60,63 @@
     font-weight: bold;
     font-size: 1.5em;
 }
+.discord-icon-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.discord-icon-container img {
+    width: 50px; /* Adjust the size as needed */
+    height: auto;
+    transition: transform 0.3s ease-in-out;
+}
+
+.discord-icon-container a.chat-bubble {
+    position: relative;
+    display: inline-block;
+}
+
+.discord-icon-container a.chat-bubble::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  background-color: #00aced; /* Adjust the background color as needed */
+  color: #fff; /* Adjust the text color as needed */
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-50%) translateY(-100%);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+
+.discord-icon-container a.chat-bubble:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-110%);
+}
+
+.button-and-icon-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .button-and-icon-container > * {
+    margin-right: 50px; /* Adjust the margin as needed */
+  }
+  
+  .discord-icon-container {
+    cursor: pointer;
+    width: 50px;
+
+  }
+  .discord-icon {
+    width: 50px; /* Adjust the width as needed */
+    height: auto;
+  }
+
+  .spacing {
+    margin-right: 300px; /* Adjust the spacing as needed */
+  }

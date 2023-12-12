@@ -46,14 +46,14 @@ function ResponsiveAppBar() {
         window.alert("You have logged out. See you again!");
     
         // Redirect the user to the login page or another destination
-        //navigate("/custom-login");
+        navigate("/custom-login");
     
         // Close the user menu after logout
         handleCloseUserMenu();
     };
 
     return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{ background: '#0F52BA' }}>
         <Container maxWidth="xl">
         <Toolbar disableGutters>
             <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
@@ -72,7 +72,7 @@ function ResponsiveAppBar() {
                 textDecoration: 'none',
             }}
             >
-            SCHEDULING APP
+            TIMEIFICER
             </Typography>
 
             <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
