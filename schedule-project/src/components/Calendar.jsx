@@ -32,6 +32,8 @@ function Calendar(){
     const {calendar_id} = useParams();
     const [events, setEvents] = useState([]);
     const [user_id, setUserId] = useState(null);
+    const [commonTimeSlots, setCommonTimeSlots] = useState(null);
+    const [showCommonTimeSlotsPopup, setShowCommonTimeSlotsPopup] = useState(false);
 
     useEffect(() => {
       const token = getToken();
@@ -731,7 +733,58 @@ function Calendar(){
 ////////////////////////////////////////////////////////////////////////////////////////////////
 /*                          COMMON TIMESLOT FUNCTION                          */
 
+    
+    const fetchCommonTimeSlots = async () => {
+      try {
+        const token = getToken();
+        const userIdFromToken = getUserIdFromToken(token);
 
+        const response = await fetch(`http://localhost:8080/api/calendar/${calendar_id}/timeslots`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const commonTimeSlots = await response.json();
+
+          const formattedTimeSlots = commonTimeSlots.map(userTimeSlot => ({
+            ...userTimeSlot,
+            timeslots: userTimeSlot.timeslots.map(timeSlot => ({
+            ...timeSlot,
+            username: userTimeSlot.username, 
+            })),
+          }));
+
+          console.log('Common Time Slots:', formattedTimeSlots);
+          setCommonTimeSlots(formattedTimeSlots);
+          setShowCommonTimeSlotsPopup(true);
+        } else {
+          console.error('Failed to fetch common time slots');
+        }
+      } catch (error) {
+        console.error('Error fetching common time slots:', error);
+      }
+    };
+
+    // Group time slots by date
+    const groupedTimeSlots = commonTimeSlots ? commonTimeSlots.reduce((groups, userTimeSlot) => {
+      userTimeSlot.timeslots.forEach((timeSlot) => {
+        const date = timeSlot.date;
+        if (!groups[date]) {
+          groups[date] = [];
+        }
+        groups[date].push({
+          userId: userTimeSlot.userId,
+          username: timeSlot.username, 
+          start: timeSlot.start,
+          end: timeSlot.end,
+        });
+      });
+      return groups;
+    }, {}) : {};
+    
     return(
       <div>
         <h1> </h1>
@@ -740,10 +793,39 @@ function Calendar(){
         Create Meeting
         </Button>  
       <div>
-        <Button variant="contained" size="large">
+      <Button variant="contained" size="large" onClick={fetchCommonTimeSlots}>
           Common TimeSlots
         </Button>
-        <Button variant = "contained" size = "large" onClick= {inviteUsers}> Invite Users </Button>
+        {showCommonTimeSlotsPopup && commonTimeSlots && commonTimeSlots.length > 0 && (
+      <div
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          backgroundColor: '#3087CF',
+          padding: '20px',
+          zIndex: 1000,
+        }}
+      >
+        <h2 style={{ color: 'white' }}>Common Time Slots</h2>
+        {Object.entries(groupedTimeSlots).map(([date, timeSlots]) => (
+          <div key={date}>
+            <h3>Date: {date}</h3>
+            <ul>
+              {timeSlots.map((timeSlots, index) => (
+                <li key={index}>
+                  User: {timeSlots.username},  Start: {new Date(timeSlots.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric' })}, End: {new Date(timeSlots.end).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric' })}
+                </li>
+              ))}
+            </ul>
+            <hr style={{ borderColor: 'white', margin: '10px 0' }} />
+          </div>
+        ))}
+        <button onClick={() => setShowCommonTimeSlotsPopup(false)}>Close</button>
+      </div>
+    )}
+      <Button variant = "contained" size = "large" onClick= {inviteUsers}> Invite Users </Button>
       </div>
     </Box>
         <h1> </h1>
