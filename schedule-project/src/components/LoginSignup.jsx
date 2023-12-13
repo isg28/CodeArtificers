@@ -8,7 +8,6 @@ import password_icon from './assets/password.png';
 
 
 const LoginSignup = () => {
-
     const [action, setAction] = useState("Login");
     const[firstName,setName]=useState('');
     const[lastName,setLastName]=useState('');
@@ -22,7 +21,6 @@ const LoginSignup = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         if (action === "Sign Up") {
-            // Logic for switching to Login page
             setAction("Login");
         } else if (action === "Login"){
             console.log("Email:", email);
@@ -49,37 +47,35 @@ const LoginSignup = () => {
                 return;
             }
 
-        const loginData = {email, password};
-        try{ 
-            const response = await fetch("http://localhost:8080/api/login", {
-            method: "POST",
-            headers: {"Content-Type": "application/json" },
-            body: JSON.stringify(loginData),
-        });
+            const loginData = {email, password};
+            try{ 
+                const response = await fetch("http://localhost:8080/api/login", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json" },
+                    body: JSON.stringify(loginData),
+                });
         
-        if(response.ok){
-            const data = await response.json();
+                if(response.ok){
+                    const data = await response.json();
             
-            if(data.token){
-                localStorage.setItem("token", data.token);
-
-                console.log("Login successful. Data: ", data);
-                window.alert("Login successful!");
-                navigate("/homepage");
-            }else{
-                console.log("Login failed. No token received");
-                window.alert("Login failed. Please try again.");
-            }
-        }else{
-            console.log("Login failed.");
-            window.alert("Invalid email or password. Please try again.");
-        }
-    }catch(error){
-        console.error("Error during login:", error);
-        window.alert("An error occured during login. Please try again.");
-    } 
-    };
-}
+                    if(data.token){
+                        localStorage.setItem("token", data.token);
+                        window.alert("Login successful!");
+                        navigate("/homepage");
+                    }else{
+                        console.log("Login failed. No token received");
+                        window.alert("Login failed. Please try again.");
+                    }
+                }else{
+                    console.log("Login failed.");
+                    window.alert("Invalid email or password. Please try again.");
+                }
+            }catch(error){
+                console.error("Error during login:", error);
+                window.alert("An error occured during login. Please try again.");
+            } 
+        };
+    }
 
 
 
@@ -87,7 +83,7 @@ const LoginSignup = () => {
         e.preventDefault();
 
         if (action === "Login") {
-          // Logic for switching to Sign Up page
+
             setAction("Sign Up");
         } else if (action === "Sign Up") {
             const nameRegex = /^[A-Za-z\s-]+$/;
@@ -134,11 +130,11 @@ const LoginSignup = () => {
                 return;
             }
             
-          // Logic for handling POST method to the database
+
             const User={firstName,lastName,email,dob,username,password};
             console.log(User);
 
-            //POST: Connects User data with the Mongo database 
+
             fetch("http://localhost:8080/api/user", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
@@ -156,69 +152,64 @@ const LoginSignup = () => {
                 setPassword('');
                 setAction("Login");
             })
-    }
-};
-
-const handleForgotPasswordClick = () => {
-    // Redirect to /updated-password
-    navigate("/update-password");
-};
+        }
+    };
 
 
 
-    return(
-        <div className = 'container'>
-            <div className = 'header'>
-                <div className = 'text'> {action} </div>
-                <div className = 'underline'></div>
-            </div>
 
-            <div className= 'inputs'>
-                {action === "Login"?<div></div>:<div className = 'input'>
-                    <img src = {user_icon} alt= 'User Icon'/>
-                    <input type = 'text' placeholder = 'First Name' value={firstName} onChange={(e)=>setName(e.target.value)}/>
-                </div>}
-                {action === "Login"?<div></div>:<div className = 'input'>
-                    <img src = {user_icon} alt= 'User Icon'/>
-                    <input type = 'text' placeholder = 'Last Name' value ={lastName} onChange={(e)=>setLastName(e.target.value)}/>
-                </div>}
+return(
+    <div className = 'container'>
+        <div className = 'header'>
+            <div className = 'text'> {action} </div>
+            <div className = 'underline'></div>
+        </div>
+
+        <div className= 'inputs'>
+            {action === "Login"?<div></div>:<div className = 'input'>
+                <img src = {user_icon} alt= 'User Icon'/>
+                <input type = 'text' placeholder = 'First Name' value={firstName} onChange={(e)=>setName(e.target.value)}/>
+            </div>}
+            {action === "Login"?<div></div>:<div className = 'input'>
+                <img src = {user_icon} alt= 'User Icon'/>
+                <input type = 'text' placeholder = 'Last Name' value ={lastName} onChange={(e)=>setLastName(e.target.value)}/>
+            </div>}
 
                 
-                {action=== "Login"?<div className = 'input'>
-                    <img src = {email_icon} alt= 'Email Icon'/>
-                    <input type = 'email' placeholder = 'Email Address' onChange={(e) => setEmail(e.target.value)} />
-                </div>: <div className = 'input'>
-                    <img src = {email_icon} alt= 'Email Icon'/>
-                    <input type = 'email' placeholder = 'Email Address' value = {email} onChange ={(e)=>setEmail(e.target.value)}/>
-                </div>}
+            {action=== "Login"?<div className = 'input'>
+                <img src = {email_icon} alt= 'Email Icon'/>
+                <input type = 'email' placeholder = 'Email Address' onChange={(e) => setEmail(e.target.value)} />
+            </div>: <div className = 'input'>
+                <img src = {email_icon} alt= 'Email Icon'/>
+                <input type = 'email' placeholder = 'Email Address' value = {email} onChange ={(e)=>setEmail(e.target.value)}/>
+            </div>}
 
-                {action === "Login"?<div></div>:<div className = 'input'>
-                    <img src = {user_icon} alt= 'User Icon'/>
-                    <input type = 'text' placeholder = 'Date of Birth (YYYY-MM-DD)' value = {dob} onChange ={(e)=> setDob(e.target.value)}/>
-                </div>}
+            {action === "Login"?<div></div>:<div className = 'input'>
+                <img src = {user_icon} alt= 'User Icon'/>
+                <input type = 'text' placeholder = 'Date of Birth (YYYY-MM-DD)' value = {dob} onChange ={(e)=> setDob(e.target.value)}/>
+            </div>}
                 
-                {action === "Login"?<div></div>:<div className = 'input'>
-                    <img src = {user_icon} alt= 'User Icon'/>
-                    <input type = 'text' placeholder = 'Username' value={username} onChange={(e)=>setUsername(e.target.value)}/>
-                </div>}
+            {action === "Login"?<div></div>:<div className = 'input'>
+                <img src = {user_icon} alt= 'User Icon'/>
+                <input type = 'text' placeholder = 'Username' value={username} onChange={(e)=>setUsername(e.target.value)}/>
+            </div>}
 
-                {/* This lets only Login have a password option. This is temporary since we dont have a password field yet in User. This was done so front end can create a User without a password until password field is made (11/16)- Danica */}
-                {action === "Login"?<div className = 'input'>
-                    <img src = {password_icon} alt= 'Password Icon'/>
-                    <input type = 'password' placeholder = 'Password' onChange= {(e) => setPassword(e.target.value)} />
-                </div>: <div className = 'input'>
-                    <img src = {password_icon} alt= 'Password Icon'/>
-                    <input type = 'password' placeholder = 'Password' value={password} onChange ={(e) => setPassword(e.target.value)}/>
-                </div>}
+            {action === "Login"?<div className = 'input'>
+                <img src = {password_icon} alt= 'Password Icon'/>
+                <input type = 'password' placeholder = 'Password' onChange= {(e) => setPassword(e.target.value)} />
+            </div>: <div className = 'input'>
+                <img src = {password_icon} alt= 'Password Icon'/>
+                <input type = 'password' placeholder = 'Password' value={password} onChange ={(e) => setPassword(e.target.value)}/>
+            </div>}
                 
 
-            </div>
-            {action=== "Sign Up"?<div></div>:<div className = 'forgot-password' onClick = {handleForgotPasswordClick}>Lost Password? <span>Click Here!</span> </div>}
-            <div className= 'submit-container'>
-                <div className = {action === "Login"?"submit gray":"submit"} onClick = {handleClick}>Sign Up</div>
-                <div className = {action === "Sign Up"?"submit gray": "submit"} onClick = {handleLogin}>Login</div>
+        </div>
+        
+        <div className= 'submit-container'>
+            <div className = {action === "Login"?"submit gray":"submit"} onClick = {handleClick}>Sign Up</div>
+            <div className = {action === "Sign Up"?"submit gray": "submit"} onClick = {handleLogin}>Login</div>
                 
-            </div>
+        </div>
 
         </div>
     )

@@ -1,6 +1,4 @@
-.edit-icon,
-.delete-icon
- {
+.edit-icon,.delete-icon{
     position: absolute;
     top: 50%;
     transform: translateY(-50%);

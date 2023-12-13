@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import CalendarCard from './CalendarCard'; // Create a new component for each calendar card
 
 const CalendarList = ({ calendars }) => {
@@ -11,5 +10,4 @@ const CalendarList = ({ calendars }) => {
         </div>
     );
 };
-    
 export default CalendarList;

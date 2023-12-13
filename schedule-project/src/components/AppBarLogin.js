@@ -52,7 +52,7 @@ function ResponsiveAppBar() {
         handleCloseUserMenu();
     };
 
-    return (
+return (
     <AppBar position="static" sx={{ background: '#0F52BA' }}>
         <Container maxWidth="xl">
         <Toolbar disableGutters>
@@ -162,12 +162,10 @@ function ResponsiveAppBar() {
                 horizontal: 'right',
                 }}
                 open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-            >
+                onClose={handleCloseUserMenu}>
+
                 {settings.map((setting) => (
                 <MenuItem key={setting} onClick={setting === "Logout" ? handleLogout : handleCloseUserMenu}>
-                    {/*{setting === 'Calendars'?  <Typography textAlign="center" component={Link} to="/calendar" style ={{textDecoration: 'none', color: 'inherit'}}>
-                    {setting} </Typography> :<Typography textAlign="center">{setting}</Typography> }*/}
                     {setting === 'Calendars' ? (
                     <Typography textAlign="center" component={Link} to="/homepage" style={{ textDecoration: 'none', color: 'inherit' }}>
                     {setting}

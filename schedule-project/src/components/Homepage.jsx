@@ -9,7 +9,6 @@ const HomePage = () => {
     const [user_id, setUserId] = useState(null);
     const [calendars, setCalendars] = useState([]);
     const [sortedCalendars, setSortedCalendars] = useState([]);
-    const [calendar_id, setCalendarId] = useState(null);
 
 
     useEffect(() => {
@@ -17,7 +16,7 @@ const HomePage = () => {
         if(token){
             try{
                 const decodedToken = jwt.decode(token);
-                console.log(decodedToken) // for checking purposes
+                console.log(decodedToken);
                 const user_id = decodedToken.user_id;
                 setUserId(user_id);
                 console.log(user_id);
@@ -35,7 +34,7 @@ const HomePage = () => {
         return token;
     };
 
-    const fetchCalendars = useCallback(async () => {
+    const fetchCalendars = useCallback( async () => {
         if (user_id) {
             const token = getToken();
             try {
@@ -61,15 +60,14 @@ const HomePage = () => {
         }
     }, [user_id]);
 
+
     useEffect(() => {
-        // Initial fetch when the component mounts
         fetchCalendars();
     }, [fetchCalendars]);
 
+
     useEffect(() => {
-        const sorted = calendars
-            .slice()
-            .sort((a, b) => parseInt(b.calendar_id, 10) - parseInt(a.calendar_id, 10));
+        const sorted = calendars.slice().sort((a, b) => parseInt(b.calendar_id, 10) - parseInt(a.calendar_id, 10));
         setSortedCalendars(sorted);
     }, [calendars]);
 
@@ -90,6 +88,7 @@ const HomePage = () => {
                         user_id: user_id,
                     }),
                 });
+
                 if(response.ok){
                     const newCalendar = await response.json();
                     console.log('New Calendar:', newCalendar);
@@ -106,9 +105,9 @@ const HomePage = () => {
         }
     };
 
-    return (
-        <div className="home-container">
-            <h2> </h2>
+return (
+    <div className="home-container">
+        <h2> </h2>
         <div className="white-box">
         <div className = "header">
             <h1>My Calendars</h1>
@@ -126,8 +125,8 @@ const HomePage = () => {
                 >
                     <img src={discord_logo} alt="Discord Logo" className="discord-icon"/>
                 </a>
-                </div>
             </div>
+        </div>
             <h1> </h1>
             {calendars.length === 0 ? (
                 <div className ="empty-message">
@@ -142,5 +141,4 @@ const HomePage = () => {
     </div>
     );
 };
-
 export default HomePage;

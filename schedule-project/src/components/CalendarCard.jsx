@@ -11,7 +11,6 @@ const CalendarCard = ({ calendar }) => {
     const [user_id, setUserId] = useState(null);
     const [calendars, setCalendars] = useState([]);
 
-
     useEffect(() => {
         const token = localStorage.getItem("token");
         if(token){
@@ -36,7 +35,6 @@ const CalendarCard = ({ calendar }) => {
     };
 
     const onDelete = (calendar_id) => {
-        // Update state to remove the deleted calendar
         setCalendars((prevCalendars) => prevCalendars.filter((calendar) => calendar.calendar_id !== calendar_id));
 
         console.log("Updated Calendars:", calendars);
@@ -63,19 +61,17 @@ const CalendarCard = ({ calendar }) => {
         } catch (error){
             console.error('Error deleting calendar:', error);
         }
-    }
+    };
 
     const handleEdit = async (clickEvent) => {
         clickEvent.preventDefault();
         const editedTitle = window.prompt('Enter the new calendar title:', calendar.calendarTitle);
         console.log(editedTitle);
 
-        // If the user cancels the prompt or leaves the input empty, do nothing
         if (editedTitle === null || editedTitle.trim() === '') {
             return;
         }
         const token = getToken();
-        console.log('Going into PUT method');
         try {
             const response = await fetch(`http://localhost:8080/api/user/${calendar.user_id}/calendar/${calendar.calendar_id}`, {
                 method: 'PUT',
@@ -94,7 +90,7 @@ const CalendarCard = ({ calendar }) => {
                 window.location.reload();
             } else {
                 console.error('Error editing calendar. Status: ', response.status);
-                const responseBody = await response.text(); // or response.json() if the error response is in JSON
+                const responseBody = await response.text();
                 console.error('Error response body:', responseBody);
             }
 
@@ -103,31 +99,28 @@ const CalendarCard = ({ calendar }) => {
         }
     };
 
-    return (
-        <Link to={`/calendar/${calendar.calendar_id}`} className="calendar-link">
-            <div className="calendar-card">
-                <div className="card-content">
+return (
+    <Link to={`/calendar/${calendar.calendar_id}`} className="calendar-link">
+        <div className="calendar-card">
+            <div className="card-content">
                 <h3>{calendar.calendarTitle}</h3>
-                </div>
+            </div>
 
-            <div className= "card-icons">
+        <div className= "card-icons">
             <IconButton aria-label = "users">
                 <PeopleIcon />
             </IconButton>
-            
+
             <IconButton aria-label = "edit" onClick = {handleEdit}>
                 <ModeEditIcon />
             </IconButton>
 
-
             <IconButton aria-label = "delete" onClick = {handleDelete}>
                 <DeleteIcon />
             </IconButton>
-
-            </div>
         </div>
-        </Link>
+        </div>
+    </Link>
     );
 };
-
 export default CalendarCard;

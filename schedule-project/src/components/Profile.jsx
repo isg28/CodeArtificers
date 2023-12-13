@@ -1,15 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import profile_icon from './assets/profile.png';
-import person from './assets/person.png';
 import './Profile.css'
-import Avatar from '@mui/material/Avatar';
-import Stack from '@mui/material/Stack';
-import { deepOrange, deepPurple } from '@mui/material/colors';
 import jwt from 'jsonwebtoken';
 import { useNavigate} from 'react-router-dom'
 
 const UserProfile = () => {
-  // Initial user data
+
   const initialUserData = {
     firstName: '',
     lastName: '',
@@ -17,6 +13,7 @@ const UserProfile = () => {
     email: '',
     dob: '',
   };
+
   const [user_id, setUserId] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [userData, setUserData] = useState(initialUserData);
@@ -28,7 +25,6 @@ const UserProfile = () => {
 
   const toggleEditMode = () => {
     setIsEditMode((prevMode) => !prevMode);
-
     setFieldErrors({});
   };
 
@@ -39,7 +35,6 @@ const UserProfile = () => {
       try {
         const decodedToken = jwt.decode(token);
         const user_id = decodedToken.user_id;
-
         setUserId(user_id);
       } catch (error) {
         console.error("Error decoding token: ", error);
@@ -89,7 +84,6 @@ const UserProfile = () => {
       [name]: value,
     });
 
-    // Validate the field
     validateField(name, value);
   };
 
@@ -129,30 +123,26 @@ const UserProfile = () => {
       default:
         break;
       }
-
-      setFieldErrors((prevErrors) => ({
-        ...prevErrors,
-        [name]: errorMessage,
-      }));
-      if (errorMessage) {
-        setValidationErrors((prevErrors) => [...prevErrors, errorMessage]);
-      }
-    };
+    setFieldErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: errorMessage,
+    }));
+    if (errorMessage) {
+      setValidationErrors((prevErrors) => [...prevErrors, errorMessage]);
+    }
+  };
 
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
       const reader = new FileReader();
-
       reader.onload = (event) => {
         setUserData((prevUserData) => ({
           ...prevUserData,
           profilePicture: event.target.result,
         }));
       };
-
       reader.readAsDataURL(file);
     } else {
       alert('Please upload a valid JPEG or PNG image.');
@@ -164,13 +154,10 @@ const UserProfile = () => {
   };
 
   const saveChanges = async () => {
-    // Validate all fields before attempting to save changes
     validateAllFields();
 
-    // Check if any validation errors exist
     if (validationErrors.length > 0) {
       alert('Please correct the following errors before saving changes:\n\n' + validationErrors.join('\n'));
-      // Clear validation errors after displaying the alert
       setValidationErrors([]);
       return;
     }
@@ -185,7 +172,7 @@ const UserProfile = () => {
         },
         body: JSON.stringify(userData),
       });
-  
+
       if (response.ok) {
         console.log('User profile updated successfully');
       } else {
@@ -220,7 +207,7 @@ const UserProfile = () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
           },
         });
 
@@ -252,39 +239,38 @@ const UserProfile = () => {
   }
 
 
-  return (
-    <div className="profile-container">
-      <h2>User Profile</h2>
+return (
+  <div className="profile-container">
+    <h2>User Profile</h2>
+    <div className="avatar-container" onClick={changeAvatar}>
+      {userData.profilePicture ? (
+        <img className="profile-picture" src={userData.profilePicture} alt="Profile Icon" />
+      ) : (
+        <img className="profile-picture" src={profile_icon} alt="Placeholder Icon" />
+      )}
+    </div>
 
-      <div className="avatar-container" onClick={changeAvatar}>
-        {userData.profilePicture ? (
-          <img className="profile-picture" src={userData.profilePicture} alt="Profile Icon" />
-        ) : (
-          <img className="profile-picture" src={profile_icon} alt="Placeholder Icon" />
-        )}
-      </div>
+    <input
+      id="avatarInput"
+      type="file"
+      accept="image/jpeg, image/png"
+      onChange={handleFileChange}
+      style={{ display: 'none' }}
+    />
 
-      <input
-        id="avatarInput"
-        type="file"
-        accept="image/jpeg, image/png"
-        onChange={handleFileChange}
-        style={{ display: 'none' }}
-      />
+    <label htmlFor="firstName">First Name:</label>
+    <input
+      type="text"
+      id="firstName"
+      name="firstName"
+      value={userData.firstName}
+      onClick={() => handleFieldEdit('firstName')}
+      onChange={handleInputChange}
+      disabled={!isEditMode}
+    />
 
-      <label htmlFor="firstName">First Name:</label>
-      <input
-        type="text"
-        id="firstName"
-        name="firstName"
-        value={userData.firstName}
-        onClick={() => handleFieldEdit('firstName')}
-        onChange={handleInputChange}
-        disabled={!isEditMode}
-      />
-
-      <label htmlFor="lastName">Last Name:</label>
-      <input
+    <label htmlFor="lastName">Last Name:</label>
+    <input
         type="text"
         id="lastName"
         name = 'lastName'
@@ -292,53 +278,53 @@ const UserProfile = () => {
         onClick={() => handleFieldEdit('lastName')}
         onChange={handleInputChange}
         disabled={!isEditMode}
-      />
+    />
 
-      <label htmlFor="username">Username:</label>
-      <input
-        type="text"
-        id="username"
-        name = 'username'
-        value={userData.username}
-        onClick={() => handleFieldEdit('username')}
-        onChange={handleInputChange}
-        disabled={!isEditMode}
-      />
+    <label htmlFor="username">Username:</label>
+    <input
+      type="text"
+      id="username"
+      name = 'username'
+      value={userData.username}
+      onClick={() => handleFieldEdit('username')}
+      onChange={handleInputChange}
+      disabled={!isEditMode}
+    />
 
-      <label htmlFor="email">Email:</label>
-      <input
-        type="email"
-        id="email"
-        name = 'email'
-        value={userData.email}
-        onClick={() => handleFieldEdit('email')}
-        onChange={handleInputChange}
-        disabled={!isEditMode}
-      />
+    <label htmlFor="email">Email:</label>
+    <input
+      type="email"
+      id="email"
+      name = 'email'
+      value={userData.email}
+      onClick={() => handleFieldEdit('email')}
+      onChange={handleInputChange}
+      disabled={!isEditMode}
+    />
 
-      <label htmlFor="dob">Date of Birth:</label>
-      <input
-        type="text"
-        id="dob"
-        name = 'dob'
-        value={userData.dob}
-        onClick={() => handleFieldEdit('dob')}
-        onChange={handleInputChange}
-        disabled={!isEditMode}
-      />
+    <label htmlFor="dob">Date of Birth:</label>
+    <input
+      type="text"
+      id="dob"
+      name = 'dob'
+      value={userData.dob}
+      onClick={() => handleFieldEdit('dob')}
+      onChange={handleInputChange}
+      disabled={!isEditMode}
+    />
 
-      <div className = "button-container">
-      {isEditMode &&
-      <button className = 'save-changes-btn' onClick={saveChanges}>Save Changes</button>}
-      {!isEditMode && <button className = "edit-btn" onClick={toggleEditMode}>Edit</button>}
+    <div className = "button-container">
+    {isEditMode &&
+    <button className = 'save-changes-btn' onClick={saveChanges}>Save Changes</button>}
+    {!isEditMode && <button className = "edit-btn" onClick={toggleEditMode}>Edit</button>}
 
-      <button className = "delete-btn" onClick={handleDeleteButtonClick}>Delete Account</button>
-      </div>
+    <button className = "delete-btn" onClick={handleDeleteButtonClick}>Delete Account</button>
+    </div>
 
-      {showDeleteConfirmation && (
+    {showDeleteConfirmation && (
         <div className="delete-confirmation">
-        <p>Are you sure you want to delete your account?</p>
-        <p>Please enter your username to confirm:</p>
+          <p>Are you sure you want to delete your account?</p>
+          <p>Please enter your username to confirm:</p>
         <div className = "input-container">
         <input
           type="text"
@@ -355,6 +341,5 @@ const UserProfile = () => {
   </div>
   );
 };
-
 export default UserProfile;
 
