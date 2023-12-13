@@ -178,12 +178,27 @@ function Calendar(){
             console.log("deleteMeeting", chosenEvent.title);
           } else {
 
-            const unauthorizedEvents = existingEvents.filter((event) => event.user_id !== user_id);
+            const unauthorizedEvents = existingEvents.filter(
+              (event) => event.user_id !== user_id
+              );
 
-            if (unauthorizedEvents.length > 0) {
+              const unauthorizedForDeletion = unauthorizedEvents.filter((event) => event.user_id !== user_id);
+
+              // Check if the user is not the creator of any unauthorized events
+              const isUserCreatorOfUnauthorizedEvents = unauthorizedForDeletion.some((event) => event.user_id === user_id);
+
+
+            if (isUserCreatorOfUnauthorizedEvents) { //you can now edit this but like it deletes everything now so idk
               alert("You don't have permission to delete the event.");
+              console.log(unauthorizedEvents);
               return;
             }
+
+            if (chosenEvent.user_id !== user_id) {
+              alert("You don't have permission to delete this event.");
+              return;
+            }
+            
 
             
             const shouldDelete = window.confirm(`Are you sure you want to delete the event "${chosenEvent.title}" on this date (${info.dateStr})?`);
