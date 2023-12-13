@@ -10,6 +10,8 @@ import jwt from 'jsonwebtoken';
 const CalendarCard = ({ calendar }) => {
     const [user_id, setUserId] = useState(null);
     const [calendars, setCalendars] = useState([]);
+    const [showUserList, setShowUserList] = useState(false);
+    const [userList, setUserList] = useState([]);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -98,6 +100,31 @@ const CalendarCard = ({ calendar }) => {
             console.error('Error editing calendar: ', error);
         }
     };
+    const handleUserListClick = async (clickEvent) => {
+        clickEvent.preventDefault();
+        setShowUserList(true);
+        await fetchUserList();
+    };
+    const fetchUserList = async () => {
+        const token = getToken();
+        try {
+            const response = await fetch(`http://localhost:8080/api/user/${user_id}/calendar/${calendar.calendar_id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            if (response.ok) {
+                const users = await response.json();
+                setUserList(users);
+            } else {
+                console.error('Error fetching user list. Status:', response.status);
+            }
+        } catch (error) {
+            console.error('Error fetching user list:', error);
+        }
+    };
 
 return (
     <Link to={`/calendar/${calendar.calendar_id}`} className="calendar-link">
@@ -106,19 +133,30 @@ return (
                 <h3>{calendar.calendarTitle}</h3>
             </div>
 
-        <div className= "card-icons">
-            <IconButton aria-label = "users">
-                <PeopleIcon />
-            </IconButton>
+            <div className= "card-icons">
+                <IconButton aria-label="users" onClick={handleUserListClick}>
+                    <PeopleIcon />
+                </IconButton>
 
-            <IconButton aria-label = "edit" onClick = {handleEdit}>
-                <ModeEditIcon />
-            </IconButton>
+                <IconButton aria-label = "edit" onClick = {handleEdit}>
+                    <ModeEditIcon />
+                </IconButton>
 
-            <IconButton aria-label = "delete" onClick = {handleDelete}>
-                <DeleteIcon />
-            </IconButton>
-        </div>
+                <IconButton aria-label = "delete" onClick = {handleDelete}>
+                    <DeleteIcon />
+                </IconButton>
+            </div>
+            {showUserList && (
+                <div className="user-list-popup">
+                <h4>Users with access to the calendar:</h4>
+                <ul>
+                {userList.map((user) => (
+                    <li key={user.user_id}>{user.username}</li>
+                ))}
+                </ul>
+                <button onClick={(e) => { e.preventDefault(); setShowUserList(false); }}>Close</button>
+                </div>
+            )}
         </div>
     </Link>
     );

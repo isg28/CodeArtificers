@@ -168,8 +168,9 @@ function Calendar(){
         if (!isNaN(userChoiceIndex) && userChoiceIndex >= 1 && userChoiceIndex <= existingEvents.length) {
           const chosenIndex = userChoiceIndex - 1;
           const chosenEvent = existingEvents[chosenIndex];
+
           if (chosenEvent.isMeeting) {
-            
+        
             const shouldDelete = window.confirm(`Are you sure you want to delete the event "${chosenEvent.title}" on this date (${info.dateStr})?`);
             if (shouldDelete) {
               deleteMeeting([chosenEvent]); 
