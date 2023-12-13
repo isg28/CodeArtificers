@@ -115,16 +115,7 @@ return (
                 <Button variant="contained" size="large" onClick = {handleNewCalendarClick}>
                     New Calendar
                 </Button>
-                <div className="spacing"></div>
-                <a
-                    href="https://discord.com/api/oauth2/authorize?client_id=1182507898639753286&permissions=8&scope=bot+applications.commands"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Click me to invite the Timeificer Bot to your servers!"
-                    className="chat-bubble"
-                >
-                    <img src={discord_logo} alt="Discord Logo" className="discord-icon"/>
-                </a>
+            
             </div>
         </div>
             <h1> </h1>
