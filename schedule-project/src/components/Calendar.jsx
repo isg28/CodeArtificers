@@ -607,7 +607,7 @@ function Calendar(){
       try {
         const updatedMeeting = {
           ...existingEvent,
-          title: newDescription,
+          meeting_Description: newDescription,
           location: newLocation,
           start: `${chosenDate}T${newStartTime}:00`,
           end: `${chosenDate}T${newEndTime}:00`, 
@@ -673,6 +673,7 @@ function Calendar(){
     const eventContent = (eventInfo) => {
       const isMeeting = eventInfo.event.extendedProps.isMeeting;
       const dotColor = isMeeting ? '#52307c' : '#E6E6FA';
+
       return (
         <>
           <div className= "custom-dot" style={{ backgroundColor: dotColor }} />
@@ -685,6 +686,43 @@ function Calendar(){
         </>
       );
     };
+
+    const handleEventClick = (clickInfo) => {
+      const event = clickInfo.event;
+
+      if(event.extendedProps.isMeeting){
+        showMeetingDetails(event);
+      }
+    };
+
+    const showMeetingDetails = async(meetingEvent) =>{
+      const meeting_id = meetingEvent.extendedProps.meeting_id;
+
+      try{
+        const response = await fetch (`http://localhost:8080/api/user/${user_id}/calendar/${calendar_id}/meeting/${meeting_id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if(!response.ok){
+          console.error(`Error fetching meeting details: ${response.status} - ${response.statusText}`);
+          return;
+        }
+        const meetingDetails = await response.json();
+
+        const localStartTime = moment(meetingDetails.start).local();
+        const localEndTime = moment(meetingDetails.end).local();
+
+        const formattedStartTime = localStartTime.format('hh:mm A');
+        const formattedEndTime = localEndTime.format('hh:mm A');
+
+        alert(`Meeting Details: \nTitle: ${meetingDetails.meeting_Description}\nStart: ${formattedStartTime}\nEnd: ${formattedEndTime}\nLocation: ${meetingDetails.location} `)
+      }catch (error){
+        console.error('Error fetching meeting details:', error);
+      }
+    }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /*                          INVITE FUNCTION                          */
@@ -806,6 +844,8 @@ function Calendar(){
           backgroundColor: '#3087CF',
           padding: '20px',
           zIndex: 1000,
+          maxHeight: '90vh',
+          overflowY: 'auto',
         }}
       >
         <h2 style={{ color: 'white' }}>Common Time Slots</h2>
@@ -815,14 +855,27 @@ function Calendar(){
             <ul>
               {timeSlots.map((timeSlots, index) => (
                 <li key={index}>
-                  User: {timeSlots.username},  Start: {new Date(timeSlots.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric' })}, End: {new Date(timeSlots.end).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric' })}
+                  <span style={{ fontWeight: 'bold', fontSize: '16px' }}>User: </span> {timeSlots.username}
+                  <div style={{ marginLeft: '20px' }}> 
+                  <span style={{ fontWeight: 'bold', fontSize: '16px' }}>Start: </span> {new Date(timeSlots.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric' })}
+                  </div>
+                  <div style={{ marginLeft: '20px' }}> 
+                  <span style={{ fontWeight: 'bold', fontSize: '16px' }}>End: </span> {new Date(timeSlots.end).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric' })}
+                  </div>
                 </li>
               ))}
             </ul>
             <hr style={{ borderColor: 'white', margin: '10px 0' }} />
           </div>
         ))}
-        <button onClick={() => setShowCommonTimeSlotsPopup(false)}>Close</button>
+        <button style={{
+        backgroundColor: 'black', // Change the background color
+        color: 'white',
+        padding: '10px 15px',
+        border: 'none',
+        borderRadius: '4px', // Adding border radius for rounded corners
+        cursor: 'pointer',
+      }}onClick={() => setShowCommonTimeSlotsPopup(false)}>Close</button>
       </div>
     )}
       <Button variant = "contained" size = "large" onClick= {inviteUsers}> Invite Users </Button>
@@ -841,6 +894,7 @@ function Calendar(){
           height={"98vh"}
           events = {events}
           dateClick={handleDateClick}
+          eventClick = {handleEventClick}
           eventContent={eventContent}
           />
           {showCreateMeetingForm && (
