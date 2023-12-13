@@ -46,7 +46,6 @@ public class User {
         this.token = token;
     }
 
-    //Getter and Setter methods for each instance variable
     public String getUser_id() {
         return user_id;
     }

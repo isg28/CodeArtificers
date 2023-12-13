@@ -1,13 +1,10 @@
 package com.codeartificers.schedulingapp.model;
 
-//import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
 @Document("Meeting")
 public class Meeting {
     @Id

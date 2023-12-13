@@ -53,7 +53,7 @@ public class UserService {
         if (counter == null) {
             counter = new UserCounter();
             counter.setName("user_id");
-            counter.setSequence(1L); // Set an initial variable of 1.
+            counter.setSequence(1L);
         }
         long nextUserId = counter.getSequence() + 1;
         counter.setSequence(nextUserId);
@@ -67,7 +67,6 @@ public class UserService {
         user.setDob(userRequest.getDob());
         user.setUsername(userRequest.getUsername());
 
-        //Hashing the password before saving it to the database
         String hashPassword = passwordEncoder.encode(userRequest.getPassword());
         user.setPassword(hashPassword);
 
@@ -90,7 +89,7 @@ public class UserService {
             return user;
         }
         else{
-            return null; // Authentication failed
+            return null;
         }
     }
 
@@ -119,12 +118,10 @@ public class UserService {
         return userRepository.existsById(userId);
     }
 
-    // Stores a list of calendarIds on the homepage
     public void addCalendarToHomePage(User user, String calendar_id) {
         try {
             List<String> userHomePageCalendars = user.getHomepageCalendars();
 
-            // Check if the calendarId is not already in the list
             if (!userHomePageCalendars.contains(calendar_id)) {
                 userHomePageCalendars.add(calendar_id);
                 userRepository.save(user);

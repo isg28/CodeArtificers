@@ -1,6 +1,5 @@
 package com.codeartificers.schedulingapp.repository;
 
-import com.codeartificers.schedulingapp.model.Availability;
 import com.codeartificers.schedulingapp.model.Calendar;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;

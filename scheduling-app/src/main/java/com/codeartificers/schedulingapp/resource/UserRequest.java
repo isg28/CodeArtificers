@@ -34,7 +34,6 @@ public class UserRequest {
         this.newPassword = newPassword;
         this.token = token;
     }
-    //Getter and Setter methods for instance variables
     public String getUser_Id() {
         return user_id;
     }

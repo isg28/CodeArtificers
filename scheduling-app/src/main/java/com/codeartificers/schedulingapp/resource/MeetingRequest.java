@@ -1,9 +1,7 @@
 package com.codeartificers.schedulingapp.resource;
 
-//import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.LocalDateTime;
 
 public class MeetingRequest {

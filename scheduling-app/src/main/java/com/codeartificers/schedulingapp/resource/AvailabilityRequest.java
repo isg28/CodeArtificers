@@ -17,7 +17,6 @@ public class AvailabilityRequest {
     public AvailabilityRequest(){
 
     }
-    //Constructor to access availability_Id, days, and time for Availability entry
     public AvailabilityRequest(String availability_id, String user_id, String calendar_id, LocalDate date, LocalDateTime start,
                                LocalDateTime end, String title) {
         this.availability_id = availability_id;

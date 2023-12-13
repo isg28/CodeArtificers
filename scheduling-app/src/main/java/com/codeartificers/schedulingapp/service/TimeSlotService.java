@@ -32,12 +32,9 @@ public class TimeSlotService {
 
     private boolean hasSameDateAndTimeAsOthers(TimeSlot timeSlot, List<Availability> allAvailability, String userId) {
         for (Availability otherAvailability : allAvailability) {
-            // Check if the availability belongs to a different user
             if (!otherAvailability.getUser_id().equals(userId)) {
-                // Map the other availability to time slot
                 TimeSlot otherTimeSlot = mapAvailabilityToTimeSlot(otherAvailability);
 
-                // Check if the time slots have the same date and time
                 if (areTimeSlotsEqual(timeSlot, otherTimeSlot)) {
                     return true;
                 }

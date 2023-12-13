@@ -15,10 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.*;
-
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -28,8 +27,6 @@ class ScheduleController {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    //We will delete later, but this is to check whether you connected
-    //successfully with MongoDB via local host
     @GetMapping("/health")
     public ResponseEntity<String> checkHealth() {
         try {
@@ -103,16 +100,40 @@ class ScheduleController {
         this.calendarRepository = calendarRepository;
     }
 
+    @GetMapping("/api/user/{user_id}/calendar/{calendar_id}")
+    public ResponseEntity<List<UserInformationOnCalendar>> getUsersByCalendarId(@PathVariable String user_id, @PathVariable String calendar_id) {
+        Optional<Calendar> optionalCalendar = calendarRepository.findById(calendar_id);
 
-    // ********************* USER MANAGEMENT ENDPOINTS ***********************************
+        if (optionalCalendar.isPresent()) {
+            Calendar calendar = optionalCalendar.get();
 
-    // GET: Retrieve all user data, Danica
-    @GetMapping("/api/user")
-    public ResponseEntity<List<User>> getAllUserData() {
-        return ResponseEntity.status(200).body(this.userRepository.findAll());
+            if (calendar.getSharedWith() != null) {
+                List<String> userIDs = new ArrayList<>(calendar.getSharedWith());
+                userIDs.add(calendar.getUser_id());
+
+                List<User> users = userRepository.findAllById(userIDs);
+
+                List<UserInformationOnCalendar> userInformationOnCalendarsList = users.stream()
+                        .map(user -> {
+                            UserInformationOnCalendar userInformationOnCalendar = new UserInformationOnCalendar();
+                            userInformationOnCalendar.setFirstName(user.getFirstName());
+                            userInformationOnCalendar.setLastName(user.getLastName());
+                            userInformationOnCalendar.setEmail(user.getEmail());
+                            userInformationOnCalendar.setDob(user.getDob());
+                            userInformationOnCalendar.setUsername(user.getUsername());
+                            return userInformationOnCalendar;
+                        })
+                        .collect(Collectors.toList());
+
+                return ResponseEntity.status(200).body(userInformationOnCalendarsList);
+            } else {
+                return ResponseEntity.status(404).body(Collections.emptyList());
+            }
+        } else {
+            return ResponseEntity.status(404).body(Collections.emptyList());
+        }
     }
 
-    //POST: Create a new user, Danica and Isabel
     @PostMapping("/api/user")
     public ResponseEntity<?> createUser(@RequestBody UserRequest userRequest) {
         try{
@@ -124,11 +145,9 @@ class ScheduleController {
 
     }
 
-    //GET: Retrieve user profile information, Mansoor
     @GetMapping("/api/user/{user_id}")
     public ResponseEntity<?> get_UserProfile(@PathVariable String user_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
-        // checks if the user profile based on id is available else print error code.
         if (userProfile.isPresent()) {
             return ResponseEntity.status(200).body(userProfile.get());
         } else {
@@ -136,7 +155,6 @@ class ScheduleController {
         }
     }
 
-    //PUT: Edit user info, Isabel
     @PutMapping("/api/user/{user_id}")
     public ResponseEntity<?> edit_UserProfile(@RequestBody UserRequest userRequest, @PathVariable String user_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
@@ -144,7 +162,6 @@ class ScheduleController {
         if (userProfile.isPresent()) {
             User existingProfile = userProfile.get();
 
-            //Updated the user's profile data with the new values, doesn't have to provide new values for each component
             if (userRequest.getFirstName() != null) {
                 existingProfile.setFirstName(userRequest.getFirstName());
             }
@@ -161,13 +178,11 @@ class ScheduleController {
                 existingProfile.setUsername(userRequest.getUsername());
             }
 
-            //error case handling if the JSON request is invalid for any of the User's data fields
             if (userRequest.getFirstName() == null && userRequest.getLastName() == null && userRequest.getEmail() == null
                     && userRequest.getDob() == null && userRequest.getUsername() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
 
-            //saving the updated profile to the DB
             userRepository.save(existingProfile);
             return ResponseEntity.status(200).body(existingProfile);
         } else {
@@ -175,7 +190,6 @@ class ScheduleController {
         }
     }
 
-    //DELETE: deletes user, Oscar
     @DeleteMapping("/api/user/{user_id}")
     public ResponseEntity delete_UserProfile(@PathVariable String user_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
@@ -187,18 +201,15 @@ class ScheduleController {
         return ResponseEntity.status(404).build();
     }
 
-    //********************* AVAILABILITY MANAGEMENT ENDPOINTS ***********************************
-    //POST: Create a new availability entry for a user, Danica
     @PostMapping("/api/user/{user_id}/calendar/{calendar_id}/availability")
     public ResponseEntity<?> createNewAvailability(@PathVariable String user_id, @PathVariable String calendar_id, @RequestBody AvailabilityRequest availabilityRequest) {
         AvailabilityCounter availabilityCounter = availabilityCounterRepository.findByName("availability_id");
 
         if (availabilityRequest.getDate() != null && availabilityRequest.getTitle() != null) {
-            //To ensure that the availabilityCounter remains consistent. If empty, starts at 0 then increments.
             if (availabilityCounter == null) {
                 availabilityCounter = new AvailabilityCounter();
                 availabilityCounter.setName("availability_id");
-                availabilityCounter.setSequence(1L); //sets initial variable to 1
+                availabilityCounter.setSequence(1L);
             }
             long nextAvailabilityId = availabilityCounter.getSequence() + 1;
             availabilityCounter.setSequence(nextAvailabilityId);
@@ -231,8 +242,6 @@ class ScheduleController {
 
     }
 
-
-    //GET: Retrieve all availabilities for a user (useful for showing your own availability), Brandon
     @GetMapping("/api/user/{user_id}/calendar/{calendar_id}/availability")
     public ResponseEntity<?> getAllAvailability(@PathVariable String user_id, @PathVariable String calendar_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
@@ -252,8 +261,6 @@ class ScheduleController {
         return ResponseEntity.status(200).body(userAvailabilities);
     }
 
-
-    //PUT: Update an existing availability entry, Danica
     @PutMapping("/api/user/{user_id}/calendar/{calendar_id}/availability/{availability_id}")
     public ResponseEntity editAvailabilityEntry(@RequestBody AvailabilityRequest availabilityRequest, @PathVariable String user_id, @PathVariable String calendar_id, @PathVariable String availability_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
@@ -290,8 +297,6 @@ class ScheduleController {
         }
     }
 
-
-    //DELETE: Delete an available entry, Isabel
     @DeleteMapping("/api/user/{user_id}/calendar/{calendar_id}/availability/{availability_id}")
     public ResponseEntity<?> deleteAvailabilityEntry(@PathVariable String user_id, @PathVariable String calendar_id, @PathVariable String availability_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
@@ -307,9 +312,6 @@ class ScheduleController {
         return ResponseEntity.status(404).body("Availability entry " + availability_id + " not found for User " + user_id);
     }
 
-
-    //// ********************* MEETING MANAGEMENT ENDPOINTS ***********************************
-    //POST: Create a new meeting, Danica
     @PostMapping("/api/user/{user_id}/calendar/{calendar_id}/meeting")
     public ResponseEntity<?> createMeeting(@PathVariable String user_id, @PathVariable String calendar_id, @RequestBody MeetingRequest meetingRequest) {
         MeetingCounter counter = meetingCounterRepository.findByName("meeting_id");
@@ -319,7 +321,7 @@ class ScheduleController {
             if (counter == null) {
                 counter = new MeetingCounter();
                 counter.setName("meeting_id");
-                counter.setSequence(1L); //sets initial variable to 1
+                counter.setSequence(1L);
             }
             long nextMeetingId = counter.getSequence() + 1;
             counter.setSequence(nextMeetingId);
@@ -347,24 +349,20 @@ class ScheduleController {
 
     }
 
-
-    //GET: Retrieve details about a specific meeting, Oscar
     @GetMapping("/api/user/{user_id}/calendar/{calendar_id}/meeting/{meeting_id}")
     public ResponseEntity<?> getMeetingDetails(@PathVariable String user_id, @PathVariable String calendar_id, @PathVariable String meeting_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
         Optional<Calendar> calendarProfile = this.calendarRepository.findById(calendar_id);
-        Optional<Meeting> meetingData = this.meetingRepository.findById(meeting_id); // Checks for any meetings that were made
+        Optional<Meeting> meetingData = this.meetingRepository.findById(meeting_id);
         if (!userProfile.isPresent()) {
             return ResponseEntity.status(404).body("User ID: " + user_id + " not found");
         } else if (!calendarProfile.isPresent()) {
             return ResponseEntity.status(404).body("Calendar ID: " + calendar_id + " not found");
         } else {
-            return ResponseEntity.status(200).body(meetingData.get()); // returns meeting details
+            return ResponseEntity.status(200).body(meetingData.get());
         }
     }
 
-
-    //GET: Retrieve a list of all available meetings based on user's availability, Isabel
     @GetMapping("/api/user/{user_id}/calendar/{calendar_id}/meeting")
     public ResponseEntity<?> getAllMeetingData(@PathVariable String user_id, @PathVariable String calendar_id) {
         Optional<User> userProfile = this.userRepository.findById(user_id);
@@ -383,7 +381,6 @@ class ScheduleController {
         return ResponseEntity.status(200).body(userMeetings);
     }
 
-    //PUT: Update an existing meeting (add, remove participants), Mansoor
     @PutMapping("/api/user/{user_id}/calendar/{calendar_id}/meeting/{meeting_id}")
     public ResponseEntity update_meeting(@RequestBody MeetingRequest meetingRequest, @PathVariable String user_id, @PathVariable String calendar_id, @PathVariable String meeting_id) {
         Optional<Meeting> meetingProfile = this.meetingRepository.findById(meeting_id);
@@ -407,13 +404,12 @@ class ScheduleController {
             if (meetingRequest.getMeeting_Description() != null) {
                 existingProfile.setMeeting_Description(meetingRequest.getMeeting_Description());
             }
-            //error check for invalid JSON request format
             if (meetingRequest.getStart() == null && meetingRequest.getEnd() == null && meetingRequest.getDate()
                     == null && meetingRequest.getLocation() == null && meetingRequest.getMeeting_Description() == null) {
                 return ResponseEntity.status(400).body("Malformed request. Missing required user fields.");
             }
 
-            meetingRepository.save(existingProfile);//store in DB
+            meetingRepository.save(existingProfile);
             return ResponseEntity.status(200).body(existingProfile);
         } else {
             return ResponseEntity.status(404).body("Meeting " + meeting_id + " does not exist.");
@@ -421,7 +417,6 @@ class ScheduleController {
     }
 
 
-    //DELETE: delete a meeting, Brandon
     @DeleteMapping("/api/user/{user_id}/calendar/{calendar_id}/meeting/{meeting_id}")
     public ResponseEntity delete_Meeting(@PathVariable String meeting_id, @PathVariable String calendar_id, @PathVariable String user_id) {
         Optional<?> meetingProfile = this.meetingRepository.findById(meeting_id);
@@ -436,7 +431,6 @@ class ScheduleController {
         }
     }
 
-    //// ********************* SEARCH FOR AVAILABLE TIMESLOTS ENDPOINTS ***********************************
     @GetMapping("/api/calendar/{calendar_id}/timeslots")
     public ResponseEntity<List<UserTimeSlots>> getCommonTimeSlots(@PathVariable String calendar_id) {
 
@@ -460,9 +454,6 @@ class ScheduleController {
         return ResponseEntity.ok(commonTimeSlotsList);
     }
 
-
-
-    //// ********************* USER REGISTRATION AND AUTHENTICATION ENDPOINTS ***********************************
     @PostMapping("/api/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRequest userRequest){
         try {
@@ -513,9 +504,6 @@ class ScheduleController {
     }
 
 
-
-    //// ********************* INVITATION AND NOTIFICATION ENDPOINTS ***********************************
-
     @PostMapping("/api/user/{user_id}/calendar/{calendar_id}/invite")
     public ResponseEntity<?> createInvitations(@RequestBody InvitationRequest invitationRequest, @PathVariable String user_id, @PathVariable String calendar_id) {
         try {
@@ -558,20 +546,18 @@ class ScheduleController {
             if (counter == null) {
                 counter = new InvitationCounter();
                 counter.setName("invitationId");
-                counter.setSequence(1L); // sets initial variable to 1
+                counter.setSequence(1L);
             }
             long nextInvitationId = counter.getSequence() + 1;
             counter.setSequence(nextInvitationId);
             invitationCounterRepository.save(counter);
 
-            // Creating new Invitation
             Invitation invitation = new Invitation();
             invitation.setInvitation_id(String.valueOf(nextInvitationId));
             invitation.setCalendar_id(calendar_id);
             invitation.setUser_id(user_id);
             invitation.setInvitedUsers(invitedUsers);
 
-            // Update invited users' profiles with the shared calendar
             Optional<Calendar> sharedCalendarOptional = calendarRepository.findById(calendar_id);
             if (sharedCalendarOptional.isPresent()) {
                 Calendar sharedCalendar = sharedCalendarOptional.get();
@@ -622,7 +608,6 @@ class ScheduleController {
         if (invitationProfile.isPresent()) {
             Invitation existingProfile = invitationProfile.get();
 
-            // Ensure that sender_id and calendar_id are not changed
             if (!invitationRequest.getUser_id().equals(existingProfile.getUser_id()) ||
                     !invitationRequest.getCalendar_id().equals(existingProfile.getCalendar_id()) ||
                     !user_id.equals(existingProfile.getUser_id())) {
@@ -636,7 +621,6 @@ class ScheduleController {
                             .anyMatch(user -> user.getEmail().equals(updatedUser.getEmail()));
 
                     if (!userExists) {
-                        // Fetch user data from userRepository based on email
                         User userData = userRepository.findByEmail(updatedUser.getEmail());
 
                         String email = userData.getEmail();
@@ -666,7 +650,7 @@ class ScheduleController {
 
                 existingProfile.setInvitedUsers(updatedInvitedUsers);
             }
-            invitationRepository.save(existingProfile);//store in DB
+            invitationRepository.save(existingProfile);
             return ResponseEntity.status(200).body(existingProfile);
         } else {
             return ResponseEntity.status(404).body("Invitation " + invitation_id + " does not exist.");
@@ -687,7 +671,6 @@ class ScheduleController {
 
             List<InvitedUser> invitedUsers = existingProfile.getInvitedUsers();
 
-            // Find and remove the InvitedUser with the specified email
             InvitedUser userToDelete = invitedUsers.stream()
                     .filter(user -> emailToDelete.equals(user.getEmail()))
                     .findFirst()
@@ -707,8 +690,6 @@ class ScheduleController {
         }
     }
 
-
-    //// ********************* Calendar ENDPOINTS ***********************************
     @PostMapping("/api/user/{user_id}/calendar")
     public ResponseEntity<?> createNewCalendar(@PathVariable String user_id, @RequestBody CalendarRequest calendarRequest){
         CalendarCounter calendarCounter = calendarCounterRepository.findByName("calendar_id");
@@ -717,7 +698,7 @@ class ScheduleController {
             if (calendarCounter == null) {
                 calendarCounter = new CalendarCounter();
                 calendarCounter.setName("calendar_id");
-                calendarCounter.setSequence(1L); //sets initial variable to 1
+                calendarCounter.setSequence(1L);
             }
             long nextCalendarId = calendarCounter.getSequence() + 1;
             calendarCounter.setSequence(nextCalendarId);
@@ -731,7 +712,6 @@ class ScheduleController {
 
             String calendarToken = TokenUtil.generateCalendarToken(calendar, jwtUtil.getSecretKey());
 
-            // Add the calendar to the user's homepage
             User user = userRepository.findById(user_id).orElse(null);
             if (user != null) {
                 userService.addCalendarToHomePage(user, String.valueOf(nextCalendarId));
