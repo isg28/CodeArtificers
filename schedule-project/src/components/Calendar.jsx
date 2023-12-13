@@ -182,13 +182,13 @@ function Calendar(){
               (event) => event.user_id !== user_id
               );
 
-              const unauthorizedForDeletion = unauthorizedEvents.filter((event) => event.user_id !== user_id);
+            const unauthorizedForDeletion = unauthorizedEvents.filter((event) => event.user_id !== user_id);
 
-              // Check if the user is not the creator of any unauthorized events
-              const isUserCreatorOfUnauthorizedEvents = unauthorizedForDeletion.some((event) => event.user_id === user_id);
+              
+            const isUserCreatorOfUnauthorizedEvents = unauthorizedForDeletion.some((event) => event.user_id === user_id);
 
 
-            if (isUserCreatorOfUnauthorizedEvents) { //you can now edit this but like it deletes everything now so idk
+            if (isUserCreatorOfUnauthorizedEvents) { 
               alert("You don't have permission to delete the event.");
               console.log(unauthorizedEvents);
               return;
